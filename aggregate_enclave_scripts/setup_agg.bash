@@ -1,4 +1,4 @@
 #!/bin/bash
 SCONE_MODE=AUTO
-pip3 install flask
+pip3 install bottle
 python3 aggregator.py
