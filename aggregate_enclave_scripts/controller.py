@@ -28,7 +28,7 @@ class DockerThread(threading.Thread):
 
         def run(self):
                 self.container.unpause()
-                output = self.container.exec_run('bash bash_file ' + self.query_type + ' ' + self.uuid + ' ' + self.agg_ip + ' ' + self.privacy_budget)
+                output = self.container.exec_run('bash user_enclave.bash ' + self.query_type + ' ' + self.uuid + ' ' + self.agg_ip + ' ' + self.privacy_budget)
                 print(output)
                 self.container.pause()
 
