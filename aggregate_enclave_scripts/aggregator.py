@@ -1,13 +1,12 @@
 import sys
 import http.client
-from flask import Flask, request, Response
+from bottle import route, run
 import json
 import uuid
 import threading
 import abc
 import numpy as np
 
-app = Flask(__name__)
 query_list = []
 
 class RequestThread(threading.Thread):
@@ -70,11 +69,11 @@ class Sum(Query):
 
     def __repr__(self):
         return "sum"
-@app.route('/')
+@route('/')
 def test():
     return "hello"
 
-@app.route('/start_query', methods=['POST'])
+@route('/start_query', methods=['POST'])
 def start_query():
     """
     1. Ask all servers stored in file/argument if they wanna respond to query
@@ -102,7 +101,7 @@ def start_query():
     clear_query_list()
     return str(value + noise)
 
-@app.route('/add_to_query_list', methods=['POST'])
+@route('/add_to_query_list', methods=['POST'])
 def add_to_query_list():
     data = json.loads(request.data.decode("utf-8"))
     if data['response'] == 'yes':
@@ -115,4 +114,4 @@ def clear_query_list():
 
 if __name__ == "__main__":
     json_data = json.load(open("mock_data.json"))
-    app.run(host='0.0.0.0', port=2001) # Different port than the agg script.
+    run(host='0.0.0.0', port=2001) # Different port than the agg script.

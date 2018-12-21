@@ -2,7 +2,7 @@
 import sys
 import os
 import requests
-from flask import Flask, request, Response, jsonify
+from bottle import route, run
 import json
 import uuid
 import threading
@@ -13,7 +13,6 @@ json_data = json.load(open("mock_data.json"))
 list_of_containers = list(json.load(open("mock_data.json")).keys())
 client = docker.from_env()
 
-app = Flask(__name__)
 path = os.path.expanduser("~/e-mission-server/")
 # container_port = 1025
 
@@ -32,20 +31,20 @@ class DockerThread(threading.Thread):
                 print(output)
                 self.container.pause()
 
-@app.route('/', methods=['GET'])
+@route('/', methods=['GET'])
 def home():
         return "hello!"
 
-@app.route('/upload_info', methods=['POST'])
+@route('/upload_info', methods=['POST'])
 def upload():
         pass
 
-@app.route('/remove_containers', methods=['GET'])
+@route('/remove_containers', methods=['GET'])
 def remove_containers():
     for container in list_of_containers:
         container[0].remove(force=True)
     return ""
-@app.route('/request_query', methods=['POST'])
+@route('/request_query', methods=['POST'])
 def query_start():
         """
         1. Read list of enclaves from file
@@ -71,7 +70,7 @@ def query_start():
                     thread.join()
         return "Finished"       
 
-@app.route('/start_containers', methods=['GET'])
+@route('/start_containers', methods=['GET'])
 def start():
         mount = Mount(target='/usr/src/app/conf/storage/db.conf', source= path + 'conf/storage/db.conf', type='bind')
         for i in range(len(list_of_containers)):
@@ -88,4 +87,4 @@ def start():
         return ""
 
 if __name__ == "__main__":
-        app.run(port=2000, host='0.0.0.0',debug=True)
+        run(port=2000, host='0.0.0.0',debug=True)
