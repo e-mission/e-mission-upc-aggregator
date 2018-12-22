@@ -4,7 +4,7 @@ import docker
 from docker.types import Mount
 
 client = docker.from_env()
-path = "/home/jessez/e-mission-server/"
+path = "~/e-mission-server/"
 def setup_agg_enclave():
     mount = Mount(target='/usr/src/app/conf/storage/db.conf', source= path + 'conf/storage/db.conf', type='bind')
     # command = "python3 aggregator.py"
