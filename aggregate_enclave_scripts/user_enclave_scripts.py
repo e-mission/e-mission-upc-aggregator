@@ -25,10 +25,10 @@ def query(query_type, e_id, aggregator_ip, privacy_budget):
                         json.dump(json_data, jsonFile)
                 else:
                     data = json.dumps({'response':'none'})
-            h1.request("POST", "/add_to_query_list", data)
+            h1.request("POST", "/add_to_result_list", data)
         except:
             data = json.dumps({'response':'none'})
-            h1.request("POST", "/add_to_query_list", data)
+            h1.request("POST", "/add_to_result_list", data)
     else:
         raise NotImplementedError
 

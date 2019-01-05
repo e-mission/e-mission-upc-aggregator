@@ -7,7 +7,7 @@ import threading
 import abc
 import numpy as np
 
-query_list = []
+intermediate_result_list = []
 
 class RequestThread(threading.Thread):
     def __init__(self, controller, enclaves_in_query, query_object, privacy_budget):
@@ -66,9 +66,33 @@ class Sum(Query):
         n = len(data)
         return np.random.laplace(scale=(n * sensitivity)/float(privacy_budget))
 
+    def __repr__(self):
+        return "sum"
+
+class Sum(Query):
+    def __init__(self):
+        self.id = uuid.uuid4()
+
+    def run_query(self, data):
+        #self.amount_of_noise = 0
+        total = 0
+        for value in data:
+            total += int(value)
+            # try:
+            #     value = float(data[enclave])
+            # except:
+            #     continue
+            #self.amount_of_noise += 1
+        return total
+
+    def generate_noise(self, data, privacy_budget):
+        sensitivity = 1
+        n = len(data)
+        return np.random.laplace(scale=(n * sensitivity)/float(privacy_budget))
 
     def __repr__(self):
         return "sum"
+
 @route('/')
 def test():
     return "hello"
@@ -96,21 +120,21 @@ def start_query():
         threads.append(thread)
     for thread in threads:
         thread.join()
-    value = query_object.run_query(query_list)
-    noise = query_object.generate_noise(query_list, privacy_budget)
-    clear_query_list()
+    value = query_object.run_query(intermediate_result_list)
+    noise = query_object.generate_noise(intermediate_result_list, privacy_budget)
+    clear_intermediate_result_list()
     return str(value + noise)
 
-@route('/add_to_query_list', methods=['POST'])
-def add_to_query_list():
+@route('/add_to_result_list', methods=['POST'])
+def add_to_result_list():
     data = json.loads(request.data.decode("utf-8"))
     if data['response'] == 'yes':
-        query_list.append(data['value'])
+        intermediate_result_list.append(data['value'])
     return "Successfully added to query list"
 
-def clear_query_list():
-    global query_list
-    query_list = []
+def clear_intermediate_result_list():
+    global intermediate_result_list
+    intermediate_result_list = []
 
 if __name__ == "__main__":
     json_data = json.load(open("mock_data.json"))
