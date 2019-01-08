@@ -88,7 +88,7 @@ def start():
         return ""
 
 if __name__ == "__main__":
-	atexit.register(remove_containers)
+    atexit.register(remove_containers)
     start()
-    #run(port=2000, host='0.0.0.0',debug=True)
-    threading.Thread(target=run, args=(port=2000, host='0.0.0.0')).start()
+    run(port=2000, host='0.0.0.0',debug=True)
+    #threading.Thread(target=run, args=(2000, '0.0.0.0')).start()
