@@ -7,6 +7,7 @@ import json
 import uuid
 import threading
 import subprocess
+import atexit
 import docker
 from docker.types import Mount
 json_data = json.load(open("mock_data.json"))
@@ -87,4 +88,7 @@ def start():
         return ""
 
 if __name__ == "__main__":
-        run(port=2000, host='0.0.0.0',debug=True)
+	atexit.register(remove_containers)
+    start()
+    #run(port=2000, host='0.0.0.0',debug=True)
+    threading.Thread(target=run, args=(port=2000, host='0.0.0.0')).start()
