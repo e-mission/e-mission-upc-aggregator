@@ -1,6 +1,6 @@
 import sys
 import http.client
-from bottle import route, run
+from bottle import route, run, get, post, request
 import json
 import uuid
 import threading
@@ -97,7 +97,7 @@ class Sum(Query):
 def test():
     return "hello"
 
-@route('/start_query', methods=['POST'])
+@post('/start_query')
 def start_query():
     """
     1. Ask all servers stored in file/argument if they wanna respond to query
@@ -108,7 +108,7 @@ def start_query():
     """
     query_mapping = {'sum' : Sum()} #TODO: Fill in query mapping from string to object
     enclaves_in_query = {}
-    request_dict = json.loads(request.data.decode('utf-8'))
+    request_dict = json.loads(request.body.read().decode('UTF-8'))
     query_object = query_mapping[request_dict['query_type']]
     privacy_budget = str(request_dict['privacy_budget'])
 
@@ -125,11 +125,14 @@ def start_query():
     clear_intermediate_result_list()
     return str(value + noise)
 
-@route('/add_to_result_list', methods=['POST'])
+@post('/add_to_result_list')
 def add_to_result_list():
-    data = json.loads(request.data.decode("utf-8"))
+    print(request)
+    data = json.loads(request.body.read().decode('UTF-8'))
+    print(data)
     if data['response'] == 'yes':
         intermediate_result_list.append(data['value'])
+    print(intermediate_result_list)
     return "Successfully added to query list"
 
 def clear_intermediate_result_list():
@@ -138,4 +141,4 @@ def clear_intermediate_result_list():
 
 if __name__ == "__main__":
     json_data = json.load(open("mock_data.json"))
-    run(host='0.0.0.0', port=2001) # Different port than the agg script.
+    run(host='0.0.0.0', port=2001, server='paste') # Different port than the agg script.

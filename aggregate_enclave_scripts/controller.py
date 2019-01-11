@@ -2,7 +2,7 @@
 import sys
 import os
 import requests
-from bottle import route, run
+from bottle import route, run, get, post, request
 import json
 import uuid
 import threading
@@ -32,27 +32,27 @@ class DockerThread(threading.Thread):
                 print(output)
                 self.container.pause()
 
-@route('/', methods=['GET'])
+@get("/")
 def home():
         return "hello!"
 
-@route('/upload_info', methods=['POST'])
+@post('/upload_info')
 def upload():
         pass
 
-@route('/remove_containers', methods=['GET'])
+@get('/remove_containers')
 def remove_containers():
     for container in list_of_containers:
         container[0].remove(force=True)
     return ""
-@route('/request_query', methods=['POST'])
+@post('/request_query')
 def query_start():
         """
         1. Read list of enclaves from file
         2. Wake them up with docker resume
         3. Ask for query from them
         """
-        request_dict = json.loads(request.data.decode('utf-8'))
+        request_dict = json.load(request.body)
         query_type = str(request_dict['query_type'])
         privacy_budget = str(request_dict['privacy_budget'])
         print(request_dict)
@@ -71,7 +71,7 @@ def query_start():
                     thread.join()
         return "Finished"       
 
-@route('/start_containers', methods=['GET'])
+@get('/start_containers')
 def start():
         mount = Mount(target='/usr/src/app/conf/storage/db.conf', source= path + 'conf/storage/db.conf', type='bind')
         for i in range(len(list_of_containers)):
