@@ -87,7 +87,7 @@ def query_start():
         print("Length of list of containers: " + str(len(list_of_containers)))
         batch_size = 10
         global uuid_counter, uuid_set, ready_to_proceed
-        ready_to_proceed = Event()
+        ready_to_proceed = threading.Event()
         uuid_counter, uuid_set = 0, set()
         for j in range(0, int(len(list_of_containers) / batch_size) + 1):
                 for i in range(min(int(len(list_of_containers) - j * batch_size), batch_size)):
