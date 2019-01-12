@@ -5,30 +5,39 @@ import requests
 from bottle import route, run, get, post, request
 import json
 import uuid
-import threading
 import subprocess
 import atexit
 import docker
+import socket
+import time
+import signal
 from docker.types import Mount
+import threading
+import http.client
+
 json_data = json.load(open("mock_data.json"))
 list_of_containers = list(json.load(open("mock_data.json")).keys())
 client = docker.from_env()
-
+controller_ip = socket.gethostbyname(socket.gethostname())
 path = os.path.expanduser("~/e-mission-server/")
+uuid_counter = 0
+uuid_set = set()
+uuid_counter_lock = threading.Lock()
+ready_to_proceed = Event()
 # container_port = 1025
 
 class DockerThread(threading.Thread):
-        def __init__(self, container, query_type, uuid, agg_ip, privacy_budget):
+        def __init__(self, container, query_type, user_uuid, agg_ip, privacy_budget, controller_uuid):
                 threading.Thread.__init__(self)
                 self.container = container
                 self.query_type = query_type
-                self.uuid = uuid
+                self.user_uuid = user_uuid
                 self.agg_ip = agg_ip
                 self.privacy_budget = privacy_budget
-
+                self.controller_uuid = controller_uuid
         def run(self):
                 self.container.unpause()
-                output = self.container.exec_run('bash user_enclave.bash ' + self.query_type + ' ' + self.uuid + ' ' + self.agg_ip + ' ' + self.privacy_budget)
+                output = self.container.exec_run('bash user_enclave.bash ' + self.query_type + ' ' + self.user_uuid + ' ' + self.agg_ip + ' ' + controller_ip + ' ' + self.controller_uuid + ' ' + self.privacy_budget)
                 print(output)
                 self.container.pause()
 
@@ -45,6 +54,22 @@ def remove_containers():
     for container in list_of_containers:
         container[0].remove(force=True)
     return ""
+@post('/user_finished')
+def user_finished():
+    """
+    Aggregator sends post request here to let controller know
+    that the container with given UUID's message has been received
+    """
+    request_dict = json.load(request.body)
+    controller_uuid = uuid.UUID(request_dict['controller_uuid'])
+    if controller_uuid in uuid_set:
+        with uuid_counter_lock:
+            uuid_counter += 1
+        if uuid_counter == len(uuid_set):
+            ready_to_proceed.set()
+        return ""
+    return "stop trying to spam me, malicious entity!"
+
 @post('/request_query')
 def query_start():
         """
@@ -61,14 +86,23 @@ def query_start():
         print("aggregator_ip: " + str(aggregator_ip))
         print("Length of list of containers: " + str(len(list_of_containers)))
         batch_size = 10
+        global uuid_counter, uuid_set, ready_to_proceed
+        ready_to_proceed = Event()
+        uuid_counter, uuid_set = 0, set()
         for j in range(0, int(len(list_of_containers) / batch_size) + 1):
                 for i in range(min(int(len(list_of_containers) - j * batch_size), batch_size)):
+                        rand_uuid = uuid.uuid1()
+                        uuid_set.add(rand_uuid)
+                        send_to_agg = http.client.HTTPConnection(aggregator_ip)
+                        send_to_agg_data = json.dumps({'controller_ip':controller_ip, 'controller_uuid':rand_uuid})
+                        h1.request("POST", "/add_uuid_map", send_to_agg_data)
                         container = list_of_containers[j * batch_size + i]
-                        thread = DockerThread(container[0], query_type, container[1], aggregator_ip, privacy_budget)
+                        thread = DockerThread(container[0], query_type, container[1], aggregator_ip, privacy_budget, rand_uuid)
                         thread.start()
                         threads.append(thread)
                 for thread in threads:
                     thread.join()
+        ready_to_proceed.wait() #wait until all requests received by agg
         return "Finished"       
 
 @get('/start_containers')
