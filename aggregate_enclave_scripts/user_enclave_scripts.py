@@ -23,10 +23,10 @@ def query(query_type, e_id, aggregator_ip, controller_ip, controller_uuid, priva
                     with open(data_path, "w") as jsonFile:
                         json.dump(json_data, jsonFile)
                 else:
-                    data = json.dumps({'response':'none'})
+                    data = json.dumps({'response':'none', 'controller_ip': controller_ip, 'controller_uuid': controller_uuid})
                 h1.request("POST", "/add_to_result_list", data)
         except:
-            data = json.dumps({'response':'none'})
+            data = json.dumps({'response':'none', 'controller_ip': controller_ip, 'controller_uuid': controller_uuid})
             h1.request("POST", "/add_to_result_list", data)
     else:
         raise NotImplementedError
