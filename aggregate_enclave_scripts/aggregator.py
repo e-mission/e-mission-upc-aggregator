@@ -134,9 +134,8 @@ def add_to_result_list():
         intermediate_result_list.append(data['value'])
     print(intermediate_result_list)
 
-    h1 = http.client.HTTPConnection(data['controller'])
-    # TODO: Add randomly generated uuid into post request.
-    h1.request("POST", "/user_finished", " ") 
+    h1 = http.client.HTTPConnection(data['controller_ip'])
+    h1.request("POST", "/user_finished", data['controller_uuid']) 
     r1 = h1.getresponse()
 
     return "Successfully added to query list"

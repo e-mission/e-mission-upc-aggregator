@@ -7,7 +7,7 @@ import http.client
 data_path = "e-mission-upc-aggregator/aggregate_enclave_scripts/mock_data.json"
 json_data = json.load(open(data_path))
 
-def query(query_type, e_id, aggregator_ip, controller_ip, privacy_budget):
+def query(query_type, e_id, aggregator_ip, controller_ip, controller_uuid, privacy_budget):
     if query_type == "sum":
         try:
             h1 = http.client.HTTPConnection(aggregator_ip)
@@ -18,7 +18,7 @@ def query(query_type, e_id, aggregator_ip, controller_ip, privacy_budget):
                 remaining_budget = float(json_data[e_id]["privacy_budget"])
                 privacy_budget = float(privacy_budget)
                 if remaining_budget >= privacy_budget:
-                    data = json.dumps({'response':'yes', 'value': sum(user_data), 'controller': controller_ip})
+                    data = json.dumps({'response':'yes', 'value': sum(user_data), 'controller_ip': controller_ip, 'controller_uuid': controller_uuid})
                     #json_data[e_id]["privacy_budget"] = remaining_budget - privacy_budget
                     with open(data_path, "w") as jsonFile:
                         json.dump(json_data, jsonFile)
@@ -35,7 +35,8 @@ if __name__ == "__main__":
     print(sys.argv)
     query_type = sys.argv[1]
     enclave_id = sys.argv[2]
-    aggregator = sys.argv[3]
-    controller = sys.argv[4]
-    privacy_budget = sys.argv[5]
-    query(query_type, enclave_id, aggregator, controller, privacy_budget)
+    aggregator_ip = sys.argv[3]
+    controller_ip = sys.argv[4]
+    controller_uuid = sys.argv[5]
+    privacy_budget = sys.argv[6]
+    query(query_type, enclave_id, aggregator_ip, controller_ip, controller_uuid, privacy_budget)
