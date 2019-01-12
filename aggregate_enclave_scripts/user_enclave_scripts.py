@@ -25,9 +25,11 @@ def query(query_type, e_id, aggregator_ip, controller_ip, controller_uuid, priva
                 else:
                     data = json.dumps({'response':'none', 'controller_ip': controller_ip, 'controller_uuid': controller_uuid})
                 h1.request("POST", "/add_to_result_list", data)
+                r1 = h1.getresponse()
         except:
             data = json.dumps({'response':'none', 'controller_ip': controller_ip, 'controller_uuid': controller_uuid})
             h1.request("POST", "/add_to_result_list", data)
+            r1 = h1.getresponse()
     else:
         raise NotImplementedError
 

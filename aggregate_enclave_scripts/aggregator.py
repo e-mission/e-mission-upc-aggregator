@@ -148,7 +148,6 @@ def add_to_result_list():
 
 @post('/add_uuid_map')
 def add_uuid_map():
-    print(controller_uuid_map)
     data = json.loads(request.body.read().decode('UTF-8'))
     controller_uuid_map[data['controller_ip']].add(uuid.UUID(data['controller_uuid']))
 

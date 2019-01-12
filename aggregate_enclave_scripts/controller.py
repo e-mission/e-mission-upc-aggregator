@@ -97,6 +97,7 @@ def query_start():
                         send_to_agg = http.client.HTTPConnection(aggregator_ip)
                         send_to_agg_data = json.dumps({'controller_ip':controller_ip, 'controller_uuid':rand_uuid})
                         send_to_agg.request("POST", "/add_uuid_map", send_to_agg_data)
+                        response = send_to_agg.getresponse()
                         container = list_of_containers[j * batch_size + i]
                         thread = DockerThread(container[0], query_type, container[1], aggregator_ip, privacy_budget, rand_uuid)
                         thread.start()
