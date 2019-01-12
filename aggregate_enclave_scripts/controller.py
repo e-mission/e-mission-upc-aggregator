@@ -91,8 +91,8 @@ def query_start():
         uuid_counter, uuid_set = 0, set()
         for j in range(0, int(len(list_of_containers) / batch_size) + 1):
                 for i in range(min(int(len(list_of_containers) - j * batch_size), batch_size)):
-                        rand_uuid = uuid.uuid1()
-                        uuid_set.add(rand_uuid)
+                        rand_uuid = str(uuid.uuid1())
+                        uuid_set.add(uuid.UUID(rand_uuid))
                         send_to_agg = http.client.HTTPConnection(aggregator_ip)
                         send_to_agg_data = json.dumps({'controller_ip':controller_ip, 'controller_uuid':rand_uuid})
                         h1.request("POST", "/add_uuid_map", send_to_agg_data)
