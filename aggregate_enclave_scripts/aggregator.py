@@ -114,6 +114,8 @@ def start_query():
     privacy_budget = str(request_dict['privacy_budget'])
 
     controller_map = ['128.32.37.205:2000']
+    for controller in controller_map:
+        controller_uuid_map[controller] = set()
     threads = []
     for controller in controller_map:
         thread = RequestThread(controller, enclaves_in_query, query_object, privacy_budget)
@@ -148,8 +150,6 @@ def add_to_result_list():
 @post('/add_uuid_map')
 def add_uuid_map(controller_ip, controller_uuid):
     data = json.loads(request.body.read().decode('UTF-8'))
-    if data['controller_ip'] not in controller_uuid_map:
-        controller_uuid_map[data['controller_ip']] = set()
     controller_uuid_map[data['controller_ip']].add(uuid.UUID(data['controller_uuid']))
 
 def clear_intermediate_result_list():
