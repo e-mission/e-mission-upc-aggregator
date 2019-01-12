@@ -8,6 +8,7 @@ import abc
 import numpy as np
 
 intermediate_result_list = []
+controller_uuid_map = {}
 
 class RequestThread(threading.Thread):
     def __init__(self, controller, enclaves_in_query, query_object, privacy_budget):
@@ -131,14 +132,23 @@ def add_to_result_list():
     data = json.loads(request.body.read().decode('UTF-8'))
     print(data)
     if data['response'] == 'yes':
-        intermediate_result_list.append(data['value'])
+        controller_uuid_set = controller_uuid_map[data['controller_ip']]
+        if data['controller_uuid'] in controller_uuid_set:
+            intermediate_result_list.append(data['value'])
+
+            h1 = http.client.HTTPConnection(data['controller_ip'])
+            h1.request("POST", "/user_finished", data['controller_uuid']) 
+            r1 = h1.getresponse()
+        else:
+            return "Invalid controller uuid"
     print(intermediate_result_list)
 
-    h1 = http.client.HTTPConnection(data['controller_ip'])
-    h1.request("POST", "/user_finished", data['controller_uuid']) 
-    r1 = h1.getresponse()
-
     return "Successfully added to query list"
+
+@post('/add_uuid_map')
+def add_uuid_map(controller_ip, controller_uuid):
+    data = json.loads(request.body.read().decode('UTF-8'))
+    controller_uuid_map[data['controller_ip']] = data['controller_uuid']
 
 def clear_intermediate_result_list():
     global intermediate_result_list
