@@ -23,7 +23,7 @@ path = os.path.expanduser("~/e-mission-server/")
 uuid_counter = 0
 uuid_set = set()
 uuid_counter_lock = threading.Lock()
-ready_to_proceed = Event()
+ready_to_proceed = threading.Event()
 # container_port = 1025
 
 class DockerThread(threading.Thread):
@@ -87,15 +87,15 @@ def query_start():
         print("Length of list of containers: " + str(len(list_of_containers)))
         batch_size = 10
         global uuid_counter, uuid_set, ready_to_proceed
-        ready_to_proceed = Event()
+        ready_to_proceed = threading.Event()
         uuid_counter, uuid_set = 0, set()
         for j in range(0, int(len(list_of_containers) / batch_size) + 1):
                 for i in range(min(int(len(list_of_containers) - j * batch_size), batch_size)):
-                        rand_uuid = uuid.uuid1()
-                        uuid_set.add(rand_uuid)
+                        rand_uuid = str(uuid.uuid1())
+                        uuid_set.add(uuid.UUID(rand_uuid))
                         send_to_agg = http.client.HTTPConnection(aggregator_ip)
                         send_to_agg_data = json.dumps({'controller_ip':controller_ip, 'controller_uuid':rand_uuid})
-                        h1.request("POST", "/add_uuid_map", send_to_agg_data)
+                        send_to_agg.request("POST", "/add_uuid_map", send_to_agg_data)
                         container = list_of_containers[j * batch_size + i]
                         thread = DockerThread(container[0], query_type, container[1], aggregator_ip, privacy_budget, rand_uuid)
                         thread.start()
