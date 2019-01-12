@@ -15,10 +15,11 @@ from docker.types import Mount
 import threading
 import http.client
 
+port = 2000
 json_data = json.load(open("mock_data.json"))
 list_of_containers = list(json.load(open("mock_data.json")).keys())
 client = docker.from_env()
-controller_ip = socket.gethostbyname(socket.gethostname())
+controller_ip = socket.gethostbyname(socket.gethostname()) + ":" + str(port)
 path = os.path.expanduser("~/e-mission-server/")
 uuid_counter = 0
 uuid_set = set()
@@ -124,5 +125,5 @@ def start():
 if __name__ == "__main__":
     atexit.register(remove_containers)
     start()
-    run(port=2000, host='0.0.0.0',debug=True)
+    run(port=port, host='0.0.0.0',debug=True)
     #threading.Thread(target=run, args=(2000, '0.0.0.0')).start()
