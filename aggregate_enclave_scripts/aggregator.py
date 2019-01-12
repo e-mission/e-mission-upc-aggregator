@@ -148,7 +148,9 @@ def add_to_result_list():
 @post('/add_uuid_map')
 def add_uuid_map(controller_ip, controller_uuid):
     data = json.loads(request.body.read().decode('UTF-8'))
-    controller_uuid_map[data['controller_ip']] = uuid.UUID(data['controller_uuid'])
+    if data['controller_ip'] not in controller_uuid_map:
+        controller_uuid_map[data['controller_ip']] = set()
+    controller_uuid_map[data['controller_ip']].add(uuid.UUID(data['controller_uuid']))
 
 def clear_intermediate_result_list():
     global intermediate_result_list
