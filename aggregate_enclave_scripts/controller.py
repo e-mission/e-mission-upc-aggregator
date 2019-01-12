@@ -23,7 +23,7 @@ path = os.path.expanduser("~/e-mission-server/")
 uuid_counter = 0
 uuid_set = set()
 uuid_counter_lock = threading.Lock()
-ready_to_proceed = Event()
+ready_to_proceed = threading.Event()
 # container_port = 1025
 
 class DockerThread(threading.Thread):
