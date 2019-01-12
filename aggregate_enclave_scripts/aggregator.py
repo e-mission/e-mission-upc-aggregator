@@ -133,7 +133,7 @@ def add_to_result_list():
     print(data)
     if data['response'] == 'yes':
         controller_uuid_set = controller_uuid_map[data['controller_ip']]
-        if data['controller_uuid'] in controller_uuid_set:
+        if uuid.UUID(data['controller_uuid']) in controller_uuid_set:
             intermediate_result_list.append(data['value'])
 
             h1 = http.client.HTTPConnection(data['controller_ip'])
@@ -148,7 +148,7 @@ def add_to_result_list():
 @post('/add_uuid_map')
 def add_uuid_map(controller_ip, controller_uuid):
     data = json.loads(request.body.read().decode('UTF-8'))
-    controller_uuid_map[data['controller_ip']] = data['controller_uuid']
+    controller_uuid_map[data['controller_ip']] = uuid.UUID(data['controller_uuid'])
 
 def clear_intermediate_result_list():
     global intermediate_result_list
