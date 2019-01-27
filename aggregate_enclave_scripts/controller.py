@@ -54,21 +54,23 @@ def upload():
 def remove_containers():
     for container in list_of_containers:
         container[0].remove(force=True)
-    return ""
+    return "User containers removed"
 @post('/user_finished')
 def user_finished():
     """
     Aggregator sends post request here to let controller know
     that the container with given UUID's message has been received
     """
-    request_dict = json.load(request.body)
+    global uuid_counter
+    request_dict = json.loads(request.body.read().decode('UTF-8'))
     controller_uuid = uuid.UUID(request_dict['controller_uuid'])
     if controller_uuid in uuid_set:
         with uuid_counter_lock:
             uuid_counter += 1
+            print(uuid_counter)
         if uuid_counter == len(uuid_set):
             ready_to_proceed.set()
-        return ""
+        return "Done with current user_finished call"
     return "stop trying to spam me, malicious entity!"
 
 @post('/request_query')
@@ -78,7 +80,7 @@ def query_start():
         2. Wake them up with docker resume
         3. Ask for query from them
         """
-        request_dict = json.load(request.body)
+        request_dict = json.loads(request.body.read().decode('UTF-8'))
         query_type = str(request_dict['query_type'])
         privacy_budget = str(request_dict['privacy_budget'])
         print(request_dict)
@@ -119,12 +121,12 @@ def start():
                         container]
                 list_of_containers[i][0].pause()
         print(list_of_containers)
-        with open("mock_data.json", "w") as jsonFile:
-            json.dump(json_data, jsonFile)
-        return ""
+        #with open("mock_data.json", "w") as jsonFile:
+        #    json.dump(json_data, jsonFile)
+        return "User containers started"
 
 if __name__ == "__main__":
     atexit.register(remove_containers)
     start()
-    run(port=port, host='0.0.0.0',debug=True)
+    run(port=port, host='0.0.0.0',debug=True, server='paste')
     #threading.Thread(target=run, args=(2000, '0.0.0.0')).start()

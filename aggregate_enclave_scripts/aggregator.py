@@ -129,7 +129,10 @@ def start_query():
 
 @post('/add_to_result_list')
 def add_to_result_list():
-    print(request)
+    #print(type(request))
+    #print(type(request.body))
+    #print(request.body.decode('UTF-8'))
+    #print(request.body.read())
     data = json.loads(request.body.read().decode('UTF-8'))
     print(data)
     if data['response'] == 'yes':
@@ -138,7 +141,7 @@ def add_to_result_list():
             intermediate_result_list.append(data['value'])
 
             h1 = http.client.HTTPConnection(data['controller_ip'])
-            h1.request("POST", "/user_finished", data['controller_uuid']) 
+            h1.request("POST", "/user_finished", json.dumps(data)) 
             r1 = h1.getresponse()
         else:
             return "Invalid controller uuid"
@@ -148,8 +151,11 @@ def add_to_result_list():
 
 @post('/add_uuid_map')
 def add_uuid_map():
+    print(controller_uuid_map)
+    print(request.body.read())
     data = json.loads(request.body.read().decode('UTF-8'))
     controller_uuid_map[data['controller_ip']].add(uuid.UUID(data['controller_uuid']))
+    return "Successfully added to uuid map"
 
 def clear_intermediate_result_list():
     global intermediate_result_list
