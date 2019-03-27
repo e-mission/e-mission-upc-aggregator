@@ -7,6 +7,8 @@ import arrow
 import requests
 #emission imports
 import emission.core.wrapper.user as ecwu
+import emission.simulation.gen_profile as gp
+import emission.simulation.connect_usercloud as cu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 
 class FakeUser:
@@ -27,6 +29,10 @@ class FakeUser:
         self._label_to_coordinate_map = self._create_label_to_coordinate_map(config)
         self._trip_to_mode_map = self._create_trip_to_mode_map(config)
         self._measurements_cache = []
+        # Additional info for user cloud
+        key = np.random.randint (low=0, high=(pow(2, 63) - 1))
+        profile = gp.AlgProfile ()
+        self._usercloud = cu.UserCloud (key, profile)
 
     def take_trip(self):
         #TODO: If we have already completed a trip, we could potentially cache the location data 

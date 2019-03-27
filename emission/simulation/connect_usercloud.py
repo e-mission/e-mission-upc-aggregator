@@ -3,7 +3,7 @@
 # the key and profile.
 
 # Inspired by https://stackoverflow.com/questions/34417279/sending-a-json-string-as-a-post-request/34418733
-from gen_profile import AlgProfile 
+from emission.simulation.gen_profile import AlgProfile 
 import requests
 import numpy as np
 
@@ -44,16 +44,16 @@ def main ():
         addr = getaddress (names[i])
         user_list[i].send_contents (addr)
         alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        print (requests.post (addr + "/run", json=alg_contents).text)
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
         alg_contents["algorithm"] = "Not an algorithm"
-        print (requests.post (addr + "/run", json=alg_contents).text)
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
     for i in range (2):
         addr = getaddress (names[i])
         user_list[i].send_contents (addr)
         alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        print (requests.post (addr + "/run", json=alg_contents).text)
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
         alg_contents["algorithm"] = "Not an algorithm"
-        print (requests.post (addr + "/run", json=alg_contents).text)
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
 
 if __name__ == "__main__":
     main ()

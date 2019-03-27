@@ -26,7 +26,7 @@ class AlgProfile:
     alg_dict = None  
 
     # Default location of known algorithms relative to this file
-    alg_file = "known_algs.json"
+    alg_file = "emission/simulation/known_algs.json"
 
     # Default value for number of algorithms
     LAMBDA_ALG = 4
