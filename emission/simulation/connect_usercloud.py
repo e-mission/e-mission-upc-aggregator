@@ -40,20 +40,20 @@ def main ():
         user_list.append (UserCloud (key_list[i], profile_list[i]))
     alg_contents = dict ()
     alg_contents["algorithm"] = list (user_list[0].profile.algs.keys ())[0]
-    for i in range (1):
+    for i in range (2):
         addr = getaddress (names[i])
-        #user_list[i].send_contents (addr)
-        #alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-        #alg_contents["algorithm"] = "Not an algorithm"
-        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-    for i in range (1):
+        user_list[i].send_contents (addr)
+        alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+        alg_contents["algorithm"] = "Not an algorithm"
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+    for i in range (2):
         addr = getaddress (names[i])
-        #user_list[i].send_contents (addr)
-        #alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-        #alg_contents["algorithm"] = "Not an algorithm"
-        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+        user_list[i].send_contents (addr)
+        alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+        alg_contents["algorithm"] = "Not an algorithm"
+        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
 
 if __name__ == "__main__":
     main ()

@@ -102,6 +102,7 @@ def spawn_usercloud ():
                 not_spawn = False
         output = "http://localhost:" + str (port)
         print (port)
+        time.sleep (30)
         userclouds[contents] = output
         return output
     
