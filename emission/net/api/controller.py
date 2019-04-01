@@ -93,13 +93,15 @@ def spawn_usercloud ():
         while (not_spawn):
             # select a random port and hope it works
             port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-            res = subprocess.Popen (['python', 'emission/net/api/usercloud.py', str (port)])
-            # Check if it instantly crashes which suggests the port is no good
-            try:
-                res.wait (.5)
-            except subprocess.TimeoutExpired:
+            res = subprocess.run (['docker', 'stack', 'deploy', '-c', '/home/nicholas/Documents/Research/sp19/e-mission-docker/docker-compose.yml', contents])
+            print (res)
+            if res.returncode != 0:
+                continue
+            res = subprocess.run (['docker', 'service', 'update', '--publish-add', '{}:8080'.format (str (port)), "{}_web-server".format (contents)])
+            if res.returncode == 0:
                 not_spawn = False
         output = "http://localhost:" + str (port)
+        print (port)
         userclouds[contents] = output
         return output
     

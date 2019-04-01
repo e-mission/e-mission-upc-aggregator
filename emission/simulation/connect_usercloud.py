@@ -7,7 +7,7 @@ from emission.simulation.gen_profile import AlgProfile
 import requests
 import numpy as np
 
-kal_port = 8080
+controller_port = 4040
 
 class UserCloud:
 
@@ -25,7 +25,7 @@ class UserCloud:
 
 # Method used to get the address from speaking to the KAL
 def getaddress (username):
-    return requests.post ("http://localhost:" + str (kal_port) + "/usercloud", json=username).text
+    return requests.post ("http://localhost:" + str (controller_port) + "/usercloud", json=username).text
 
 # Sample main to test out connecting to the user cloud setup with bottle
 def main ():
@@ -40,20 +40,20 @@ def main ():
         user_list.append (UserCloud (key_list[i], profile_list[i]))
     alg_contents = dict ()
     alg_contents["algorithm"] = list (user_list[0].profile.algs.keys ())[0]
-    for i in range (2):
+    for i in range (1):
         addr = getaddress (names[i])
-        user_list[i].send_contents (addr)
-        alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-        alg_contents["algorithm"] = "Not an algorithm"
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-    for i in range (2):
+        #user_list[i].send_contents (addr)
+        #alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
+        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+        #alg_contents["algorithm"] = "Not an algorithm"
+        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+    for i in range (1):
         addr = getaddress (names[i])
-        user_list[i].send_contents (addr)
-        alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-        alg_contents["algorithm"] = "Not an algorithm"
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+        #user_list[i].send_contents (addr)
+        #alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
+        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+        #alg_contents["algorithm"] = "Not an algorithm"
+        #print (requests.post (addr + "/run/useralg", json=alg_contents).text)
 
 if __name__ == "__main__":
     main ()
