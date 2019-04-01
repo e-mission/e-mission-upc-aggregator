@@ -445,7 +445,7 @@ def getUUID(request, inHeader=False):
 
 ##### START OF NICK'S CHANGES FOR THE NEW ARCH
 
-@post ("/key")
+@post ("/cloud/key")
 def process_key():
     global key
     if key:
@@ -454,7 +454,7 @@ def process_key():
         key = request.json
         print (key)
 
-@post ("/profile")
+@post ("/cloud/profile")
 def process_profile():
     global profile
     if profile:
@@ -463,7 +463,7 @@ def process_profile():
         profile = request.json
         print (profile)
     
-@get ("/status")
+@get ("/cloud/status")
 def check_status ():
     ret_string = ""
     if key is None:
