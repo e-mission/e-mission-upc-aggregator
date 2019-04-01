@@ -9,7 +9,7 @@ WORKDIR /usr/src/app
 RUN git clone https://github.com/njriasan/e-mission-server.git .
 
 # update the branch
-RUN git checkout -b newArch
+RUN git checkout newArch
 
 # setup python environment.
 RUN conda env update --name emission --file setup/environment36.yml

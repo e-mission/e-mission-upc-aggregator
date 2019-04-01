@@ -444,6 +444,8 @@ def getUUID(request, inHeader=False):
 # Auth helpers END
 
 ##### START OF NICK'S CHANGES FOR THE NEW ARCH
+key = None
+profile = None
 
 @post ("/cloud/key")
 def process_key():
