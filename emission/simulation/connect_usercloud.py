@@ -14,6 +14,7 @@ class UserCloud:
     def __init__ (self, key, profile):
         self.key = key
         self.profile = profile
+        self.address = None
 
     def send_contents (self, addr="http://localhost:4443"):
         print (requests.get (addr + "/cloud/status").text)
@@ -23,9 +24,16 @@ class UserCloud:
         print (requests.post (addr + "/cloud/profile", json=self.profile.algs).text)
 
 
-# Method used to get the address from speaking to the KAL
-def getaddress (username):
-    return requests.post ("http://localhost:" + str (controller_port) + "/usercloud", json=username).text
+    # Method used to get the address from speaking to the KAL
+    def getaddress (self, username):
+        self.address = requests.post ("http://localhost:" + str (controller_port) + "/usercloud", json=username).text
+
+    def init_usercloud (self, username):
+        self.getaddress (username)
+        self.send_contents (self.address)
+
+    def make_post (self, addr_extension="", contents=None):
+        return requests.post (self.address + addr_extension, json=contents)
 
 # Sample main to test out connecting to the user cloud setup with bottle
 def main ():
@@ -40,20 +48,13 @@ def main ():
         user_list.append (UserCloud (key_list[i], profile_list[i]))
     alg_contents = dict ()
     alg_contents["algorithm"] = list (user_list[0].profile.algs.keys ())[0]
-    for i in range (2):
-        addr = getaddress (names[i])
-        user_list[i].send_contents (addr)
-        alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-        alg_contents["algorithm"] = "Not an algorithm"
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-    for i in range (2):
-        addr = getaddress (names[i])
-        user_list[i].send_contents (addr)
-        alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
-        alg_contents["algorithm"] = "Not an algorithm"
-        print (requests.post (addr + "/run/useralg", json=alg_contents).text)
+    for j in range (2):
+        for i in range (2):
+            user_list[i].init_ usercloud (names[i])
+            alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
+            print (user_list[i].make_post ("/run/useralg", alg_contents).text)
+            alg_contents["algorithm"] = "Not an algorithm"
+            print (user_list[i].make_post ("/run/useralg", alg_contents).text)
 
 if __name__ == "__main__":
     main ()

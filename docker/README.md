@@ -42,7 +42,7 @@ Instructions on re-building the image are [in the build instructions](#Docker_Bu
 1. Build local docker image
 
    ```
-   docker build -f docker/Dockerfile -t emission/e-mission-server:latest ./docker
+   docker build -f docker/Dockerfile -t emission/test-server:latest ./docker
    ```
 
 1. Tag the release (make sure you are in the owners group for emission, or

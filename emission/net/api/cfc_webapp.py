@@ -234,10 +234,13 @@ def getFromCache():
 
 @post('/usercache/put')
 def putIntoCache():
+  if key is None:
+      abort (403, "Cannot store data without a key.\n") 
   logging.debug("Called userCache.put")
   user_uuid=getUUID(request)
   logging.debug("user_uuid %s" % user_uuid)
   from_phone = request.json['phone_to_server']
+  print (request.json['phone_to_server']) 
   return usercache.sync_phone_to_server(user_uuid, from_phone)
 
 @post('/timeline/getTrips/<day>')

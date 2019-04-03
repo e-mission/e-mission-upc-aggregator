@@ -24,6 +24,7 @@ import emission.net.ext_service.geocoder.nominatim as enn
 import emission.core.get_database as edb
 import emission.core.wrapper.trip as ecwt
 import emission.core.wrapper.section as ecws
+import emission.simulation.connect_usercloud as esc_u
 
 class Address(object):
 

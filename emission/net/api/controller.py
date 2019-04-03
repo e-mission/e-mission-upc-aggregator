@@ -93,7 +93,7 @@ def spawn_usercloud ():
         while (not_spawn):
             # select a random port and hope it works
             port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-            res = subprocess.run (['docker', 'stack', 'deploy', '-c', '/home/nicholas/Documents/Research/sp19/e-mission-docker/docker-compose.yml', contents])
+            res = subprocess.run (['docker', 'stack', 'deploy', '-c', 'docker/docker-compose.yml', contents])
             print (res)
             if res.returncode != 0:
                 continue
@@ -102,7 +102,7 @@ def spawn_usercloud ():
                 not_spawn = False
         output = "http://localhost:" + str (port)
         print (port)
-        time.sleep (30)
+        time.sleep (5)
         userclouds[contents] = output
         return output
     

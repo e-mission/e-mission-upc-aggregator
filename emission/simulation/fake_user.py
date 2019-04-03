@@ -8,7 +8,7 @@ import requests
 #emission imports
 import emission.core.wrapper.user as ecwu
 import emission.simulation.gen_profile as gp
-import emission.simulation.connect_usercloud as cu
+import emission.simulation.connect_usercloud as escu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 
 class FakeUser:
@@ -72,13 +72,16 @@ class FakeUser:
     def sync_data_to_server(self):
         #Remove the _id field
         measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
+        self._usercloud.init_usercloud (self._uuid)
         #Send data to server
         data = {
             'phone_to_server': measurements_no_id,
             'user': self._email
         }
 
-        r = requests.post(self._config['upload_url'], json=data)
+        upload_url = self._usercloud.address + "/usercache/put"
+
+        r = requests.post(upload_url, json=data)
 
         #Check if sucessful
         if r.ok:
