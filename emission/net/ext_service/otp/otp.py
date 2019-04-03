@@ -100,7 +100,6 @@ class OTP(object):
         query_url = "%s/otp/routers/default/plan?" % address
         encoded_params = urllib.parse.urlencode(params)
         url = query_url + encoded_params
-        #print(url)
         add_file.close()
         return url
 

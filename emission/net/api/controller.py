@@ -85,7 +85,7 @@ def test():
 
 @post ("/usercloud")
 def spawn_usercloud ():
-    contents = request.json
+    contents = request.json['user']
     if contents in userclouds:
         return userclouds[contents]
     else:
@@ -102,7 +102,7 @@ def spawn_usercloud ():
                 not_spawn = False
         output = "http://localhost:" + str (port)
         print (port)
-        time.sleep (5)
+        time.sleep (30)
         userclouds[contents] = output
         return output
     

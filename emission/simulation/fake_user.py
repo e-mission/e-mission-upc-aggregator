@@ -7,8 +7,6 @@ import arrow
 import requests
 #emission imports
 import emission.core.wrapper.user as ecwu
-import emission.simulation.gen_profile as gp
-import emission.simulation.connect_usercloud as escu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 
 class FakeUser:
@@ -29,10 +27,6 @@ class FakeUser:
         self._label_to_coordinate_map = self._create_label_to_coordinate_map(config)
         self._trip_to_mode_map = self._create_trip_to_mode_map(config)
         self._measurements_cache = []
-        # Additional info for user cloud
-        key = np.random.randint (low=0, high=(pow(2, 63) - 1))
-        profile = gp.AlgProfile ()
-        self._usercloud = cu.UserCloud (key, profile)
 
     def take_trip(self):
         #TODO: If we have already completed a trip, we could potentially cache the location data 
@@ -72,16 +66,16 @@ class FakeUser:
     def sync_data_to_server(self):
         #Remove the _id field
         measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
-        self._usercloud.init_usercloud (self._uuid)
+
         #Send data to server
         data = {
             'phone_to_server': measurements_no_id,
             'user': self._email
         }
 
-        upload_url = self._usercloud.address + "/usercache/put"
+        print (self._config['upload_url'])
 
-        r = requests.post(upload_url, json=data)
+        r = requests.post(self._config['upload_url'], json=data) 
 
         #Check if sucessful
         if r.ok:

@@ -24,7 +24,6 @@ import emission.net.ext_service.geocoder.nominatim as enn
 import emission.core.get_database as edb
 import emission.core.wrapper.trip as ecwt
 import emission.core.wrapper.section as ecws
-import emission.simulation.connect_usercloud as esc_u
 
 class Address(object):
 
@@ -108,8 +107,7 @@ class Creator(object):
                 rand_user_id = user_id if user_id else random.random()
                 otp_trip = OTP(t[0], t[1], mode, write_day(curr_month, curr_day, curr_year), write_time(curr_hour, curr_minute), True)
                 if self.new:
-                    print("here")
-                    otp_trip.turn_into_new_trip(user_id)
+                    otp_trip.get_measurements_along_route (user_id)
                 else:
                     alt_trip = otp_trip.turn_into_trip("%s%s" % (rand_user_id, rand_trip_id), rand_user_id, rand_trip_id, True)   ## ids
                     save_trip_to_db(alt_trip)
@@ -177,7 +175,7 @@ def get_one_random_point_in_radius(address, radius):
     return to_return
 
 def kilometers_to_degrees(km):
-    ## From stackexchnage mentioned above 
+    ## From stack exchange mentioned above 
     return (old_div(float(km),float(40000))) * 360
 
 def write_day(month, day, year):
@@ -190,7 +188,7 @@ def create_fake_trips(user_name=None, new=False):
     ### This is the main function, its the only thing you need to run
     my_creator = Creator(new)
     my_creator.set_up()
-    #TODO: If we cant find coordintates for one of the addresses, tell the user. We must decide how the user shoudl enter the addresses in a meaningfull format. 
+    #TODO: If we cant find coordintates for one of the addresses, tell the user. We must decide how the user should enter the addresses in a meaningfull format. 
     my_creator.get_starting_ending_points()
     my_creator.make_a_to_b()
     my_creator.get_trips_from_a_to_b(user_name)

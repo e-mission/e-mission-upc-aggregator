@@ -7,7 +7,7 @@ from emission.simulation.gen_profile import AlgProfile
 import requests
 import numpy as np
 
-controller_port = 4040
+controller_addr = "http://localhost:4040"
 
 class UserCloud:
 
@@ -25,11 +25,11 @@ class UserCloud:
 
 
     # Method used to get the address from speaking to the KAL
-    def getaddress (self, username):
-        self.address = requests.post ("http://localhost:" + str (controller_port) + "/usercloud", json=username).text
+    def getaddress (self, username, addr):
+        self.address = requests.post (addr + "/usercloud", json=username).text
 
-    def init_usercloud (self, username):
-        self.getaddress (username)
+    def init_usercloud (self, username, base_addr):
+        self.getaddress (username, base_addr)
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):
@@ -50,7 +50,7 @@ def main ():
     alg_contents["algorithm"] = list (user_list[0].profile.algs.keys ())[0]
     for j in range (2):
         for i in range (2):
-            user_list[i].init_ usercloud (names[i])
+            user_list[i].init_usercloud ({'user' : names[i]}, controller_addr)
             alg_contents["algorithm"] = list (user_list[i].profile.algs.keys ())[0]
             print (user_list[i].make_post ("/run/useralg", alg_contents).text)
             alg_contents["algorithm"] = "Not an algorithm"
