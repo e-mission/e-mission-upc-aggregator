@@ -32,6 +32,7 @@ class EmissionFakeDataGenerator(Client):
         uuid = self._register_fake_user(config['email'])
         config['uuid'] = uuid
         config['upload_url'] = self._usercloud.address + self._config['user_cache_endpoint']
+        #config['pipeline_url'] = self._usercloud.address + self._config['algorithm_endpoint']
         return self._user_factory(config)
 
     def _register_fake_user(self, email):

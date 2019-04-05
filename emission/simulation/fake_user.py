@@ -73,8 +73,6 @@ class FakeUser:
             'user': self._email
         }
 
-        print (self._config['upload_url'])
-
         r = requests.post(self._config['upload_url'], json=data) 
 
         #Check if sucessful
@@ -84,6 +82,10 @@ class FakeUser:
         else:
             print('Something went wrong when trying to sync your data. Try again or use save_cache_to_file to save your data.')
             print(r.content)
+
+    def run_pipeline (self):
+        # Make a call 
+        pass 
 
     def _create_new_otp_trip(self, curr_coordinate, next_coordinate, cur_loc, next_loc):
         try:

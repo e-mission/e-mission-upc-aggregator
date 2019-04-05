@@ -17,6 +17,7 @@ import emission.net.api.bottle as bt
 import subprocess
 import sys
 import os
+import signal
 import logging
 import logging.config
 
@@ -77,7 +78,12 @@ BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 print("Finished configuring logging for %s" % logging.getLogger())
 app = app()
 
-userclouds = dict ()
+runningclouds = dict ()
+pausedclouds = dict ()
+cloudticks = dict ()
+ticks = 0
+tick_limit = 10
+tick_time = 10.0
 
 @route ("/")
 def test():
@@ -86,8 +92,21 @@ def test():
 @post ("/usercloud")
 def spawn_usercloud ():
     contents = request.json['user']
-    if contents in userclouds:
-        return userclouds[contents]
+    if contents in runningclouds:
+        cloudticks[contents] = ticks
+        return runningclouds[contents]
+    elif contents in pausedclouds:
+        containers = get_container_names (contents)
+        for name in containers:
+            if name:
+              res = subprocess.run (['docker', 'unpause', name])
+              if res.returncode != 0:
+                print ("Error: DANGER DANGER!!!!!!")
+        addr = pausedclouds[contents]
+        del pausedclouds[contents]
+        runningclouds[contents] = addr
+        cloudticks[contents] = ticks
+        return addr 
     else:
         not_spawn = True
         while (not_spawn):
@@ -103,7 +122,8 @@ def spawn_usercloud ():
         output = "http://localhost:" + str (port)
         print (port)
         time.sleep (30)
-        userclouds[contents] = output
+        runningclouds[contents] = output
+        cloudticks[contents] = ticks
         return output
     
 @post('/profile/create')
@@ -119,6 +139,38 @@ def createUserProfile():
   except ValueError as e:
       traceback.print_exc()
       abort(403, e.message)
+
+# Container Helper functions
+def get_container_names (contents):
+    process = subprocess.Popen (['./bin/deploy/container_id.sh', contents], stdout=subprocess.PIPE)
+    process.wait ()
+    (result, error) = process.communicate ()
+    return result.decode ('utf-8').split ('\n')
+
+
+def tick_incr (unused1, unused2):
+    global ticks
+    print ("Ticking the timer")
+    ticks += 1
+    contents_list = list (cloudticks.keys ()) [:]
+    for contents in contents_list:
+      starttime = cloudticks[contents]
+      if ticks - starttime > tick_limit:
+          containers = get_container_names (contents)
+          for name in containers:
+              if name:
+                  res = subprocess.run (['docker', 'pause', name])
+                  if res.returncode != 0:
+                      print ("Error: DANGER DANGER!!!!!!")
+          addr = runningclouds[contents]
+          del runningclouds[contents]
+          del cloudticks[contents]
+          pausedclouds[contents] = addr
+    launch_timer ()
+        
+
+def launch_timer ():
+    signal.setitimer (signal.ITIMER_REAL, tick_time)
 
 # Auth helpers BEGIN
 # This should only be used by createUserProfile since we may not have a UUID
@@ -138,6 +190,8 @@ def getUUID(request, inHeader=False):
 # Auth helpers END
 
 if __name__ == "__main__":
+    signal.signal (signal.SIGALRM, tick_incr)
+    launch_timer ()
     if (len (sys.argv) == 1):
         run(host='localhost', port=8080, debug=True)
     elif (len (sys.argv) == 2):
