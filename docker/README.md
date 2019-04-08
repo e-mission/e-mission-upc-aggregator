@@ -42,7 +42,7 @@ Instructions on re-building the image are [in the build instructions](#Docker_Bu
 1. Build local docker image
 
    ```
-   docker build -f docker/Dockerfile -t emission/e-mission-server:latest ./docker
+   docker build -f docker/Dockerfile -t emission/test-server:latest ./docker
    ```
 
 1. Tag the release (make sure you are in the owners group for emission, or
@@ -59,3 +59,16 @@ Instructions on re-building the image are [in the build instructions](#Docker_Bu
    docker push emission/e-mission-server:<version>
    docker push emission/e-mission-server:latest
    ```
+   
+## Docker NewArch Instructions 
+
+For the new architecture this is all you should need to do to have the proper containers.
+
+   ```
+   docker build -f docker/Dockerfile -t emission/test-server:latest ./docker
+   ```
+You will also need to run docker swarm.
+
+  ```
+   docker swarm init 
+   ``` 

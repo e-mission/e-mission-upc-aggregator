@@ -66,13 +66,14 @@ class FakeUser:
     def sync_data_to_server(self):
         #Remove the _id field
         measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
+
         #Send data to server
         data = {
             'phone_to_server': measurements_no_id,
             'user': self._email
         }
 
-        r = requests.post(self._config['upload_url'], json=data)
+        r = requests.post(self._config['upload_url'], json=data) 
 
         #Check if sucessful
         if r.ok:
@@ -81,6 +82,10 @@ class FakeUser:
         else:
             print('Something went wrong when trying to sync your data. Try again or use save_cache_to_file to save your data.')
             print(r.content)
+
+    def run_pipeline (self):
+        # Make a call 
+        pass 
 
     def _create_new_otp_trip(self, curr_coordinate, next_coordinate, cur_loc, next_loc):
         try:

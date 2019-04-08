@@ -9,6 +9,7 @@ from builtins import object
 import urllib.request, urllib.parse, urllib.error, urllib.request, urllib.error, urllib.parse
 import logging
 import json
+import os
 
 from emission.core.wrapper.trip_old import Coordinate
 from pygeocoder import Geocoder as pyGeo  ## We fall back on this if we have to

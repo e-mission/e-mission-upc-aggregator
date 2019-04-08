@@ -1,7 +1,10 @@
 from abc import ABC, abstractmethod
 from emission.simulation.fake_user import FakeUser
 from emission.simulation.error import AddressNotFoundError
+import emission.simulation.gen_profile as gp
+import emission.simulation.connect_usercloud as escu
 import requests
+import numpy as np
 
 class Client(ABC):
     def __init__(self):
@@ -19,18 +22,24 @@ class EmissionFakeDataGenerator(Client):
         #TODO: Check that the config object has keys: emission_server_base_url, register_user_endpoint, user_cache_endpoint
         self._config = config
         self._user_factory = FakeUser
+        # Additional info for user cloud
+        key = np.random.randint (low=0, high=(pow(2, 63) - 1))
+        profile = gp.AlgProfile ()
+        self._usercloud = escu.UserCloud (key, profile)
 
     def create_fake_user(self, config):
         #TODO: parse the config object
         uuid = self._register_fake_user(config['email'])
         config['uuid'] = uuid
-        config['upload_url'] = self._config['emission_server_base_url'] + self._config['user_cache_endpoint']
+        config['upload_url'] = self._usercloud.address + self._config['user_cache_endpoint']
+        #config['pipeline_url'] = self._usercloud.address + self._config['algorithm_endpoint']
         return self._user_factory(config)
 
     def _register_fake_user(self, email):
         data = {'user': email}
-        url = self._config['emission_server_base_url'] + self._config['register_user_endpoint'] 
-        r = requests.post(url, json=data)
+        #url = self._config['emission_server_base_url'] + self._config['register_user_endpoint'] 
+        self._usercloud.init_usercloud (data, self._config['emission_server_base_url'])
+        r = requests.post(self._usercloud.address + self._config['register_user_endpoint'], json=data)
         r.raise_for_status()
         uuid = r.json()['uuid']
         #TODO: This is a hack to make all the genereated entries JSON encodeable. 
