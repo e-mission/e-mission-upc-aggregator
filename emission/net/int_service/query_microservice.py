@@ -8,6 +8,8 @@ import abc
 import numpy as np
 import sys
 
+query_mapping = {'sum' : Sum()}
+
 class Query(abc.ABC):
     """
     ABC is an abstract base class to define an interface for all queries
@@ -17,7 +19,11 @@ class Query(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def generate_noise(self, data):
+    def update_current_query_result(self, data):
+        pass
+
+    @abc.abstractmethod
+    def get_current_query_result(self, data):
         pass
 
     @abc.abstractmethod
@@ -27,55 +33,42 @@ class Query(abc.ABC):
 class Sum(Query):
     def __init__(self):
         self.id = uuid.uuid4()
+        self.query_value = 0
 
     def run_query(self, data):
-        #self.amount_of_noise = 0
         total = 0
         for value in data:
-            total += int(value)
+            total += value
         return total
 
-    def generate_noise(self, data, privacy_budget):
-        sensitivity = 1
-        n = len(data)
-        return np.random.laplace(scale=(n * sensitivity)/float(privacy_budget))
+    def update_current_query_result(self, query_result):
+        self.query_value += query_result
+
+    def get_current_query_result(self):
+        return self.query_value
 
     def __repr__(self):
         return "sum"
-
-# @post('/add_to_result_list')
-# def add_to_result_list():
-#     #print(type(request))
-#     #print(type(request.body))
-#     #print(request.body.decode('UTF-8'))
-#     #print(request.body.read())
-#     data = json.loads(request.body.read().decode('UTF-8'))
-#     print(data)
-#     if data['response'] == 'yes':
-#         controller_uuid_set = controller_uuid_map[data['controller_ip']]
-#         if uuid.UUID(data['controller_uuid']) in controller_uuid_set:
-#             intermediate_result_list.append(data['value'])
-
-#             h1 = http.client.HTTPConnection(data['controller_ip'])
-#             h1.request("POST", "/user_finished", json.dumps(data)) 
-#             r1 = h1.getresponse()
-#         else:
-#             return "Invalid controller uuid"
-#     print(intermediate_result_list)
-
-#     return "Successfully added to query list"
 
 @post('/receive_query')
 def receive_query():
     user_cloud_addr = request.json['user_cloud_addr']
     query = request.json['query']
-    requests.post(user_cloud_addr + "/run/aggregate", json=query)
-    return "Query sent to user cloud."
+    query_object = query_mapping[query['query_type']]
 
-@post('/receive_user_data')
-def receive_user_data():
-    # Complete when we know where the datastreams intereface is.
-    return "Data received."
+    # Eventually have to add a loop that collects all the streamed data packets instead of just one.
+    cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json=query)
+    # end_of_stream = cloud_response.json['end_of_stream']
+    return receive_user_data(cloud_response, query_object)
+
+def receive_user_data(resp, query_object):
+    # Assume the response has list of ts_entries
+    curr_data_list = resp.json['curr_data_list']
+
+    # Get the query result by running the query on the data.
+    query_result = query_object.run_query(curr_data_list)
+    query_object.update_current_query_result(query_result)
+    return query_object.get_current_query_result()
 
 if __name__ == "__main__":
     run(host='localhost', port=80, server='cheroot')
