@@ -172,6 +172,9 @@ def launch_queriers (query_type):
     addr_list = []
     for i in range (querier_count):
        addr_list.append (launch_query (query_type, i, user_uuid))
+    ret_dict = dict ()
+    for i, addr in enumerate(addr_list):
+        ret_dict[i] = addr
     # No way to check the updates are ready. Remove later with something more accurate 
     time.sleep (20)
     return json.dumps (ret_dict)

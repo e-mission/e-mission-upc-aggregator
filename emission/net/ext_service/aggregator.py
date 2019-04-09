@@ -58,11 +58,10 @@ def get_user_addrs (controller_addr, num_users_lower_bound):
 
 def launch_query_microservices (query_type, service_count, username):
     r = requests.post(controller_addr + "/get_querier_addrs/{}".format (query_type), json={"user": username, "count": service_count})
-    print (r.text)
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)
-    if len(addr_list) != service_count:
+    if len(addr_list) == service_count:
         return addr_list
     else:
         print ("Failure to spawn enough microservice instances")
