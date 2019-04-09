@@ -1,6 +1,6 @@
 import sys
 import http.client
-from bottle import route, run, get, post, request
+from emission.net.api.bottle import route, run, get, post, request
 import json
 import uuid
 import threading
@@ -8,7 +8,7 @@ import abc
 import numpy as np
 import sys
 
-query_mapping = {'sum' : Sum()}
+query_mapping = {'sum' : sum}
 
 class Query(abc.ABC):
     """
@@ -71,4 +71,4 @@ def receive_user_data(resp, query_object):
     return query_object.get_current_query_result()
 
 if __name__ == "__main__":
-    run(host='localhost', port=80, server='cheroot')
+    run(host='localhost', port=8080, server='cheroot')

@@ -26,4 +26,4 @@ cat conf/net/api/webserver.conf
 source activate emission
 
 # launch the webapp
-./e-mission-py.bash emission/net/api/querier.py
+./e-mission-py.bash emission/net/int_service/query_microservice.py
