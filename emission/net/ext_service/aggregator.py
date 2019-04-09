@@ -8,7 +8,7 @@ from multiprocessing.dummy import Pool
 import requests
 
 pool = Pool(10)
-query_mapping = {'sum' : Sum()}
+query_mapping = {'sum' : sum}
 
 
 class Query(abc.ABC):
@@ -45,14 +45,31 @@ class Sum(Query):
     def __repr__(self):
         return "sum"
 
-def start_query(controller_addr, num_users_lower_bound):
-    addr_list = requests.post(controller_addr + "/get_user_querier_addrs")
+def get_user_addrs (controller_addr, num_users_lower_bound):
+    r = requests.post(controller_addr + "/get_user_addrs")
+    json_addrs = r.json ()
+    addr_list = list (json_addrs.values ())
+    print (addr_list)
     if len(addr_list) >= num_users_lower_bound:
         return addr_list
     else:
-        return "Rejected"
+        print ("Rejected")
+        return None
 
-def launch_query(q, query_micro_addrs):
+def launch_query_microservices (query_type, service_count, username):
+    r = requests.post(controller_addr + "/get_querier_addrs/{}".format (query_type), json={"user": username, "count": service_count})
+    print (r.text)
+    json_addrs = r.json ()
+    addr_list = list (json_addrs.values ())
+    print (addr_list)
+    if len(addr_list) != service_count:
+        return addr_list
+    else:
+        print ("Failure to spawn enough microservice instances")
+        return None
+
+
+def launch_query(q, user_addrs, query_micro_addrs):
     query_results = []
     for addr in query_micro_addrs:
         query_results.append(pool.apply_async(requests.post, [addr + "/receive_query"], {'data': q}))
@@ -65,22 +82,23 @@ def aggregate(query_object, query_results):
 
 if __name__ == "__main__":
     # Inputs:
-    # 0) Query q
-    # 1) Controller address
-    # 2) Minimum number of users required for query
+    # 1) Query q
+    # 2) Controller address
+    # 3) Minimum number of users required for query
+    # 4) Username/email of the analyst
+    # 5) Query type
 
     q = sys.argv[1]
     controller_addr = sys.argv[2]
-    num_users_lower_bound = sys.argv[3]
+    num_users_lower_bound = int (sys.argv[3])
+    username = sys.argv[4]
+    query_name = sys.argv[5]
 
-    query_micro_addrs = start_query(controller_addr, num_users_lower_bound)
+    user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
 
-    if query_micro_addrs != "Rejected":
-        query_results = launch_query(q, query_micro_addrs)
-        query_object = query_mapping[q['query_type']]
-        return aggregate(query_object, query_results)
-
-
-
-
-
+    if user_addrs is not None:
+        query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
+        if query_micro_addrs is not None:
+            query_results = launch_query(q, user_addrs, query_micro_addrs)
+            query_object = query_mapping[q['query_type']]
+            print (aggregate(query_object, query_results))

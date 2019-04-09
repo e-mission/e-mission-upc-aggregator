@@ -1,4 +1,3 @@
-
 from abc import ABC, abstractmethod
 from prob140 import MarkovChain 
 import numpy as np

@@ -81,8 +81,11 @@ app = app()
 runningclouds = dict ()
 pausedclouds = dict ()
 cloudticks = dict ()
+queryinstances = dict ()
+queryticks = dict ()
+
 ticks = 0
-tick_limit = 10
+tick_limit = 4
 tick_time = 10.0
 
 @route ("/")
@@ -91,39 +94,43 @@ def test():
 
 @post ("/usercloud")
 def spawn_usercloud ():
-    contents = request.json['user']
-    if contents in runningclouds:
-        cloudticks[contents] = ticks
-        return runningclouds[contents]
-    elif contents in pausedclouds:
-        containers = get_container_names (contents)
+    if 'user' in request.json:
+       uuid = getUUID(request)
+    else:
+       uuid = None #Maybe this should error
+    user_uuid = str (uuid)
+    if user_uuid in runningclouds:
+        cloudticks[user_uuid] = ticks
+        return runningclouds[user_uuid]
+    elif user_uuid in pausedclouds:
+        containers = get_container_names (user_uuid)
         for name in containers:
             if name:
               res = subprocess.run (['docker', 'unpause', name])
               if res.returncode != 0:
                 print ("Error: DANGER DANGER!!!!!!")
-        addr = pausedclouds[contents]
-        del pausedclouds[contents]
-        runningclouds[contents] = addr
-        cloudticks[contents] = ticks
+        addr = pausedclouds[user_uuid]
+        del pausedclouds[user_uuid]
+        runningclouds[user_uuid] = addr
+        cloudticks[user_uuid] = ticks
         return addr 
     else:
         not_spawn = True
         while (not_spawn):
             # select a random port and hope it works
             port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-            res = subprocess.run (['docker', 'stack', 'deploy', '-c', 'docker/docker-compose.yml', contents])
+            res = subprocess.run (['docker', 'stack', 'deploy', '-c', 'docker/docker-compose.yml', user_uuid])
             print (res)
             if res.returncode != 0:
                 continue
-            res = subprocess.run (['docker', 'service', 'update', '--publish-add', '{}:8080'.format (str (port)), "{}_web-server".format (contents)])
+            res = subprocess.run (['docker', 'service', 'update', '--publish-add', '{}:8080'.format (str (port)), "{}_web-server".format (user_uuid)])
             if res.returncode == 0:
                 not_spawn = False
         output = "http://localhost:" + str (port)
-        print (port)
-        time.sleep (30)
-        runningclouds[contents] = output
-        cloudticks[contents] = ticks
+        # No way to check the updates are ready. Remove later with something more accurate 
+        time.sleep (20)
+        runningclouds[user_uuid] = output
+        cloudticks[user_uuid] = ticks
         return output
     
 @post('/profile/create')
@@ -140,6 +147,35 @@ def createUserProfile():
       traceback.print_exc()
       abort(403, e.message)
 
+@post('/get_user_addrs')
+def return_container_addrs ():
+    addr_list = []
+    for name in list (runningclouds.keys ()):
+        addr_list.append (runningclouds[name])
+        cloudticks[name] = ticks
+    for name in list (pausedclouds.keys ())[:]:
+        unpause_container (name, cloudticks, runningclouds, pausedclouds)
+        addr_list.append (runningclouds[name])
+    ret_dict = dict ()
+    for i, addr in enumerate(addr_list):
+        ret_dict[i] = addr
+    return json.dumps (ret_dict)
+
+@post('/get_querier_addrs/<query_type>')
+def launch_queriers (query_type):
+    if 'user' in request.json:
+       uuid = getUUID(request)
+    else:
+       uuid = None #Maybe this should error
+    user_uuid = str (uuid)
+    querier_count = int (request.json['count'])
+    addr_list = []
+    for i in range (querier_count):
+       addr_list.append (launch_query (query_type, i, user_uuid))
+    # No way to check the updates are ready. Remove later with something more accurate 
+    time.sleep (20)
+    return json.dumps (ret_dict)
+
 # Container Helper functions
 def get_container_names (contents):
     process = subprocess.Popen (['./bin/deploy/container_id.sh', contents], stdout=subprocess.PIPE)
@@ -148,26 +184,99 @@ def get_container_names (contents):
     return result.decode ('utf-8').split ('\n')
 
 
+def launch_query (query_type, instance_number, uuid):
+    # First make sure the queries are unique to the user
+    not_spawn = True
+    while (not_spawn):
+        # select a random port and hope it works
+        port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
+        name = uuid + str (instance_number)
+        res = subprocess.run (['docker', 'stack', 'deploy', '-c', 'docker/docker-compose-{}.yml'.format (query_type), name])
+        print (res)
+        if res.returncode != 0:
+            continue
+        res = subprocess.run (['docker', 'service', 'update', '--publish-add', '{}:8080'.format (str (port)), "{}_querier".format (name)])
+        if res.returncode == 0:
+            not_spawn = False
+    addr = "http://localhost:{}".format (str (port))
+    queryinstances[name] = addr
+    queryticks[name] = ticks
+    return addr 
+    
+
 def tick_incr (unused1, unused2):
     global ticks
     print ("Ticking the timer")
     ticks += 1
-    contents_list = list (cloudticks.keys ()) [:]
-    for contents in contents_list:
-      starttime = cloudticks[contents]
-      if ticks - starttime > tick_limit:
-          containers = get_container_names (contents)
-          for name in containers:
-              if name:
-                  res = subprocess.run (['docker', 'pause', name])
-                  if res.returncode != 0:
-                      print ("Error: DANGER DANGER!!!!!!")
-          addr = runningclouds[contents]
-          del runningclouds[contents]
-          del cloudticks[contents]
-          pausedclouds[contents] = addr
+    check_timer (keylist=list (cloudticks.keys ()) [:], tickdict=cloudticks, runningdict=runningclouds, pauseddict=pausedclouds, should_kill=False)
+    check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, pauseddict=None, should_kill=True)
     launch_timer ()
-        
+
+
+# General functions to handle timer check for running service. The arguments are:
+#
+# A keylist. This is the a copy of the keys in the tickdict
+#
+# A tickdict. This is a mapping of name ---> ticktime, which is the time the service
+# was last accessed. This will be checked against running ticks to check if a service
+# should be shutdown.
+#
+# A runningdict. This is a dictionary for all currently running services of a particular
+# type. Its mapping name -----> addr, where the name is the same as tickdict and the addr
+# is the location at which the service is deployed.
+#
+# A pauseddict. If the service should be paused when run too long this should be a dictionary
+# mapping name ----> addr, the same as runningdict. All of these services should be paused and
+# thus constitute a destination when pausing a container. If should_kill is True this does not
+# matter and can be None
+#
+# Should_kill. This is a boolean flag to determine if the service should be killed or paused
+# when it runs too long. 
+#
+# For example the userclouds is a service that should be paused. Its arguments would be
+# keylist = list (cloudticks.keys ()) [:]
+# tickdict = cloudticks
+# runningdict = runningclouds
+# pauseddict = pausedclouds
+# should_kill = False
+#
+
+def check_timer (keylist, tickdict, runningdict, pauseddict=None, should_kill=False):
+    for contents in keylist:
+      starttime = tickdict[contents]
+      if ticks - starttime >= tick_limit:
+          if should_kill:
+              res = subprocess.run (['docker', 'stack', 'rm', contents])
+              if res.returncode != 0:
+                  print ("Error: DANGER DANGER!!!!!!")
+              del runningdict[contents]
+              del tickdict[contents]
+          else:
+              pause_container (contents, tickdict, runningdict, pauseddict)
+
+def unpause_container (contents, tickdict, runningdict, pauseddict):
+    containers = get_container_names (contents)
+    for name in containers:
+        if name:
+            res = subprocess.run (['docker', 'unpause', name])
+            if res.returncode != 0:
+                print ("Error: DANGER DANGER!!!!!!")
+    addr = pauseddict[contents]
+    del pauseddict[contents]
+    runningdict[contents] = addr
+    tickdict[contents] = ticks
+
+def pause_container (contents, tickdict, runningdict, pauseddict):
+    containers = get_container_names (contents)
+    for name in containers:
+        if name:
+            res = subprocess.run (['docker', 'pause', name])
+            if res.returncode != 0:
+                print ("Error: DANGER DANGER!!!!!!")
+    addr = runningdict[contents]
+    del runningdict[contents]
+    del tickdict[contents]
+    pauseddict[contents] = addr
 
 def launch_timer ():
     signal.setitimer (signal.ITIMER_REAL, tick_time)

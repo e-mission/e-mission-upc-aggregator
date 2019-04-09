@@ -6,6 +6,8 @@ import emission.simulation.connect_usercloud as escu
 import requests
 import numpy as np
 
+UMAX_64 = int (np.power (2.0, 64))
+
 class Client(ABC):
     def __init__(self):
         super().__init__()
@@ -17,13 +19,20 @@ class Client(ABC):
     def _parse_user_config(self, config):
         pass  
 
+def random_64s (count):
+    val = 0
+    for i in range (count):
+        val <<= 6
+        val += int (np.random.randint (low=0, high=UMAX_64, dtype="uint64"))
+    return val
+
 class EmissionFakeDataGenerator(Client):
     def __init__(self, config):
         #TODO: Check that the config object has keys: emission_server_base_url, register_user_endpoint, user_cache_endpoint
         self._config = config
         self._user_factory = FakeUser
         # Additional info for user cloud
-        key = np.random.randint (low=0, high=(pow(2, 63) - 1))
+        key = random_64s (32)
         profile = gp.AlgProfile ()
         self._usercloud = escu.UserCloud (key, profile)
 
