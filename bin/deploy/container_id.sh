@@ -1,2 +1,2 @@
 #!/bin/bash
-docker container ls | grep -o -P $1"[^\s]*"
+docker container ls | perl -nle 'print $& while m{'$1'[^\s]*}g' 
