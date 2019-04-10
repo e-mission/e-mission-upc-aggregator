@@ -63,7 +63,7 @@ def receive_query():
 
 def receive_user_data(resp, query_object):
     # Assume the response has list of ts_entries
-    curr_data_list = resp.json['curr_data_list']
+    curr_data_list = resp.json['phone_data']
 
     # Get the query result by running the query on the data.
     query_result = query_object.run_query(curr_data_list)
