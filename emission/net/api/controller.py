@@ -305,7 +305,7 @@ if __name__ == "__main__":
     signal.signal (signal.SIGALRM, tick_incr)
     launch_timer ()
     if (len (sys.argv) == 1):
-        run(host='localhost', port=8080, debug=True)
+        run(host='localhost', port=4040, debug=True)
     elif (len (sys.argv) == 2):
         run(host='localhost', port= int (sys.argv[1]), debug=True)
     else:
