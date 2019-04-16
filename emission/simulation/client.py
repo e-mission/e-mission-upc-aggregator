@@ -34,6 +34,8 @@ class EmissionFakeDataGenerator(Client):
         # Additional info for user cloud
         key = random_64s (32)
         profile = gp.AlgProfile ()
+        # Add all known algs to default algs.
+        profile.add_all_to_default_algs()
         self._usercloud = escu.UserCloud (key, profile)
 
     def create_fake_user(self, config):

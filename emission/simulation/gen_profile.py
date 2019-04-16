@@ -31,22 +31,33 @@ class AlgProfile:
     # Default value for number of algorithms
     LAMBDA_ALG = 4
     
-    def __init__ (self, mean=LAMBDA_ALG):
+    def __init__ (self, mean=LAMBDA_ALG, default_algs=set()):
         if not AlgProfile.is_read:
             self.read_algorithms ()
             AlgProfile.is_read = True
 
+        # List of allowed aggregators and algs.
+        self.aggs = set()
         self.algs = dict ()
+
+        # Aggregator to set of allowed algs, if alg not in the set then an agg doesn't have access.
+        # Use this map to specify aggregator alg access when you want a unique config for a particular aggregator.
+        self.agg_alg_map = dict ()
+        # If an aggregator is not in the agg_alg_map, check default_algs set of algs.
+        self.default_algs = default_algs
+
         # Samples from a poisson distribution to get how many algorithms the user should select.
         # The choice of a poisson is arbitrary and simply because it is dependent on one parameter.
-        count = round (np.random.poisson (mean))
+        # count = round (np.random.poisson (mean))
        
         # Select up to count elements from the array
         alg_names = AlgProfile.alg_dict.keys ()
-        names_array = np.array (list (alg_names))
-        np.random.shuffle (names_array)
-        selected_names = list (names_array) [:count]
-        for name in selected_names:
+        # names_array = np.array (list (alg_names))
+        # np.random.shuffle (names_array)
+        # selected_names = list (names_array) [:count]
+        # for name in selected_names:
+        #     self.algs[name] = AlgProfile.alg_dict[name]
+        for name in alg_names:
             self.algs[name] = AlgProfile.alg_dict[name]
 
 
@@ -54,3 +65,31 @@ class AlgProfile:
     def read_algorithms (self):
         with open (AlgProfile.alg_file, "r") as f:
             AlgProfile.alg_dict = json.load (f)
+
+    def add_to_aggs(self, new_agg):
+        self.aggs.add(new_agg)
+
+    def remove_from_aggs(self, remove_agg):
+        self.aggs.remove(remove_agg)
+
+    def add_to_alg_map(self, new_agg, alg):
+        if new_agg not in self.agg_alg_map:
+            self.agg_alg_map[new_agg] = set()
+        self.agg_alg_map[new_agg].add(alg)
+
+    def remove_from_alg_map(self, agg, alg):
+        if agg not in self.agg_alg_map:
+           print("Aggregator " + str(agg) + " not in the agg_alg_map.")
+        else:
+            self.agg_alg_map[agg].remove(alg)
+
+    def add_to_default_algs(self, alg):
+        self.default_algs.add(alg)
+
+    def add_all_to_default_algs(self):
+        alg_names = AlgProfile.alg_dict.keys ()
+        for name in alg_names:
+            self.default_algs.add(name)
+
+    def remove_from_default_algs(self, alg):
+        self.default_algs.remove(alg)
