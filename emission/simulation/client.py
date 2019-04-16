@@ -22,7 +22,7 @@ class Client(ABC):
 def random_64s (count):
     val = 0
     for i in range (count):
-        val <<= 6
+        val <<= 64
         val += int (np.random.randint (low=0, high=UMAX_64, dtype="uint64"))
     return val
 

@@ -72,23 +72,28 @@ class FakeUser:
             'user': self._email
         }
 
-        r = requests.post(self._config['upload_url'], json=data)
-
         error = False
+        try:
+            r = requests.post(self._config['upload_url'], json=data, timeout=5)
+        except (socket.timeout) as e:
+            error = True
 
         #Check if sucessful
-        if not r.ok:
+        if not r.ok or error:
             error = True
 
             #We may have failed because the usercloud was paused. Let's contact the controller and try one more time
-            r = request.post(self._config['check_url'], json={'user': self.email})
-            if r.ok:
-
-                # If this succeeded then we have the address of our cloud again (with the timer reset)
-                self._config['upload_url'] = r.text
-                r = requests.post(self._config['upload_url'], json=data)
+            try:
+                r = request.post(self._config['check_url'], json={'user': self.email}, timeout=5)
                 if r.ok:
-                    error = False 
+
+                    # If this succeeded then we have the address of our cloud again (with the timer reset)
+                    self._config['upload_url'] = r.text
+                    r = requests.post(self._config['upload_url'], json=data, timeout=5)
+                    if r.ok:
+                        error = False 
+            except (socket.timeout) as e:
+                error = True
         if error:
             print('Something went wrong when trying to sync your data. Try again or use save_cache_to_file to save your data.')
             print(r.content)
