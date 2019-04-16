@@ -14,6 +14,7 @@ def main ():
         'emission_server_base_url': 'http://localhost:4040',
         'register_user_endpoint': '/profile/create',
         'user_cache_endpoint': '/usercache/put'
+        'spawn_usercloud_endpoint': '/usercloud'
     }
 
     base_user_config = {

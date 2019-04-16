@@ -72,15 +72,29 @@ class FakeUser:
             'user': self._email
         }
 
-        r = requests.post(self._config['upload_url'], json=data) 
+        r = requests.post(self._config['upload_url'], json=data)
+
+        error = False
 
         #Check if sucessful
-        if r.ok:
-            self._flush_cache()
-            print("%d entries were sucessfully synced to the server" % len(measurements_no_id))
-        else:
+        if not r.ok:
+            error = True
+
+            #We may have failed because the usercloud was paused. Let's contact the controller and try one more time
+            r = request.post(self._config['check_url'], json={'user': self.email})
+            if r.ok:
+
+                # If this succeeded then we have the address of our cloud again (with the timer reset)
+                self._config['upload_url'] = r.text
+                r = requests.post(self._config['upload_url'], json=data)
+                if r.ok:
+                    error = False 
+        if error:
             print('Something went wrong when trying to sync your data. Try again or use save_cache_to_file to save your data.')
             print(r.content)
+        else:
+            self._flush_cache()
+            print("%d entries were sucessfully synced to the server" % len(measurements_no_id))
 
     def run_pipeline (self):
         # Make a call 
