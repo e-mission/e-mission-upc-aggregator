@@ -50,6 +50,7 @@ import emission.core.wrapper.motionactivity as ecwm
 import emission.storage.timeseries.timequery as estt
 import emission.storage.timeseries.tcquery as esttc
 import emission.storage.timeseries.aggregate_timeseries as estag
+import emission.storage.decorations.analysis_timeseries_queries as esda
 import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
@@ -497,20 +498,34 @@ def run_algorithm ():
 def run_aggregate ():
   user_uuid = getUUID(request)
   assert(user_uuid is not None)
+
+  # Checks to see if this aggregator and query combination meet user policies.
+
+  # TODO pass in agg.
+  agg = request.json['agg']
   query = request.json['query']
+  if profile.check_policies(agg, query) == False:
+    abort (403, "Failed to pass user policy checks in profile.\n")
+
+  # Time filtering.
   start_time = query.json['start_ts']
   end_time = query.json['end_ts']
-
-  # Not using the start and end locations yet, but eventaully want to use these to filter by location.
-  start_loc = query.json['start_loc']
-  end_loc = query.json['end_loc']
-  
   ts = esta.TimeSeries.get_time_series(user_uuid)
   time_query = estt.TimeQuery("metadata.write_ts",
                                               start_time,
                                               end_time)
-  curr_data_list = ts.find_entries(["analysis/cleaned_trip"], time_query=time_query)
-  return {'phone_data': data_list}
+
+  # Spatial filtering.
+  region = request.json['sel_region']
+  if region is None:
+    geo_query = None
+  else:
+    geo_query = estg.GeoQuery(["data.loc"], region)
+
+  loc_entry_list = esda.get_entries(esda.CLEANED_LOCATION_KEY, user_id=user_uuid,
+                                      time_query=time_query, geo_query=geo_query)
+
+  return {'phone_data': loc_entry_list}
 
 ##### END OF NICK'S CHANGES FOR THE NEW ARCH
 

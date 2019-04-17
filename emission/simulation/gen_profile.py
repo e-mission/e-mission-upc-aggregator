@@ -66,6 +66,25 @@ class AlgProfile:
         with open (AlgProfile.alg_file, "r") as f:
             AlgProfile.alg_dict = json.load (f)
 
+
+    # Policy check method.
+    def check_policies(self, agg, alg):
+        if agg not in self.aggs:
+            return False
+
+        if alg not in self.algs:
+            return False
+
+        if agg in self.agg_alg_map:
+            if alg not in self.agg_alg_map[agg]:
+                return False
+        else:
+            if alg not in self.default_algs:
+                return False
+
+        return True
+
+    # Policy modification methods.
     def add_to_aggs(self, new_agg):
         self.aggs.add(new_agg)
 

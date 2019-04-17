@@ -71,7 +71,7 @@ def launch_query_microservices (query_type, service_count, username):
 def launch_query(q, user_addrs, query_micro_addrs):
     query_results = []
     for addr in query_micro_addrs:
-        query_results.append(pool.apply_async(requests.post, [addr + "/receive_query"], {'data': q}))
+        query_results.append(pool.apply_async(requests.post, [addr + "/receive_query"], {'query': q}))
     return query_results
 
 def aggregate(query_object, query_results):
