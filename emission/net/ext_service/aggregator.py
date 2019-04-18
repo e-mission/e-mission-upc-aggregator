@@ -8,8 +8,8 @@ from multiprocessing.dummy import Pool
 import requests
 
 pool = Pool(10)
-query_mapping = {'sum' : sum}
-
+query_type_mapping = {'sum' : Sum()}
+query_file = "query.json"
 
 class Query(abc.ABC):
     """
@@ -68,10 +68,12 @@ def launch_query_microservices (query_type, service_count, username):
         return None
 
 
-def launch_query(q, user_addrs, query_micro_addrs):
+def launch_query(q, username, user_addrs, query_micro_addrs):
+    assert(len(user_addrs) == len(query_micro_addrs))
     query_results = []
-    for addr in query_micro_addrs:
-        query_results.append(pool.apply_async(requests.post, [addr + "/receive_query"], {'query': q}))
+    for i, query_addr in enumerate(query_micro_addrs):
+        user_addr = user_addrs[i]
+        query_results.append(pool.apply_async(requests.post, [query_addr + "/receive_query"], {'query': q, 'user_cloud_addr': user_addr, 'agg': username}))
     return query_results
 
 def aggregate(query_object, query_results):
@@ -87,17 +89,19 @@ if __name__ == "__main__":
     # 4) Username/email of the analyst
     # 5) Query type
 
-    q = sys.argv[1]
-    controller_addr = sys.argv[2]
-    num_users_lower_bound = int (sys.argv[3])
-    username = sys.argv[4]
-    query_name = sys.argv[5]
+    with open (query_file, "r") as f:
+        q = json.load (f)
+
+    controller_addr = sys.argv[1]
+    num_users_lower_bound = int (sys.argv[2])
+    username = sys.argv[3]
+    query_name = sys.argv[4]
 
     user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
 
     if user_addrs is not None:
         query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
         if query_micro_addrs is not None:
-            query_results = launch_query(q, user_addrs, query_micro_addrs)
-            query_object = query_mapping[q['query_type']]
+            query_results = launch_query(q, username, user_addrs, query_micro_addrs)
+            query_object = query_type_mapping[q['query_type']]
             print (aggregate(query_object, query_results))

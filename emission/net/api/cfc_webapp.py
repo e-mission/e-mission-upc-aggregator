@@ -496,6 +496,8 @@ def run_algorithm ():
 
 @post ("/run/aggregate")
 def run_aggregate ():
+  if 'user' not in request.json:
+    abort(401, "only a user can read his/her data")
   user_uuid = getUUID(request)
   assert(user_uuid is not None)
 
