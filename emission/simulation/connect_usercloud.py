@@ -21,7 +21,7 @@ class UserCloud:
         print (self.key)
         print (requests.post (addr + "/cloud/key", json=self.key).text)
         print (self.profile.algs)
-        print (requests.post (addr + "/cloud/profile", json=self.profile).text)
+        print (requests.post (addr + "/cloud/profile", json=self.profile.to_json()).text)
 
 
     # Method used to get the address from speaking to the KAL

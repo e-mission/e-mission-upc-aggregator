@@ -1,25 +1,13 @@
 {
-	"query_type": "sum",
-	// arrow.get(str(x)).format() to get start_ts/end_ts.
-	"start_ts": "2017-08-01 00:00:00+00:00",
-	"end_ts": "2019-05-01 00:00:00+00:00",
-	"sel_region": {"geometry": {
+    "query_type": "sum",
+    "start_ts": "2017-08-01 00:00:00+00:00",
+    "end_ts": "2019-05-01 00:00:00+00:00",
+    "sel_region": {"geometry": {
        "type": "Polygon",
        "coordinates": [[
          [-122.267443, 37.864693], [-122.267443, 37.880687], [-122.250985, 37.880687], [-122.250985, 37.864693], [-122.267443, 37.864693]
          ]]
        }
      }
-
-	 // Example of region that can be used in the queries above
-  //    berkeley_json  = {"geometry": {
-  //      "type": "Polygon",
-  //      "coordinates": [[
-  //        [-122.267443, 37.864693], [-122.267443, 37.880687], [-122.250985, 37.880687], [-122.250985, 37.864693], [-122.267443, 37.864693]
-  //        ]]
-  //      }
-  //    }
-
-
 
 }

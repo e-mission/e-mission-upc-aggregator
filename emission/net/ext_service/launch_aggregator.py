@@ -1,4 +1,5 @@
 import subprocess, sys, requests
+import json
 
 controller_addr = "http://localhost:4040"
 username = "test_analyst"
@@ -10,6 +11,7 @@ def main ():
     r = requests.post (controller_addr + "/profile/create", json={'user':username})
     with open (query_file, "r") as f:
         query = json.load (f)
+        print(query)
     if r.ok:
         subprocess.run (["python", "emission/net/ext_service/aggregator.py", controller_addr, "4", username, "test-querier"])
     else:

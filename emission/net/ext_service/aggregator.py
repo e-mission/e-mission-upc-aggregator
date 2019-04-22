@@ -8,7 +8,6 @@ from multiprocessing.dummy import Pool
 import requests
 
 pool = Pool(10)
-query_type_mapping = {'sum' : Sum()}
 query_file = "query.json"
 
 class Query(abc.ABC):
@@ -40,7 +39,7 @@ class Sum(Query):
     def generate_noise(self, data, privacy_budget):
         sensitivity = 1
         n = len(data)
-        return np.random.laplace(scale=(n * sensitivity)/float(privacy_budget))
+        return np.random.laplace(scale=1.0/float(privacy_budget))
 
     def __repr__(self):
         return "sum"
@@ -74,12 +73,14 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
         query_results.append(pool.apply_async(requests.post, [query_addr + "/receive_query"], {'query': q, 'user_cloud_addr': user_addr, 'agg': username}))
-    return query_results
+    pool.close()
+    pool.join()
+    return [result.get() for result in query_results]
 
-def aggregate(query_object, query_results):
-    value = query_object.run_query(intermediate_result_list)
-    noise = query_object.generate_noise(intermediate_result_list, privacy_budget)
-    return value + noise
+def aggregate(query_object, query_results, privacy_budget=0.1):
+    value = query_object.run_query(query_results)
+    #noise = query_object.generate_noise(query_results, privacy_budget)
+    return value #+ noise
 
 if __name__ == "__main__":
     # Inputs:
@@ -96,6 +97,8 @@ if __name__ == "__main__":
     num_users_lower_bound = int (sys.argv[2])
     username = sys.argv[3]
     query_name = sys.argv[4]
+
+    query_type_mapping = {'sum' : Sum()}
 
     user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
 

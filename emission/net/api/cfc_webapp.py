@@ -506,7 +506,7 @@ def run_aggregate ():
   # TODO pass in agg.
   agg = request.json['agg']
   query = request.json['query']
-  if profile.check_policies(agg, query) == False:
+  if check_policies(agg, query) == False:
     abort (403, "Failed to pass user policy checks in profile.\n")
 
   # Time filtering.
@@ -528,6 +528,24 @@ def run_aggregate ():
                                       time_query=time_query, geo_query=geo_query)
 
   return {'phone_data': loc_entry_list}
+
+def check_policies(agg, alg):
+  if agg not in self.aggs:
+      return False
+
+  if alg not in self.algs:
+      return False
+
+  if agg in self.agg_alg_map:
+      if alg not in self.agg_alg_map[agg]:
+          return False
+  else:
+      if alg not in self.default_algs:
+          return False
+
+  return True
+
+
 
 ##### END OF NICK'S CHANGES FOR THE NEW ARCH
 

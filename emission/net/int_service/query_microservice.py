@@ -36,10 +36,11 @@ class Sum(Query):
         self.query_value = 0
 
     def run_query(self, data):
-        total = 0
-        for value in data:
-            total += value
-        return total
+        # If there are any trip entries satisfying the time and location query, then the user count is 1, else 0.
+        if len(data) > 0:
+            return 1
+        else:
+            return 0
 
     def update_current_query_result(self, query_result):
         self.query_value += query_result
