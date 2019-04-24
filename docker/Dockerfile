@@ -45,4 +45,5 @@ RUN chmod u+x /usr/src/app/start_script.sh
 
 EXPOSE 8080
 
+
 CMD ["/bin/bash", "/usr/src/app/start_script.sh"]

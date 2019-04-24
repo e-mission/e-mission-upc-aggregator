@@ -22,7 +22,7 @@ class Client(ABC):
 def random_64s (count):
     val = 0
     for i in range (count):
-        val <<= 6
+        val <<= 64
         val += int (np.random.randint (low=0, high=UMAX_64, dtype="uint64"))
     return val
 
@@ -43,6 +43,7 @@ class EmissionFakeDataGenerator(Client):
         #TODO: parse the config object
         uuid = self._register_fake_user(config['email'])
         config['uuid'] = uuid
+        config['check_url'] = self._config['emission_server_base_url'] + self._config['spawn_usercloud_endpoint']
         config['upload_url'] = self._usercloud.address + self._config['user_cache_endpoint']
         #config['pipeline_url'] = self._usercloud.address + self._config['algorithm_endpoint']
         return self._user_factory(config)
