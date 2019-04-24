@@ -8,8 +8,6 @@ WORKDIR /usr/src/app
 # clone from repo
 RUN git clone https://github.com/njriasan/e-mission-server.git .
 
-# update the branch
-RUN git checkout newArch
 
 # setup python environment.
 RUN conda env update --name emission --file setup/environment36.yml
@@ -44,5 +42,8 @@ ADD start_script.sh /usr/src/app/start_script.sh
 RUN chmod u+x /usr/src/app/start_script.sh
 
 EXPOSE 8080
+
+# update the branch
+RUN git checkout newArch
 
 CMD ["/bin/bash", "/usr/src/app/start_script.sh"]
