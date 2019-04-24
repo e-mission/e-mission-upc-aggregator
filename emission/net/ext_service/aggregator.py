@@ -70,12 +70,19 @@ def launch_query_microservices (query_type, service_count, username):
 def launch_query(q, username, user_addrs, query_micro_addrs):
     assert(len(user_addrs) == len(query_micro_addrs))
     query_results = []
+    # return requests.post(query_micro_addrs[0] + "/receive_query", json={'query': q, 'user_cloud_addr': user_addrs[0], 'agg': username})
+
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
-        query_results.append(pool.apply_async(requests.post, [query_addr + "/receive_query"], {'query': q, 'user_cloud_addr': user_addr, 'agg': username}))
+        query_results.append(pool.apply_async(requests.post, ["http://localhost:6500/receive_query", None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
     pool.close()
     pool.join()
-    return [result.get() for result in query_results]
+    try:
+        results = [result.get() for result in query_results]
+    except:
+        print("Async failed.")
+        return
+    return results
 
 def aggregate(query_object, query_results, privacy_budget=0.1):
     value = query_object.run_query(query_results)

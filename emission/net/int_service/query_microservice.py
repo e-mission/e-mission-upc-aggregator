@@ -7,8 +7,7 @@ import threading
 import abc
 import numpy as np
 import sys
-
-query_type_mapping = {'sum' : Sum()}
+import requests
 
 class Query(abc.ABC):
     """
@@ -58,20 +57,27 @@ def receive_query():
     query = request.json['query']
     query_object = query_type_mapping[query['query_type']]
     agg = request.json['agg']
+    #return request
 
     # Eventually have to add a loop that collects all the streamed data packets instead of just one.
     cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json={'query': query, 'agg': agg})
+    print("Cloud response: " + str(cloud_response))
+    print("Cloud response text: " + str(cloud_response.text))
     # end_of_stream = cloud_response.json['end_of_stream']
     return receive_user_data(cloud_response, query_object)
 
 def receive_user_data(resp, query_object):
     # Assume the response has list of ts_entries
-    curr_data_list = resp.json['phone_data']
+    # curr_data_list = resp.json['phone_data']
+    json_data = json.loads(resp.text)
+    curr_data_list = json_data['phone_data']
 
     # Get the query result by running the query on the data.
     query_result = query_object.run_query(curr_data_list)
     query_object.update_current_query_result(query_result)
+    print(query_object.get_current_query_result())
     return query_object.get_current_query_result()
 
 if __name__ == "__main__":
-    run(host='localhost', port=8080, server='cheroot')
+    query_type_mapping = {'sum' : Sum()}
+    run(host='localhost', port=6500, server='cheroot')
