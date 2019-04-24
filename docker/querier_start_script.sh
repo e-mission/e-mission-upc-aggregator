@@ -21,6 +21,9 @@ else
 fi
 cat conf/net/api/webserver.conf
 
+#Pull the latest changes from the repo
+cd /usr/src/app && git checkout newArch
+
 #TODO: start cron jobs
 # change python environment
 source activate emission
