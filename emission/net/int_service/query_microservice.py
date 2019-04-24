@@ -8,7 +8,7 @@ import abc
 import numpy as np
 import sys
 
-query_mapping = {'sum' : sum}
+query_type_mapping = {'sum' : Sum()}
 
 class Query(abc.ABC):
     """
@@ -36,10 +36,11 @@ class Sum(Query):
         self.query_value = 0
 
     def run_query(self, data):
-        total = 0
-        for value in data:
-            total += value
-        return total
+        # If there are any trip entries satisfying the time and location query, then the user count is 1, else 0.
+        if len(data) > 0:
+            return 1
+        else:
+            return 0
 
     def update_current_query_result(self, query_result):
         self.query_value += query_result
@@ -52,12 +53,14 @@ class Sum(Query):
 
 @post('/receive_query')
 def receive_query():
+    # TODO: pass in user_cloud_addr.
     user_cloud_addr = request.json['user_cloud_addr']
     query = request.json['query']
-    query_object = query_mapping[query['query_type']]
+    query_object = query_type_mapping[query['query_type']]
+    agg = request.json['agg']
 
     # Eventually have to add a loop that collects all the streamed data packets instead of just one.
-    cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json=query)
+    cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json={'query': query, 'agg': agg})
     # end_of_stream = cloud_response.json['end_of_stream']
     return receive_user_data(cloud_response, query_object)
 

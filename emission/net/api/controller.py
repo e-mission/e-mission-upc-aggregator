@@ -86,7 +86,7 @@ queryticks = dict ()
 
 ticks = 0
 tick_limit = 4
-tick_time = 10.0
+tick_time = 300.0
 
 @route ("/")
 def test():
