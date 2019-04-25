@@ -54,6 +54,7 @@ import emission.storage.decorations.analysis_timeseries_queries as esda
 import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
+import emission.storage.timeseries.geoquery as estg
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -517,7 +518,6 @@ def run_aggregate ():
   # Time filtering.
   start_time = query['start_ts']
   end_time = query['end_ts']
-  ts = esta.TimeSeries.get_time_series(user_uuid)
   time_query = estt.TimeQuery("metadata.write_ts",
                                               start_time,
                                               end_time)
