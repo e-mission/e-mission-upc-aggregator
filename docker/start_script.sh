@@ -22,7 +22,7 @@ fi
 cat conf/net/api/webserver.conf
 
 #Pull the latest changes from the repo
-cd /usr/src/app && git checkout newArch
+cd /usr/src/app && git pull origin newArch
 
 #TODO: start cron jobs
 # change python environment

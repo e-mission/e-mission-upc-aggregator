@@ -22,6 +22,7 @@ services:
       replicas: 1
       restart_policy:
         condition: on-failure
+    privileged: true
 #   ports:
       #This port binding allows you to access the database server outside the host machine. Remove this is you don't need this
       #functionality
@@ -31,7 +32,7 @@ services:
     #of the data base. Learn more about how to use volumes here: https://docs.docker.com/storage/volumes/
     # And learn how to configure volumes in your compose file here: https://docs.docker.com/compose/compose-file/#volume-configuration-reference
     volumes:
-      - mongo-data:/data/db
+      - mongo-data-raw:/raw
     networks:
        - emission
 
@@ -39,4 +40,4 @@ networks:
   emission:
 
 volumes:
-  mongo-data:
+  mongo-data-raw:
