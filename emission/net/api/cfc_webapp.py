@@ -515,15 +515,15 @@ def run_aggregate ():
   #   abort (403, "Failed to pass user policy checks in profile.\n")
 
   # Time filtering.
-  start_time = query.json['start_ts']
-  end_time = query.json['end_ts']
+  start_time = query['start_ts']
+  end_time = query['end_ts']
   ts = esta.TimeSeries.get_time_series(user_uuid)
   time_query = estt.TimeQuery("metadata.write_ts",
                                               start_time,
                                               end_time)
 
   # Spatial filtering.
-  region = request.json['sel_region']
+  region = query['sel_region']
   if region is None:
     geo_query = None
   else:
