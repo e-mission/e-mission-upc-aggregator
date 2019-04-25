@@ -258,6 +258,7 @@ def getTrips(day):
 
 @post('/profile/create')
 def createUserProfile():
+  global global_uuid
   try:
       logging.debug("Called createUserProfile")
       userEmail = enaa._getEmail(request, auth_method)
@@ -265,6 +266,7 @@ def createUserProfile():
       user = User.register(userEmail)
       logging.debug("Looked up user = %s" % user)
       logging.debug("Returning result %s" % {'uuid': str(user.uuid)})
+      global_uuid = user.uuid
       return {'uuid': str(user.uuid)}
   except ValueError as e:
       traceback.print_exc()
@@ -450,6 +452,7 @@ def getUUID(request, inHeader=False):
 ##### START OF NICK'S CHANGES FOR THE NEW ARCH
 key = None
 profile = None
+global_uuid = None
 
 @post ("/cloud/key")
 def process_key():
@@ -496,9 +499,11 @@ def run_algorithm ():
 
 @post ("/run/aggregate")
 def run_aggregate ():
-  if 'user' not in request.json:
-    abort(401, "only a user can read his/her data")
-  user_uuid = getUUID(request)
+  # if 'user' not in request.json:
+  #   abort(401, "only a user can read his/her data")
+  if global_uuid == None:
+    abort(401, "Profile not created.")
+  user_uuid = global_uuid
   assert(user_uuid is not None)
 
   # Checks to see if this aggregator and query combination meet user policies.
@@ -506,19 +511,19 @@ def run_aggregate ():
   # TODO pass in agg.
   agg = request.json['agg']
   query = request.json['query']
-  if check_policies(agg, query) == False:
-    abort (403, "Failed to pass user policy checks in profile.\n")
+  # if check_policies(agg, query) == False:
+  #   abort (403, "Failed to pass user policy checks in profile.\n")
 
   # Time filtering.
-  start_time = query.json['start_ts']
-  end_time = query.json['end_ts']
+  start_time = query['start_ts']
+  end_time = query['end_ts']
   ts = esta.TimeSeries.get_time_series(user_uuid)
   time_query = estt.TimeQuery("metadata.write_ts",
                                               start_time,
                                               end_time)
 
   # Spatial filtering.
-  region = request.json['sel_region']
+  region = query['sel_region']
   if region is None:
     geo_query = None
   else:
