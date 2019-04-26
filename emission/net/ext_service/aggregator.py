@@ -77,11 +77,21 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
         query_results.append(pool.apply_async(requests.post, ["http://localhost:6500/receive_query", None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
     pool.close()
     pool.join()
-    try:
-        results = [result.get() for result in query_results]
-    except:
-        print("Async failed.")
-        return
+    results = []
+    for result in query_results:
+        curr_resp = result.get()
+        print(curr_resp)
+        curr_json_data = json.loads(curr_resp.text)
+        curr_query_result = curr_json_data['query_result']
+        results.append(curr_query_result)
+
+    # results = [float((result.get()).text) for result in query_results]
+    # try:
+    #     results = [float((result.get()).text) for result in query_results]
+    # except:
+    #     print("Async failed.")
+    #     return
+    print(results)
     return results
 
 def aggregate(query_object, query_results, privacy_budget=0.1):
@@ -113,5 +123,8 @@ if __name__ == "__main__":
         query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
         if query_micro_addrs is not None:
             query_results = launch_query(q, username, user_addrs, query_micro_addrs)
-            query_object = query_type_mapping[q['query_type']]
-            print (aggregate(query_object, query_results))
+            if query_results == None:
+                print("Obtaining query results failed.")
+            else:
+                query_object = query_type_mapping[q['query_type']]
+                print (aggregate(query_object, query_results))

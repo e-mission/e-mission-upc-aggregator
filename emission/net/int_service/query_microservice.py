@@ -76,7 +76,7 @@ def receive_user_data(resp, query_object):
     query_result = query_object.run_query(curr_data_list)
     query_object.update_current_query_result(query_result)
     print(query_object.get_current_query_result())
-    return query_object.get_current_query_result()
+    return {'query_result': query_object.get_current_query_result()}
 
 if __name__ == "__main__":
     query_type_mapping = {'sum' : Sum()}
