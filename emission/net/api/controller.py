@@ -56,6 +56,7 @@ import emission.storage.timeseries.aggregate_timeseries as estag
 import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
+import emission.net.int_service.swarm_controller as emissc
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -103,32 +104,14 @@ def spawn_usercloud ():
         cloudticks[user_uuid] = ticks
         return runningclouds[user_uuid]
     elif user_uuid in pausedclouds:
-        containers = get_container_names (user_uuid)
-        for name in containers:
-            if name:
-              res = subprocess.run (['docker', 'unpause', name])
-              if res.returncode != 0:
-                print ("Error: DANGER DANGER!!!!!!")
+        emiscc.unpauseCloudInstances (user_uuid)
         addr = pausedclouds[user_uuid]
         del pausedclouds[user_uuid]
         runningclouds[user_uuid] = addr
         cloudticks[user_uuid] = ticks
         return addr 
     else:
-        not_spawn = True
-        while (not_spawn):
-            # select a random port and hope it works
-            port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-            res = subprocess.run (['docker', 'stack', 'deploy', '-c', 'docker/docker-compose.yml', user_uuid])
-            print (res)
-            if res.returncode != 0:
-                continue
-            res = subprocess.run (['docker', 'service', 'update', '--publish-add', '{}:8080'.format (str (port)), "{}_web-server".format (user_uuid)])
-            if res.returncode == 0:
-                not_spawn = False
-        output = "http://localhost:" + str (port)
-        # No way to check the updates are ready. Remove later with something more accurate 
-        time.sleep (20)
+        output = emissc.createCloudInstance (user_uuid) 
         runningclouds[user_uuid] = output
         cloudticks[user_uuid] = ticks
         return output
@@ -154,7 +137,7 @@ def return_container_addrs ():
         addr_list.append (runningclouds[name])
         cloudticks[name] = ticks
     for name in list (pausedclouds.keys ())[:]:
-        unpause_container (name, cloudticks, runningclouds, pausedclouds)
+        unpause_cloud (name, cloudticks, runningclouds, pausedclouds)
         addr_list.append (runningclouds[name])
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
@@ -189,19 +172,7 @@ def get_container_names (contents):
 
 def launch_query (query_type, instance_number, uuid):
     # First make sure the queries are unique to the user
-    not_spawn = True
-    while (not_spawn):
-        # select a random port and hope it works
-        port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        name = uuid + str (instance_number)
-        res = subprocess.run (['docker', 'stack', 'deploy', '-c', 'docker/docker-compose-{}.yml'.format (query_type), name])
-        print (res)
-        if res.returncode != 0:
-            continue
-        res = subprocess.run (['docker', 'service', 'update', '--publish-add', '{}:8080'.format (str (port)), "{}_querier".format (name)])
-        if res.returncode == 0:
-            not_spawn = False
-    addr = "http://localhost:{}".format (str (port))
+    addr = emiscc.createQueryInstance ("{}{}".foramt (uuid, instance_number), query_type)
     queryinstances[name] = addr
     queryticks[name] = ticks
     return addr 
@@ -245,37 +216,28 @@ def tick_incr (unused1, unused2):
 #
 
 def check_timer (keylist, tickdict, runningdict, pauseddict=None, should_kill=False):
-    for contents in keylist:
-      starttime = tickdict[contents]
-      if ticks - starttime >= tick_limit:
-          if should_kill:
-              res = subprocess.run (['docker', 'stack', 'rm', contents])
-              if res.returncode != 0:
-                  print ("Error: DANGER DANGER!!!!!!")
-              del runningdict[contents]
-              del tickdict[contents]
-          else:
-              pause_container (contents, tickdict, runningdict, pauseddict)
+    for name in keylist:
+        starttime = tickdict[name]
+        if ticks - starttime >= tick_limit:
+            if should_kill:
+                kill_query (name)
+            else:
+                pause_cloud (name, tickdict, runningdict, pauseddict)
 
-def unpause_container (contents, tickdict, runningdict, pauseddict):
-    containers = get_container_names (contents)
-    for name in containers:
-        if name:
-            res = subprocess.run (['docker', 'unpause', name])
-            if res.returncode != 0:
-                print ("Error: DANGER DANGER!!!!!!")
+def kill_query (name, tickdick, runningdict):
+    emiscc.killQueryInstance (name)
+    del runningdict[name]
+    del tickdict[name]
+
+def unpause_cloud (contents, tickdict, runningdict, pauseddict):
+    emiscc.unpauseCloudInstances (user_uuid)
     addr = pauseddict[contents]
     del pauseddict[contents]
     runningdict[contents] = addr
     tickdict[contents] = ticks
 
-def pause_container (contents, tickdict, runningdict, pauseddict):
-    containers = get_container_names (contents)
-    for name in containers:
-        if name:
-            res = subprocess.run (['docker', 'pause', name])
-            if res.returncode != 0:
-                print ("Error: DANGER DANGER!!!!!!")
+def pause_cloud (contents, tickdict, runningdict, pauseddict):
+    emiscc.pauseCloudInstances (user_uuid)
     addr = runningdict[contents]
     del runningdict[contents]
     del tickdict[contents]
