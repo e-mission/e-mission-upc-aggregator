@@ -19,7 +19,9 @@ except:
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
 if os.env['MONGOMAP']: # A env var for just docker
-    url = "{}:{}".format (url, os.env['MONGOMAP'])
+    mongoHostPort = int(os.env['MONGOMAP'])
+else:
+    mongoHostPort = 27017
 
 _current_db = None
 #config_file.close()
@@ -28,7 +30,7 @@ def _get_current_db():
     global _current_db
     if _current_db is None:
         print("Connecting to database URL "+url)
-        _current_db = MongoClient(url).Stage_database
+        _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
     return _current_db
         #config_file.close()
 
