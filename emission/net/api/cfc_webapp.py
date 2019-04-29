@@ -467,6 +467,7 @@ def process_key():
             s.connect(("127.0.0.1", mongoport))
             s.sendall (key)
             time.sleep (15)
+            return "Socket seen"
 
 @post ("/cloud/profile")
 def process_profile():
