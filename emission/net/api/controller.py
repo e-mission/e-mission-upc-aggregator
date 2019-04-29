@@ -104,7 +104,7 @@ def spawn_usercloud ():
         cloudticks[user_uuid] = ticks
         return runningclouds[user_uuid]
     elif user_uuid in pausedclouds:
-        emiscc.unpauseCloudInstances (user_uuid)
+        emissc.unpauseCloudInstances (user_uuid)
         addr = pausedclouds[user_uuid]
         del pausedclouds[user_uuid]
         runningclouds[user_uuid] = addr
@@ -172,7 +172,8 @@ def get_container_names (contents):
 
 def launch_query (query_type, instance_number, uuid):
     # First make sure the queries are unique to the user
-    addr = emiscc.createQueryInstance ("{}{}".foramt (uuid, instance_number), query_type)
+    name = "{}{}".format (uuid, instance_number)
+    addr = emissc.createQueryInstance (name, query_type)
     queryinstances[name] = addr
     queryticks[name] = ticks
     return addr 
@@ -225,19 +226,19 @@ def check_timer (keylist, tickdict, runningdict, pauseddict=None, should_kill=Fa
                 pause_cloud (name, tickdict, runningdict, pauseddict)
 
 def kill_query (name, tickdick, runningdict):
-    emiscc.killQueryInstance (name)
+    emissc.killQueryInstance (name)
     del runningdict[name]
     del tickdict[name]
 
 def unpause_cloud (contents, tickdict, runningdict, pauseddict):
-    emiscc.unpauseCloudInstances (user_uuid)
+    emissc.unpauseCloudInstances (user_uuid)
     addr = pauseddict[contents]
     del pauseddict[contents]
     runningdict[contents] = addr
     tickdict[contents] = ticks
 
 def pause_cloud (contents, tickdict, runningdict, pauseddict):
-    emiscc.pauseCloudInstances (user_uuid)
+    emissc.pauseCloudInstances (user_uuid)
     addr = runningdict[contents]
     del runningdict[contents]
     del tickdict[contents]

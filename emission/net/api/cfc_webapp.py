@@ -422,16 +422,16 @@ def after_request():
   new_duration = request.params.timer.elapsed
   if round(old_div((duration - new_duration), new_duration) > 100) > 0:
     logging.error("old style duration %s != timer based duration %s" % (duration, new_duration))
-    stats.store_server_api_error(request.params.user_uuid, "MISMATCH_%s_%s" %
-                                 (request.method, request.path), msTimeNow, duration - new_duration)
+    #stats.store_server_api_error(request.params.user_uuid, "MISMATCH_%s_%s" %
+    #                             (request.method, request.path), msTimeNow, duration - new_duration)
 
   print("END %s %s %s %s %s " % (datetime.now(), request.method, request.path, request.params.user_uuid, duration))
   logging.debug("END %s %s %s %s " % (request.method, request.path, request.params.user_uuid, duration))
   # Keep track of the time and duration for each call
-  stats.store_server_api_time(request.params.user_uuid, "%s_%s" % (request.method, request.path),
-        msTimeNow, duration)
-  stats.store_server_api_time(request.params.user_uuid, "%s_%s_cputime" % (request.method, request.path),
-        msTimeNow, new_duration)
+  #stats.store_server_api_time(request.params.user_uuid, "%s_%s" % (request.method, request.path),
+  #      msTimeNow, duration)
+  #stats.store_server_api_time(request.params.user_uuid, "%s_%s_cputime" % (request.method, request.path),
+  #      msTimeNow, new_duration)
 
 # Auth helpers BEGIN
 # This should only be used by createUserProfile since we may not have a UUID

@@ -10,24 +10,31 @@
 from emission.net.api.bottle import route, run, get, post, request
 import json
 import socket
+import subprocess
 import sys
 import requests
+import time
+import numpy as np
 
 varName = "PORTMAP"
-host = socket.gethostbyname(socket.gethostname())
+
+@post('/')
+def test():
+    return "This is a test"
 
 @post('/launch_querier')
 def launch_querier():
-    name = request.json['uuid']
+    name = request.json['name']
     query_type = request.json['query']
     not_spawn = True
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {varName: "{}:{}:{}".format (host, "{}".format (port), "8080")}
+        envVars = {varName: "{}:{}".format (port, "8080")}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
-        if res.returncode != 0:
+        if res.returncode == 0:
             not_spawn = False
+    time.sleep (10)
     return str (port)
 
 @post('/launch_cloud')
@@ -37,10 +44,11 @@ def launch_cloud():
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {varName: "{}:{}:{}".format (host, "{}".format (port), "8080")}
-        res = subprocess.run (['docker-compose', '-p', '{}'.format (user_uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
-        if res.returncode != 0:
+        envVars = {varName: "{}:{}".format (port, "8080")}
+        res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
+        if res.returncode == 0:
             not_spawn = False
+    time.sleep (10)
     return str (port)
 
 
@@ -81,4 +89,4 @@ def get_container_names (name):
 
 
 if __name__ == "__main__":
-    run(host=socket.gethostname (), port=54321, server='cheroot')
+    run(host="127.0.0.1", port=54321, server='cheroot')

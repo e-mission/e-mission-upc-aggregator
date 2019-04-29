@@ -14,41 +14,41 @@ class Machine ():
     total = 0
     def __init__ (self, baseaddr, serverPort, weight):
         self.baseaddr = baseaddr
-        self.serverport = serverPort
+        self.serverPort = serverPort
         self.weight = weight
         self.containers = []
 
-    def addCloud (uuid):
-        if Machine.total == 0 or len (containers) / Machine.total <= self.weight:
+    def addCloud (self, uuid):
+        if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
             resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             self.containers.append (uuid)
             Machine.total += 1
             return "{}:{}".format (self.baseaddr, resp.text)
         return ""
 
-    def addQuery (name, query_type):
-        if Machine.total == 0 or len (containers) / Machine.total <= self.weight:
-            json_dict = {"name": uuid, "instance": instance, "query", query_type}
+    def addQuery (self, name, query_type):
+        if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
+            json_dict = {"name": name, "query": query_type}
             resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
-            self.containers.append (uuid)
+            self.containers.append (name)
             Machine.total += 1
             return "{}:{}".format (self.baseaddr, resp.text)
         return ""
         
 
-    def pauseContainer (uuid):
+    def pauseContainer (self, uuid):
         if uuid in self.container:
             resp = requests.post ("{}:{}/pause".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             return True 
         return False
 
-    def unpauseContainer (uuid):
+    def unpauseContainer (self, uuid):
         if uuid in self.container:
             resp = requests.post ("{}:{}/unpause".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             return True 
         return False
 
-    def killContainer (uuid):
+    def killContainer (self, uuid):
         if uuid in self.container:
             resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             return True 
@@ -63,8 +63,8 @@ class Machine ():
 
 machines = []
 
-machines.append (Machine ("10.142.33.235", serverPort, 1.0) #Nick's home machine in Weaver's office
-machines.append (Machine ("128.32.37.205", serverPort, 0.0) #ante
+machines.append (Machine ("http://127.0.0.1", serverPort, 1.0)) #Nick's home machine in Weaver's office
+machines.append (Machine ("http://128.32.37.205", serverPort, 0.0)) #ante
 
 # Right now we give ante no weight cause nothing is configured. We will launch
 # the server with sudo to enable ante
@@ -73,7 +73,7 @@ machines.append (Machine ("128.32.37.205", serverPort, 0.0) #ante
 
 # Helper function to allocate the Cloud instance
 def createCloudInstance (uuid):
-   for m in machines:
+    for m in machines:
         res = m.addCloud (uuid)
         if res:
             return res
@@ -81,25 +81,25 @@ def createCloudInstance (uuid):
 
 # Helper function to pause the Cloud instance
 def pauseCloudInstance (uuid):
-   for m in machines:
+    for m in machines:
         if m.pauseContainer (uuid):
             return
 
 
 # Helper function to unpause the Cloud instance
 def unpauseCloudInstance (uuid):
-   for m in machines:
+    for m in machines:
         if m.unpauseContainer (uuid):
             return
 
 def createQueryInstance (name, query_type):
     for m in machines:
-        res = m.addQuery (uuid, i, query_type)
+        res = m.addQuery (name, query_type)
         if res:
             return res
     return ""
 
 def killQueryInstance (uuid):
-   for m in machines:
+    for m in machines:
         if m.killContainer (uuid):
             return

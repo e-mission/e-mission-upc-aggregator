@@ -74,7 +74,7 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
 
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
-        query_results.append(pool.apply_async(requests.post, ["http://localhost:6500/receive_query", None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
+        query_results.append(pool.apply_async(requests.post, [query_addr, None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
     pool.close()
     pool.join()
     results = []
