@@ -18,8 +18,8 @@ except:
 
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
-if os.getenv['MONGOMAP']: # A env var for just docker
-    portList = os.env['MONGOMAP'].split (':')
+if os.getenv('MONGOMAP'): # A env var for just docker
+    portList = os.getenv('MONGOMAP').split (':')
     mongoHostPort = int(portList[0])
 else:
     mongoHostPort = 27017

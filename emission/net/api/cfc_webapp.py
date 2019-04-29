@@ -462,7 +462,7 @@ def process_key():
         abort (403, "Key already given\n")
     else:
         key = request.json
-        portList = os.getenv['MONGOMAP'].split (':')
+        portList = os.getenv('MONGOMAP').split (':')
         mongoHostPort = int(portList[0])
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(("127.0.0.1", mongoHostPort))
