@@ -15,7 +15,7 @@ def main ():
     if r.ok:
         subprocess.run (["python", "emission/net/ext_service/aggregator.py", controller_addr, "4", username, "test-querier"])
     else:
-        print ("Error when registering the user.", f=sys.stderr)
+        print ("Error when registering the user.", file=sys.stderr)
         sys.exit (1)
 
 if __name__ == "__main__":

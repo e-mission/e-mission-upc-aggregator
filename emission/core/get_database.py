@@ -27,6 +27,7 @@ def _get_current_db():
     if _current_db is None:
         print("Connecting to database URL "+url)
         _current_db = MongoClient(url).Stage_database
+    return _current_db
         #config_file.close()
 
 def get_mode_db():
