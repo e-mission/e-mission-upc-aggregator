@@ -44,6 +44,25 @@ class Sum(Query):
     def __repr__(self):
         return "sum"
 
+class AE(Query):
+    def __init__(self):
+        self.id = uuid.uuid4()
+
+    def run_query(self, data):
+        total = 0
+        for value in data:
+            total += int(value)
+        return total
+
+    def generate_noise(self, data, query_json):
+        offset = query_json['offset']
+        alpha = query_json['alpha']
+        privacy_budget = -1 * np.log(alpha) / offset
+        return np.random.laplace(scale=1.0/float(privacy_budget))
+
+    def __repr__(self):
+        return "ae"
+
 def get_user_addrs (controller_addr, num_users_lower_bound):
     r = requests.post(controller_addr + "/get_user_addrs")
     json_addrs = r.json ()
@@ -78,12 +97,16 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
     pool.close()
     pool.join()
     results = []
-    for result in query_results:
-        curr_resp = result.get()
-        print(curr_resp)
-        curr_json_data = json.loads(curr_resp.text)
-        curr_query_result = curr_json_data['query_result']
-        results.append(curr_query_result)
+    try:
+        for result in query_results:
+            curr_resp = result.get()
+            # print(curr_resp)
+            curr_json_data = json.loads(curr_resp.text)
+            curr_query_result = curr_json_data['query_result']
+            if curr_query_result != None:
+                results.append(curr_query_result)
+    except:
+        print("Async failed.")
 
     # results = [float((result.get()).text) for result in query_results]
     # try:
@@ -94,10 +117,12 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
     print(results)
     return results
 
-def aggregate(query_object, query_results, privacy_budget=0.1):
+def aggregate(query_object, query_results, query_json):
     value = query_object.run_query(query_results)
-    #noise = query_object.generate_noise(query_results, privacy_budget)
-    return value #+ noise
+    if "alpha" in query_json:
+        noise = query_object.generate_noise(query_results, query_json)
+        return value + noise
+    return value
 
 if __name__ == "__main__":
     # Inputs:
@@ -115,7 +140,7 @@ if __name__ == "__main__":
     username = sys.argv[3]
     query_name = sys.argv[4]
 
-    query_type_mapping = {'sum' : Sum()}
+    query_type_mapping = {'sum' : Sum(), 'ae': AE()}
 
     user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
 
