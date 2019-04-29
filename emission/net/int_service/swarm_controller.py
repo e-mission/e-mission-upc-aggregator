@@ -51,6 +51,8 @@ class Machine ():
     def killContainer (self, uuid):
         if uuid in self.container:
             resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
+            self.container.remove (uuid)
+            Machine.total -= 1
             return True 
         return False
         

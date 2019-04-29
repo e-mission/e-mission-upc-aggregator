@@ -1,9 +1,10 @@
 import socket
 import subprocess
 import tempfile
+import time
 
 HOST="127.0.0.1"
-PORT=8080
+PORT=27017
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -22,3 +23,5 @@ with tempfile.NamedTemporaryFile () as f:
     f.write ("passphrase_passwrd={}".format (data))
 
 subprocess.run (["/mount_ecryptfs.sh"])
+
+time.sleep (10)
