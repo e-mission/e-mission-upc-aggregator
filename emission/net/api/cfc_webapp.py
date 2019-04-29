@@ -468,6 +468,7 @@ def process_key():
             s.sendall (key)
             time.sleep (15)
             return "Socket seen"
+    return "Socket not seen"
 
 @post ("/cloud/profile")
 def process_profile():
