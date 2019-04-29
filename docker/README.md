@@ -75,6 +75,11 @@ For the querier:
    docker build -f docker/Dockerfile-querier -t emission/test-querier:latest ./docker
    ```
 
+For Mongo image:
+   ```
+   docker build -f docker/Dockerfile-mongo -t emission/mongo-custom:latest ./docker
+   ```
+
 If you want to add additional queriers you will also need to build additional images. We make the assumption that you will have a unique docker compose file for each query type, called:
 
   ```
