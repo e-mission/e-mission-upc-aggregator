@@ -97,12 +97,16 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
     pool.close()
     pool.join()
     results = []
-    for result in query_results:
-        curr_resp = result.get()
-        print(curr_resp)
-        curr_json_data = json.loads(curr_resp.text)
-        curr_query_result = curr_json_data['query_result']
-        results.append(curr_query_result)
+    try:
+        for result in query_results:
+            curr_resp = result.get()
+            # print(curr_resp)
+            curr_json_data = json.loads(curr_resp.text)
+            curr_query_result = curr_json_data['query_result']
+            if curr_query_result != None:
+                results.append(curr_query_result)
+    except:
+        print("Async failed.")
 
     # results = [float((result.get()).text) for result in query_results]
     # try:

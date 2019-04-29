@@ -53,6 +53,7 @@ class Sum(Query):
 class AE(Query):
     def __init__(self):
         self.id = uuid.uuid4()
+        self.query_value = 0
 
     def run_query(self, data):
         # If there are any trip entries satisfying the time and location query, then the user count is 1, else 0.
@@ -79,7 +80,10 @@ def receive_query():
     agg = request.json['agg']
 
     # Eventually have to add a loop that collects all the streamed data packets instead of just one.
-    cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json={'query': query, 'agg': agg})
+    try:
+        cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json={'query': query, 'agg': agg})
+    except:
+        return {'query_result': None}
     print("Cloud response: " + str(cloud_response))
     print("Cloud response text: " + str(cloud_response.text))
     # end_of_stream = cloud_response.json['end_of_stream']
