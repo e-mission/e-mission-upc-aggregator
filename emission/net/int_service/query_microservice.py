@@ -50,6 +50,26 @@ class Sum(Query):
     def __repr__(self):
         return "sum"
 
+class AE(Query):
+    def __init__(self):
+        self.id = uuid.uuid4()
+
+    def run_query(self, data):
+        # If there are any trip entries satisfying the time and location query, then the user count is 1, else 0.
+        if len(data) > 0:
+            return 1
+        else:
+            return 0
+
+    def update_current_query_result(self, query_result):
+        self.query_value += query_result
+
+    def get_current_query_result(self):
+        return self.query_value
+
+    def __repr__(self):
+        return "ae"
+
 @post('/receive_query')
 def receive_query():
     # TODO: pass in user_cloud_addr.
@@ -57,7 +77,6 @@ def receive_query():
     query = request.json['query']
     query_object = query_type_mapping[query['query_type']]
     agg = request.json['agg']
-    #return request
 
     # Eventually have to add a loop that collects all the streamed data packets instead of just one.
     cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json={'query': query, 'agg': agg})
@@ -79,5 +98,5 @@ def receive_user_data(resp, query_object):
     return {'query_result': query_object.get_current_query_result()}
 
 if __name__ == "__main__":
-    query_type_mapping = {'sum' : Sum()}
+    query_type_mapping = {'sum' : Sum(), 'ae': AE()}
     run(host='localhost', port=6500, server='cheroot')

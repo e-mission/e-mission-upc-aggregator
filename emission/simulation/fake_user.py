@@ -4,6 +4,7 @@ import numpy as np
 import datetime
 import arrow 
 import requests
+import socket
 #emission imports
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
