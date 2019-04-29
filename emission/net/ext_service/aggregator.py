@@ -148,8 +148,8 @@ if __name__ == "__main__":
         query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
         if query_micro_addrs is not None:
             query_results = launch_query(q, username, user_addrs, query_micro_addrs)
-            if query_results == None:
+            if query_results:
                 print("Obtaining query results failed.")
             else:
                 query_object = query_type_mapping[q['query_type']]
-                print (aggregate(query_object, query_results))
+                print (aggregate(query_object, query_results)) # FIXME

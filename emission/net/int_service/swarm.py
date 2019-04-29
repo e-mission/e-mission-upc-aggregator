@@ -51,7 +51,7 @@ def launch_cloud():
         if res.returncode == 0:
             not_spawn = False
     time.sleep (10)
-    return str (port)
+    return str (cloudPort)
 
 
 
