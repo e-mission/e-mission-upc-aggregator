@@ -18,6 +18,8 @@ except:
 
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
+if os.env['MONGOMAP']: # A env var for just docker
+    url = "{}:{}".format (url, os.env['MONGOMAP'])
 
 _current_db = None
 #config_file.close()
