@@ -17,12 +17,15 @@ services:
     networks:
       - emission
   db:
-    image: mongo:3.4
+    image: emission/mongo-custom:latest
     deploy:
       replicas: 1
       restart_policy:
         condition: on-failure
     privileged: true
+    ports:
+      #ENV VAR FOR RUNTIME PORT MAPPING
+      - $MONGOMAP
 #   ports:
       #This port binding allows you to access the database server outside the host machine. Remove this is you don't need this
       #functionality

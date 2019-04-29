@@ -16,7 +16,8 @@ import requests
 import time
 import numpy as np
 
-varName = "PORTMAP"
+cloudVarName = "PORTMAP"
+mongoVarName = "MONGOMAP"
 
 @post('/')
 def test():
@@ -30,7 +31,7 @@ def launch_querier():
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {varName: "{}:{}".format (port, "8080")}
+        envVars = {cloudVarName: "{}:{}".format (port, "8080")}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
@@ -43,8 +44,9 @@ def launch_cloud():
     not_spawn = True
     while (not_spawn):
         # select a random port and hope it works
-        port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {varName: "{}:{}".format (port, "8080")}
+        cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
+        mongoPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
+        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), mongoVarName: "{}:{}".format (mongoPort, "8080")}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False

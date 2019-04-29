@@ -462,7 +462,10 @@ def process_key():
         abort (403, "Key already given\n")
     else:
         key = request.json
-        print (key)
+        mongoport = os.environ['MONGOPORT']
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect(("127.0.0.1", mongoport))
+            s.sendall (key)
 
 @post ("/cloud/profile")
 def process_profile():
@@ -471,7 +474,6 @@ def process_profile():
         abort (403, "Profile already given\n")
     else:
         profile = request.json
-        print (profile)
     
 @get ("/cloud/status")
 def check_status ():

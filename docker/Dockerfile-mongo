@@ -1,0 +1,7 @@
+from mongo:3.4
+
+ADD ecryptfs_setup.sh /ecryptfs_setup.sh 
+RUN ./ecryptfs_setup.sh
+ADD mongo_start_script.sh /start_script.sh
+ADD mount_ecryptfs.sh /mount_ecryptfs.sh
+CMD ["./start_script.sh"] 
