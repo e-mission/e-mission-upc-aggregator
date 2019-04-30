@@ -18,11 +18,7 @@ except:
 
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
-if os.getenv ("MONGOMAP"):
-    portList = os.getenv("MONGOMAP").split (":")
-    mongoHostPort = int (portList[1])
-else:
-    mongoHostPort = 27017
+mongoHostPort = 27017
 
 _current_db = None
 #config_file.close()
