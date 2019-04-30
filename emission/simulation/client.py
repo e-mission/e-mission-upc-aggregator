@@ -32,7 +32,7 @@ class EmissionFakeDataGenerator(Client):
         self._config = config
         self._user_factory = FakeUser
         # Additional info for user cloud
-        key = random_64s (32)
+        key = random_64s (4)
         profile = gp.AlgProfile ()
         # Add all known algs to default algs.
         profile.add_to_aggs("test_analyst")

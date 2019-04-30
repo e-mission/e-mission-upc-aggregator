@@ -20,7 +20,7 @@ config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
 if os.getenv ("MONGOMAP"):
     portList = os.getenv("MONGOMAP").split (":")
-    mongoHostPort = int (portList[0])
+    mongoHostPort = int (portList[1])
 else:
     mongoHostPort = 27017
 

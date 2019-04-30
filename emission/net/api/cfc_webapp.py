@@ -463,7 +463,7 @@ def process_key():
     else:
         key = request.json
         portList = os.getenv('MONGOMAP').split (':')
-        mongoHostPort = int(portList[0])
+        mongoHostPort = int(portList[1])
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(("10.142.34.254", mongoHostPort))
             s.sendall (key.to_bytes (32, byteorder='big'))
