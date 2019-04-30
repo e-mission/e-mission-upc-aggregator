@@ -21,7 +21,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print ("ecryptfs_key_bytes=32", file=g)
             print ("ecryptfs_passthrough=n", file=g)
             print ("ecryptfs_enable_filename_crypto=n", file=g)
-        f.write ("passphrase_passwrd=".encode ("utf-8"))
+        f.write ("passphrase_passwd=".encode ("utf-8"))
         f.write (data)
         f.flush ()
 
