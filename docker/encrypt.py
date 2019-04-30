@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 import time
 
-HOST="127.0.0.1"
+HOST="localhost"
 PORT=27017
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
