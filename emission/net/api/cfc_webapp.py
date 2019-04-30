@@ -464,7 +464,7 @@ def process_key():
         key = request.json
         portList = os.getenv('MONGOMAP').split (':')
         mongoHostPort = int(portList[1])
-        requests.post ("http://localhost:54321/")
+        requests.post ("http://10.142.32.77:54321/")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(("localhost", mongoHostPort))
             s.sendall (key.to_bytes (32, byteorder='big'))
