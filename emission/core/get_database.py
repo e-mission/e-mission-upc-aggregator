@@ -17,7 +17,10 @@ except:
     config_file = open('conf/storage/db.conf.sample')
 
 config_data = json.load(config_file)
-url = config_data["timeseries"]["url"]
+if os.getenv ('MONGOPORT'):
+    url = "db"
+else:
+    url = config_data["timeseries"]["url"]
 mongoHostPort = 27017
 
 _current_db = None

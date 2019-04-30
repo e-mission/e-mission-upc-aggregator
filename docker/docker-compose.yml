@@ -24,9 +24,6 @@ services:
       restart_policy:
         condition: on-failure
     privileged: true
-    ports:
-      #ENV VAR FOR RUNTIME PORT MAPPING
-      - $MONGOMAP
 #   ports:
       #This port binding allows you to access the database server outside the host machine. Remove this is you don't need this
       #functionality
