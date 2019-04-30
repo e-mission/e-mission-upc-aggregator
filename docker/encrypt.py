@@ -3,12 +3,12 @@ import subprocess
 import tempfile
 import time
 
-HOST="136.152.143.34"
+HOST="127.0.0.1"
 PORT=27017
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
-    s.listen()
+    s.listen(1)
     conn, addr = s.accept()
     data = conn.recv (32)
 

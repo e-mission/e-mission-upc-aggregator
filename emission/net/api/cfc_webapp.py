@@ -465,7 +465,7 @@ def process_key():
         portList = os.getenv('MONGOMAP').split (':')
         mongoHostPort = int(portList[0])
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(("136.152.143.34", mongoHostPort))
+            s.connect(("10.142.34.254", mongoHostPort))
             s.sendall (key)
             s.recv(1024)
             return "Socket seen"
