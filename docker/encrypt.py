@@ -23,4 +23,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         f.write ("passphrase_passwrd={}".format (data))
 
     subprocess.run (["/mount_ecryptfs.sh"])
-    conn.sendall ("received")
+    conn.sendall (bytes ("received"))
