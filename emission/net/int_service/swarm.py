@@ -21,6 +21,7 @@ mongoVarName = "MONGOMAP"
 
 @post('/')
 def test():
+    print ("Connection successful")
     return "This is a test"
 
 @post('/launch_querier')
