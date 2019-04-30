@@ -463,7 +463,7 @@ def process_key():
     else:
         key = request.json
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(("b5611f61-869d-48d2-8491-97c392d4c977_emission", 27017))
+            s.connect(("db", 27017))
             s.sendall (key.to_bytes (32, byteorder='big'))
             s.recv(1024)
             return "Socket seen"

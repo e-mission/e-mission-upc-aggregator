@@ -18,7 +18,7 @@ except:
 
 config_data = json.load(config_file)
 if os.getenv ('MONGOPORT'):
-    url = "b5611f61-869d-48d2-8491-97c392d4c977_emission"
+    url = "db"
 else:
     url = config_data["timeseries"]["url"]
 mongoHostPort = 27017
