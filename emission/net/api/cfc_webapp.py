@@ -466,7 +466,7 @@ def process_key():
         mongoHostPort = int(portList[0])
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(("10.142.34.254", mongoHostPort))
-            s.sendall (key.to_bytes (32))
+            s.sendall (key.to_bytes (32, byteorder='big'))
             s.recv(1024)
             return "Socket seen"
     return "Socket not seen"
