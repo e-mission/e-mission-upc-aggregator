@@ -3,8 +3,8 @@ import subprocess
 import tempfile
 import time
 
-HOST="localhost"
-PORT=27017
+HOST="db"
+PORT=27018
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -12,7 +12,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     conn, addr = s.accept()
     data = conn.recv (32)
 
-    with tempfile.NamedTemporaryFile () as f:
+    with tempfile.NamedTemporaryFile (mode="w") as f:
         name = f.name
         with open ("/root/.ecryptfsrc", "w") as g:
             print ("key=passphrase:passphrase_passwd_file={}".format (name), file=g)
@@ -20,7 +20,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             print ("ecryptfs_key_bytes=32", file=g)
             print ("ecryptfs_passthrough=n", file=g)
             print ("ecryptfs_enable_filename_crypto=n", file=g)
-        f.write ("passphrase_passwrd={}".format (data))
+        print ("passphrase_passwrd={}".format (data), file=f, end="")
 
-    subprocess.run (["/mount_ecryptfs.sh"])
+#    subprocess.run (["/mount_ecryptfs.sh"])
     conn.sendall (b'Received')
