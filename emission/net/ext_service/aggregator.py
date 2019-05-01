@@ -6,9 +6,12 @@ import abc
 import numpy as np
 from multiprocessing.dummy import Pool
 import requests
+from scipy.optimize import minimize
+import autograd.numpy as np
+from autograd import grad
 
 pool = Pool(10)
-query_file = "query.json"
+query_file = "rc.json"
 
 class Query(abc.ABC):
     """
@@ -19,7 +22,7 @@ class Query(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def generate_noise(self, data):
+    def generate_diff_priv_result(self, query_result, query_json):
         pass
 
     @abc.abstractmethod
@@ -36,10 +39,11 @@ class Sum(Query):
             total += int(value)
         return total
 
-    def generate_noise(self, data, privacy_budget):
-        sensitivity = 1
-        n = len(data)
-        return np.random.laplace(scale=1.0/float(privacy_budget))
+    def generate_diff_priv_result(self, query_result, query_json):
+        offset = query_json['offset']
+        alpha = query_json['alpha']
+        privacy_budget = -1 * np.log(alpha) / offset
+        return query_result + np.random.laplace(scale=1.0/float(privacy_budget))
 
     def __repr__(self):
         return "sum"
@@ -54,11 +58,104 @@ class AE(Query):
             total += int(value)
         return total
 
-    def generate_noise(self, data, query_json):
+    def generate_diff_priv_result(self, query_result, query_json):
         offset = query_json['offset']
         alpha = query_json['alpha']
         privacy_budget = -1 * np.log(alpha) / offset
-        return np.random.laplace(scale=1.0/float(privacy_budget))
+        return query_result + np.random.laplace(scale=1.0/float(privacy_budget))
+
+    def __repr__(self):
+        return "ae"
+
+class RC():
+    # Uses the optimal Asymmetric Laplacian mechanism.
+    def __init__(self):
+        return
+
+    def run_query(self, data):
+        total = 0
+        for value in data:
+            total += int(value)
+        return total
+
+    def asym_sample(self, x):
+        if x < (self.k**2 / (1 + self.k**2)):
+            return self.true_count + (self.k / self.e) * np.log(x * (1 + self.k**2) / self.k**2)
+        else:
+            return self.true_count - (np.log((1 - x) * (1 + self.k**2)) / (self.k * self.e))
+
+    # Used in solving for optimal skewness k, result is negated as we actaully want to maximize but using a minimizer.
+    def asym_prob_k(self, k):
+        if self.true_count < self.r_start:
+            r_start = 0
+            r_end = self.r_start
+        elif self.true_count > self.r_end:
+            r_start = self.r_end
+            r_end = self.r_end + self.r_start
+        else:
+            r_start = self.r_start
+            r_end = self.r_end
+        p_left_in_bounds = (k**2 / (1 + k**2)) * (1 - np.exp(self.e*(r_start - self.true_count)/k))
+        p_right_in_bounds = (1 / (1 + k**2)) * (1 - np.exp(-self.e * (r_end - self.true_count) * k))
+        return -1 * (p_left_in_bounds + p_right_in_bounds)
+
+    # Used in Newton's method, subtracting 1 - alpha to converge to 0 in Newton's method.
+    def asym_prob_e(self, e):
+        if self.true_count < self.r_start:
+            r_start = 0
+            r_end = self.r_start
+        elif self.true_count > self.r_end:
+            r_start = self.r_end
+            r_end = self.r_end + self.r_start
+        else:
+            r_start = self.r_start
+            r_end = self.r_end
+        p_left_in_bounds = (self.k**2 / (1 + self.k**2)) * (1 - np.exp(e*(r_start - self.true_count)/self.k))
+        p_right_in_bounds = (1 / (1 + self.k**2)) * (1 - np.exp(-e * (r_end - self.true_count) * self.k))
+        return p_left_in_bounds + p_right_in_bounds - (1 - self.alpha)
+
+    def dx(self, f, k):
+        return abs(f(k))
+
+    def newtons_method(self, f, e0, delta=1e-6):
+        diff = self.dx(f, e0)
+        grad_f = grad(f)
+        while diff > delta:
+            e0 = e0 - f(e0) / grad_f(e0)
+            diff = self.dx(f, e0)
+        return e0
+
+    def get_asym_noise(self, query_result, query_json):
+        self.r_start = query_json['r_start']
+        self.r_end = query_json['r_end']
+        self.alpha = query_json['alpha']
+        self.true_count = query_result
+        # Initial (optimal) privacy budget.
+        self.e = -2 * np.log(self.alpha) / (self.r_end - self.r_start)
+
+        k0 = np.array([1.0])
+        res = minimize(self.asym_prob_k, k0, options={'maxiter': 1000})
+        self.k = res.x[0]
+        print("k: " + str(self.k))
+
+        self.e = self.newtons_method(self.asym_prob_e, self.e)
+        print("Updated privacy budget: " + str(self.e))
+
+        x = np.random.uniform()
+        return self.asym_sample(x)
+
+    def generate_diff_priv_result(self, query_result, query_json):
+        if query_result >= query_json['r_end'] + query_json['r_start'] or query_result == query_json['r_start'] or query_result == query_json['r_end']:
+            p = np.random.uniform()
+            if p < query_json['alpha']:
+                return "In range"
+            else:
+                return "NOT in range"
+        asym_val = self.get_asym_noise(query_result, query_json)
+        if asym_val > query_json['r_start'] and asym_val < query_json['r_end']:
+            return "In range"
+        else:
+            return "NOT in range"
 
     def __repr__(self):
         return "ae"
@@ -107,6 +204,7 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
                 results.append(curr_query_result)
     except:
         print("Async failed.")
+        return
 
     # results = [float((result.get()).text) for result in query_results]
     # try:
@@ -120,8 +218,7 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
 def aggregate(query_object, query_results, query_json):
     value = query_object.run_query(query_results)
     if "alpha" in query_json:
-        noise = query_object.generate_noise(query_results, query_json)
-        return value + noise
+        return query_object.generate_diff_priv_result(value, query_json)
     return value
 
 if __name__ == "__main__":
@@ -140,16 +237,17 @@ if __name__ == "__main__":
     username = sys.argv[3]
     query_name = sys.argv[4]
 
-    query_type_mapping = {'sum' : Sum(), 'ae': AE()}
+    query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
 
     user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
 
     if user_addrs is not None:
         query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
+        query_micro_addrs = 1
         if query_micro_addrs is not None:
             query_results = launch_query(q, username, user_addrs, query_micro_addrs)
-            if query_results:
+            if not query_results:
                 print("Obtaining query results failed.")
             else:
                 query_object = query_type_mapping[q['query_type']]
-                print (aggregate(query_object, query_results)) # FIXME
+                print (aggregate(query_object, query_results, q)) # FIXME
