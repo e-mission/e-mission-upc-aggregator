@@ -71,6 +71,27 @@ class AE(Query):
     def __repr__(self):
         return "ae"
 
+class RC(Query):
+    def __init__(self):
+        self.id = uuid.uuid4()
+        self.query_value = 0
+
+    def run_query(self, data):
+        # If there are any trip entries satisfying the time and location query, then the user count is 1, else 0.
+        if len(data) > 0:
+            return 1
+        else:
+            return 0
+
+    def update_current_query_result(self, query_result):
+        self.query_value += query_result
+
+    def get_current_query_result(self):
+        return self.query_value
+
+    def __repr__(self):
+        return "ae"
+
 @post('/receive_query')
 def receive_query():
     # TODO: pass in user_cloud_addr.
@@ -102,5 +123,5 @@ def receive_user_data(resp, query_object):
     return {'query_result': query_object.get_current_query_result()}
 
 if __name__ == "__main__":
-    query_type_mapping = {'sum' : Sum(), 'ae': AE()}
+    query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
     run(host='localhost', port=6500, server='cheroot')
