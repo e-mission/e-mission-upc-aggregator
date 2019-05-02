@@ -242,3 +242,4 @@ So I have moved it to the e-mission-server section in the e-mission-docs repo:
 https://github.com/e-mission/e-mission-docs/blob/master/docs/e-mission-server/deploying_your_own_server_to_production.md
 
 [Python_Structure]: https://raw.github.com/amplab/e-mission-server/master/figs/e-mission-server-module-structure.png
+# e-mission-upc-aggregator
