@@ -95,6 +95,7 @@ class RC(Query):
 @post('/receive_query')
 def receive_query():
     # TODO: pass in user_cloud_addr.
+    print ("The query has begun")
     user_cloud_addr = request.json['user_cloud_addr']
     query = request.json['query']
     query_object = query_type_mapping[query['query_type']]
