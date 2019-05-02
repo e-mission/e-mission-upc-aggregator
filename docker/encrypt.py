@@ -24,8 +24,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         f.write ("passphrase_passwd=".encode ("utf-8"))
         f.write (data)
         f.flush ()
-
-        os.system ("cat {}  >> 1234.txt".format (name))
-
         subprocess.call (["/mount_ecryptfs.sh"])
     conn.sendall (b'Received')

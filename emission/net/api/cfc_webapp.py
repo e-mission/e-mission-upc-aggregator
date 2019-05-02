@@ -242,7 +242,6 @@ def putIntoCache():
   user_uuid=getUUID(request)
   logging.debug("user_uuid %s" % user_uuid)
   from_phone = request.json['phone_to_server']
-  print (request.json['phone_to_server']) 
   return usercache.sync_phone_to_server(user_uuid, from_phone)
 
 @post('/timeline/getTrips/<day>')
@@ -466,8 +465,6 @@ def process_key():
             s.connect(("db", 27018))
             s.sendall (key.to_bytes (32, byteorder='big'))
             s.recv(1024)
-            return "Socket seen"
-    return "Socket not seen"
 
 @post ("/cloud/profile")
 def process_profile():
@@ -506,6 +503,7 @@ def run_algorithm ():
 def run_aggregate ():
   # if 'user' not in request.json:
   #   abort(401, "only a user can read his/her data")
+  print ("The containers can talk")
   if global_uuid == None:
     abort(401, "Profile not created.")
   user_uuid = global_uuid

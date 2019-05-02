@@ -18,9 +18,7 @@ class UserCloud:
 
     def send_contents (self, addr="http://localhost:4443"):
         print (requests.get (addr + "/cloud/status").text)
-        print (self.key)
         print (requests.post (addr + "/cloud/key", json=self.key).text)
-#        print (self.profile.algs)
         print (requests.post (addr + "/cloud/profile", json=self.profile.to_json()).text)
 
 

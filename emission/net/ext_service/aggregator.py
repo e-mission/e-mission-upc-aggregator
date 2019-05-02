@@ -11,7 +11,7 @@ import autograd.numpy as np
 from autograd import grad
 
 pool = Pool(10)
-query_file = "rc.json"
+query_file = "query.json"
 
 class Query(abc.ABC):
     """
@@ -243,7 +243,6 @@ if __name__ == "__main__":
 
     if user_addrs is not None:
         query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
-        query_micro_addrs = 1
         if query_micro_addrs is not None:
             query_results = launch_query(q, username, user_addrs, query_micro_addrs)
             if not query_results:
