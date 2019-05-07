@@ -1,7 +1,7 @@
 import subprocess, sys, requests
 import json
 
-controller_addr = "http://localhost:4040"
+controller_addr = "http://128.32.37.205:4040"
 username = "test_analyst"
 
 # Default location of the query.
