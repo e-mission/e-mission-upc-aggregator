@@ -3,6 +3,7 @@ import http.client
 import json
 import uuid
 import abc
+import time
 import numpy as np
 from multiprocessing.dummy import Pool
 import requests
@@ -12,6 +13,7 @@ from autograd import grad
 
 pool = Pool(10)
 query_file = "query.json"
+query_loc = "/receive_query"
 
 class Query(abc.ABC):
     """
@@ -190,19 +192,21 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
 
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
-        query_results.append(pool.apply_async(requests.post, [query_addr, None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
+        query_results.append(pool.apply_async(requests.post, [query_addr + query_loc, None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
     pool.close()
     pool.join()
     results = []
+    [result.wait () for result in query_results]
     try:
         for result in query_results:
             curr_resp = result.get()
-            # print(curr_resp)
+            print(curr_resp.text)
             curr_json_data = json.loads(curr_resp.text)
             curr_query_result = curr_json_data['query_result']
             if curr_query_result != None:
                 results.append(curr_query_result)
     except:
+        print (results)
         print("Async failed.")
         return
 
