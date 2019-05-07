@@ -1,4 +1,5 @@
 import sys
+import socket
 import http.client
 from emission.net.api.bottle import route, run, get, post, request
 import json
@@ -125,4 +126,4 @@ def receive_user_data(resp, query_object):
 
 if __name__ == "__main__":
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
-    run(host='localhost', port=6500, server='cheroot')
+    run(host=socket.gethostbyname(socket.gethostname()), port=6500, server='cheroot')

@@ -11,7 +11,7 @@ controller_addr = "http://localhost:4040"
 def main ():
     #Step1 : specify a config object for user
     client_config = {
-        'emission_server_base_url': 'http://localhost:4040',
+        'emission_server_base_url': 'http://128.32.37.205:4040',
         'register_user_endpoint': '/profile/create',
         'user_cache_endpoint': '/usercache/put',
         'spawn_usercloud_endpoint': '/usercloud'
