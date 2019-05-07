@@ -14,6 +14,7 @@ from emission.net.api.bottle import route, post, get, run, template, static_file
 import emission.net.api.bottle as bt
 # To support dynamic loading of client-specific libraries
 import sys
+import socket
 import os
 import logging
 import logging.config
@@ -565,6 +566,9 @@ if __name__ == '__main__':
 
     logging.config.dictConfig(webserver_log_config)
     logging.debug("This should go to the log file")
+    
+    # To avoid config file for tests
+    server_host = socket.gethostbyname(socket.gethostname())
 
     # We have see the sockets hang in practice. Let's set the socket timeout = 1
     # hour to be on the safe side, and see if it is hit.

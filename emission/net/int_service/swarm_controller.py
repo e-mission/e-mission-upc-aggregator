@@ -65,8 +65,8 @@ class Machine ():
 
 machines = []
 
-machines.append (Machine ("http://127.0.0.1", serverPort, 1.0)) #Nick's home machine in Weaver's office
-machines.append (Machine ("http://128.32.37.205", serverPort, 0.0)) #ante
+#machines.append (Machine ("http://127.0.0.1", serverPort, 0.0)) #Nick's home machine in Weaver's office
+machines.append (Machine ("http://128.32.37.205", serverPort, 1.0)) #ante
 
 # Right now we give ante no weight cause nothing is configured. We will launch
 # the server with sudo to enable ante

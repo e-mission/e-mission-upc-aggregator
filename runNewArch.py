@@ -1,4 +1,5 @@
 import subprocess, time
+import sys
 
 def main ():
     # First we want to spawn a the controller in a new shell
