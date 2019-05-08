@@ -526,7 +526,7 @@ def run_aggregate ():
                                               end_time)
 
   # Spatial filtering.
-  region = query['sel_region']
+  # region = query['sel_region']
   if region is None:
     geo_query = None
   else:
