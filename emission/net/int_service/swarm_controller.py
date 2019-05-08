@@ -19,6 +19,8 @@ class Machine ():
         self.containers = []
 
     def addCloud (self, uuid):
+        if self.weight == 0.0:
+            return
         if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
             resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             self.containers.append (uuid)
@@ -27,6 +29,8 @@ class Machine ():
         return ""
 
     def addQuery (self, name, query_type):
+        if self.weight == 0.0:
+            return
         if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
             json_dict = {"name": name, "query": query_type}
             resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
@@ -65,8 +69,8 @@ class Machine ():
 
 machines = []
 
-#machines.append (Machine ("http://127.0.0.1", serverPort, 0.0)) #Nick's home machine in Weaver's office
-machines.append (Machine ("http://128.32.37.205", serverPort, 1.0)) #ante
+machines.append (Machine ("http://128.32.37.205", serverPort, .75)) #ante
+machines.append (Machine ("http://34.218.199.35", serverPort, .25)) #Jack's AWS
 
 # Right now we give ante no weight cause nothing is configured. We will launch
 # the server with sudo to enable ante
