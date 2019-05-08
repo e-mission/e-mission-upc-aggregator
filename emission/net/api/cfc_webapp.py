@@ -533,7 +533,7 @@ def run_aggregate ():
   else:
     geo_query = estg.GeoQuery(["data.loc"], region)
 
-  loc_entry_list = esda.get_entries("background/filtered_location", user_id=user_uuid,
+  loc_entry_list = esdc.get_entries("background/filtered_location", user_id=user_uuid,
                                       time_query=time_query, geo_query=geo_query)
 
   return {'phone_data': loc_entry_list}
