@@ -24,31 +24,24 @@ def main ():
         [
             {
                 'label': 'home',
-                'coordinate': [37.77264255,-122.399714854263]
+                'coordinate': [37.87559,-122.26036]
             },
 
             {
                 'label': 'work',
-                'coordinate': [37.42870635,-122.140926605802]
-            },
-
-            {
-                'label': 'family',
-                'coordinate': [37.87119, -122.27388]
+                'coordinate': [37.87559,-122.26036]
             }
         ],
 
         "transition_probabilities":
             [
-                np.random.dirichlet(np.ones(3), size=1)[0],
-                np.random.dirichlet(np.ones(3), size=1)[0],
-                np.random.dirichlet(np.ones(3), size=1)[0]
+                np.array([0, 1]),
+                np.array([1, 0])
             ],
     
         "modes" : 
             {
-                "CAR" : [['home', 'family']],
-                "TRANSIT" : [['home', 'work'], ['work', 'home']]  
+                "CAR" : [['home', 'work'], ['work', 'home']]
             },
 
         "default_mode": "CAR",
