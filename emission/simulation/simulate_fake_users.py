@@ -1,5 +1,6 @@
 from emission.simulation.client import EmissionFakeDataGenerator
 from emission.simulation.fake_user import FakeUser
+from emission.simulation.data_sync import create_and_sync_data
 import requests
 from time import sleep
 import numpy as np
@@ -57,19 +58,7 @@ def main ():
         client = EmissionFakeDataGenerator (client_config)
         fakeusers.append (client.create_fake_user (user_config))
 
-    measurements = []
-    for i in range (len (fakeusers)):
-        user_measurements = []
-        for _ in range (10):
-            temp = fakeusers[i].take_trip ()
-            print('# of location measurements:', len(temp))
-            user_measurements.append (temp)
-        print('Path:', fakeusers[i]._path)
-
-    for i in range (len (fakeusers)):
-        print (len (fakeusers[i]._measurements_cache))
-        fakeusers[i].sync_data_to_server ()
-        print (len (fakeusers[i]._measurements_cache))
+    create_and_sync_data (fakeusers, 10)
         
         
 
