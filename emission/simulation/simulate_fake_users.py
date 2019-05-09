@@ -1,6 +1,8 @@
 from emission.simulation.client import EmissionFakeDataGenerator
 from emission.simulation.fake_user import FakeUser
 from emission.simulation.data_sync import create_and_sync_data
+from emission.simulation.rand_helpers import get_random_email
+import argparse
 import requests
 from time import sleep
 import numpy as np
@@ -9,7 +11,7 @@ controller_addr = "http://localhost:4040"
 
 
 # Sample main to test out connecting to the user cloud setup with bottle
-def main ():
+def main (usercount, tripcount):
     #Step1 : specify a config object for user
     client_config = {
         'emission_server_base_url': 'http://128.32.37.205:4040',
@@ -49,18 +51,21 @@ def main ():
         "initial_state" : "home",
         "radius" : ".1"
     }
+
+    fakeusers = create_fake_users (usercount, base_user_config, client_config) 
+    create_and_sync_data (fakeusers, tripcount)
+
     
-    usernames = ["Nick", "Jack", "Shankari", "Kate", "Alvin", "Hersh"]
+def create_fake_users (usercount, base_user_config, client_config):
     fakeusers = []
-    for name in usernames:
+    for i in range (usercount):
         user_config = base_user_config.copy ()
-        user_config["email"] = "{}@emission-example-user".format (name)
+        user_config["email"] = get_random_email ()
         client = EmissionFakeDataGenerator (client_config)
         fakeusers.append (client.create_fake_user (user_config))
+    return fakeusers
+     
 
-    create_and_sync_data (fakeusers, 10)
-        
-    
 def create_and_sync_data (userlist, numTrips):
     measurements = []
     for i in range (len (userlist)):
@@ -77,4 +82,10 @@ def create_and_sync_data (userlist, numTrips):
         print (len (userlist[i]._measurements_cache))
 
 if __name__ == "__main__":
-    main ()
+    parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
+    parser.add_argument ("user_count", type=int,
+            help="Number of users to be created")
+    parser.add_argument ("trip_count", type=int,
+            help="Number of trips taken by each user")
+    items = parser.parse_args ()
+    main (items.user_count, items.trip_count)

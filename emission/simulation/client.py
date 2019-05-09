@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
 from emission.simulation.fake_user import FakeUser
 from emission.simulation.error import AddressNotFoundError
+from emission.simulation.rand_helpers import get_random_key
 import emission.simulation.gen_profile as gp
 import emission.simulation.connect_usercloud as escu
 import requests
-import numpy as np
-
-UMAX_64 = int (np.power (2.0, 64))
 
 class Client(ABC):
     def __init__(self):
@@ -19,20 +17,13 @@ class Client(ABC):
     def _parse_user_config(self, config):
         pass  
 
-def random_64s (count):
-    val = 0
-    for i in range (count):
-        val <<= 64
-        val += int (np.random.randint (low=0, high=UMAX_64, dtype="uint64"))
-    return val
-
 class EmissionFakeDataGenerator(Client):
     def __init__(self, config):
         #TODO: Check that the config object has keys: emission_server_base_url, register_user_endpoint, user_cache_endpoint
         self._config = config
         self._user_factory = FakeUser
         # Additional info for user cloud
-        key = random_64s (4)
+        key = get_random_key ()
         profile = gp.AlgProfile ()
         # Add all known algs to default algs.
         profile.add_to_aggs("test_analyst")
