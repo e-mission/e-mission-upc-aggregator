@@ -5,8 +5,6 @@
 # Inspired by https://stackoverflow.com/questions/34417279/sending-a-json-string-as-a-post-request/34418733
 import requests
 
-controller_addr = "http://localhost:4040"
-
 class UserCloud:
 
     def __init__ (self, key, profile):
@@ -16,7 +14,7 @@ class UserCloud:
         self.username = None
 
 
-    def send_contents (self, addr="http://localhost:4443"):
+    def send_contents (self, addr):
         print (requests.get (addr + "/cloud/status").text)
         print (requests.post (addr + "/cloud/key", json=self.key).text)
         print (requests.post (addr + "/cloud/profile", json=self.profile.to_json()).text)
