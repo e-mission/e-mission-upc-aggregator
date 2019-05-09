@@ -1,7 +1,6 @@
 from emission.simulation.client import EmissionFakeDataGenerator
 from emission.simulation.fake_user import FakeUser
-from emission.simulation.data_sync import create_and_sync_data
-from emission.simulation.rand_helpers import get_random_email
+from emission.simulation.rand_helpers import gen_random_email
 import argparse
 import requests
 from time import sleep
@@ -60,7 +59,7 @@ def create_fake_users (usercount, base_user_config, client_config):
     fakeusers = []
     for i in range (usercount):
         user_config = base_user_config.copy ()
-        user_config["email"] = get_random_email ()
+        user_config["email"] = gen_random_email ()
         client = EmissionFakeDataGenerator (client_config)
         fakeusers.append (client.create_fake_user (user_config))
     return fakeusers

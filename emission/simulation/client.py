@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from emission.simulation.fake_user import FakeUser
 from emission.simulation.error import AddressNotFoundError
-from emission.simulation.rand_helpers import get_random_key
+from emission.simulation.rand_helpers import gen_random_key
 import emission.simulation.gen_profile as gp
 import emission.simulation.connect_usercloud as escu
 import requests
@@ -23,7 +23,7 @@ class EmissionFakeDataGenerator(Client):
         self._config = config
         self._user_factory = FakeUser
         # Additional info for user cloud
-        key = get_random_key ()
+        key = gen_random_key ()
         profile = gp.AlgProfile ()
         # Add all known algs to default algs.
         profile.add_to_aggs("test_analyst")
