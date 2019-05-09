@@ -10,6 +10,8 @@ import requests
 from scipy.optimize import minimize
 import autograd.numpy as np
 from autograd import grad
+import csv
+import time
 
 pool = Pool(10)
 query_file = "query.json"
@@ -243,14 +245,40 @@ if __name__ == "__main__":
 
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
 
+    start = time.time()
     user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
+    end = time.time()
+    user_addr_time = end - start
 
     if user_addrs is not None:
+
+        start = time.time()
         query_micro_addrs = launch_query_microservices (query_name, len (user_addrs), username)
+        end = time.time()
+        query_addr_time = end - start
+
         if query_micro_addrs is not None:
+            
+            start = time.time()
             query_results = launch_query(q, username, user_addrs, query_micro_addrs)
+            end = time.time()
+            query_results_time = end - start
+
             if not query_results:
                 print("Obtaining query results failed.")
             else:
                 query_object = query_type_mapping[q['query_type']]
+
+                start = time.time()
                 print (aggregate(query_object, query_results, q)) # FIXME
+                end = time.time()
+                agg_time = end - start
+
+                # Append query component times to results.csv.
+                row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
+
+                with open('times.csv', 'a') as csvFile:
+                    writer = csv.writer(csvFile)
+                    writer.writerow(row)
+
+                csvFile.close()

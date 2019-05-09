@@ -526,15 +526,24 @@ def run_aggregate ():
                                               end_time)
 
   # Spatial filtering.
-  # region = query['sel_region']
-  region = None
+  region = None # query['sel_region']
   if region is None:
     geo_query = None
   else:
     geo_query = estg.GeoQuery(["data.loc"], region)
 
+  # version without running the pipeline
   loc_entry_list = esdc.find_entries(user_uuid, key_list=["background/filtered_location"],
                                       time_query=time_query)
+  # version with running only moveToLongTerm
+  # loc_entry_list = esda.get_entries("background/filtered_location", user_uuid, 
+  #                                    time_query=time_query, geo_query=geo_query)
+
+  # version with running full pipeline
+  # loc_entry_list = esda.get_entries(esda.CLEANED_LOCATION_KEY, user_uuid, 
+  #                                    time_query=time_query, geo_query=geo_query)
+
+  # loc_entry_list = esta.find_entries(user_uuid)
 
   return {'phone_data': loc_entry_list}
 
