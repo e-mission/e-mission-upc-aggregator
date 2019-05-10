@@ -1,6 +1,6 @@
 import json
 
-config_file = open('conf/net/machines.json')
+config_file = open('conf/net/machines.json.sample')
 config_data = json.load(config_file)
 controller_ip = config_data["controller-ip"]
 controller_port = int (config_data["controller-port"])
