@@ -1,7 +1,9 @@
 import subprocess, sys, requests
 import json
+from emission.net.int_service.machine_configs import controller_ip, controller_port
 
-controller_addr = "http://128.32.37.205:4040"
+
+controller_addr = "{}:{}".format (controller_ip, controller_port)
 username = "test_analyst"
 
 # Default location of the query.

@@ -57,6 +57,7 @@ import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
 import emission.net.int_service.swarm_controller as emissc
+from emission.net.int_service.machine_configs import controller_port
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -88,10 +89,6 @@ queryticks = dict ()
 ticks = 0
 tick_limit = 4
 tick_time = 300.0
-
-@route ("/")
-def test():
-    return "This is a test. Please ignore"
 
 @post ("/usercloud")
 def spawn_usercloud ():
@@ -268,8 +265,6 @@ if __name__ == "__main__":
     signal.signal (signal.SIGALRM, tick_incr)
     launch_timer ()
     if (len (sys.argv) == 1):
-        run(host=socket.gethostbyname(socket.gethostname()), port=4040, debug=True)
-    elif (len (sys.argv) == 2):
-        run(host=socket.gethostbyname(socket.gethostname()), port= int (sys.argv[1]), debug=True)
+        run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, debug=True)
     else:
         sys.stderr.write ("Error too many arguments to launch known access location.\n")

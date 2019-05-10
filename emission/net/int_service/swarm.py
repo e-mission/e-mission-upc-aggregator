@@ -15,13 +15,9 @@ import sys
 import requests
 import time
 import numpy as np
+from emission.net.int_service.machine_configs import swarm_port
 
 cloudVarName = "PORTMAP"
-
-@post('/')
-def test():
-    print ("Connection successful")
-    return "This is a test"
 
 @post('/launch_querier')
 def launch_querier():
@@ -91,4 +87,4 @@ def get_container_names (name):
 
 
 if __name__ == "__main__":
-    run(host=socket.gethostbyname(socket.gethostname()), port=54321, server='cheroot')
+    run(host=socket.gethostbyname(socket.gethostname()), port=swarm_port, server='cheroot')

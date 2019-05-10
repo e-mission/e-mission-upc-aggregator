@@ -2,7 +2,8 @@ import json
 
 config_file = open('conf/net/machines.json')
 config_data = json.load(config_file)
-controller_addr = config_data["controller"]
+controller_ip = config_data["controller-ip"]
+controller_port = int (config_data["controller-port"])
 swarm_port = int (config_data["swarm-port"])
 machines_dict = config_data["machines"]
 machines_list = []
@@ -16,5 +17,8 @@ cloud_status_endpoint = config_data["cloud_status_endpoint"]
 cloud_key_endpoint = config_data["cloud_key_endpoint"]
 cloud_profile_endpoint = config_data["cloud_profile_endpoint"]
 cloud_aggregate_endpoint = config_data["cloud_aggregate_endpoint"]
+query_endpoint = config_data["query_endpoint"]
+get_queriers_endpoint = config_data["get_queriers_endpoint"]
+get_users_endpoint = config_data["get_users_endpoint"]
 
 config_file.close ()

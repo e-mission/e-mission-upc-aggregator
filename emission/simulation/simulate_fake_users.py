@@ -5,18 +5,19 @@ import argparse
 import requests
 from time import sleep
 import numpy as np
+from emission.net.int_service.machine_configs import controller_ip, controller_port
 
-controller_addr = "http://localhost:4040"
+controller_addr = "{}{}".format (controller_ip, controller_port)
 
 
 # Sample main to test out connecting to the user cloud setup with bottle
 def main (usercount, tripcount):
     #Step1 : specify a config object for user
     client_config = {
-        'emission_server_base_url': 'http://128.32.37.205:4040',
-        'register_user_endpoint': '/profile/create',
-        'user_cache_endpoint': '/usercache/put',
-        'spawn_usercloud_endpoint': '/usercloud'
+        'emission_server_base_url': controller_addr,
+        'register_user_endpoint': register_user_endpoint,
+        'user_cache_endpoint': user_cache_endpoint,
+        'spawn_usercloud_endpoint': spawn_usercloud_endpoint
     }
 
     base_user_config = {
