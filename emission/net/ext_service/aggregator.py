@@ -176,7 +176,7 @@ def get_user_addrs (controller_addr, num_users_lower_bound):
         return None
 
 def launch_query_microservices (query_type, service_count, username):
-    r = requests.post(controller_addr + get_queriers_endpoint "/{}".format (query_type), json={"user": username, "count": service_count})
+    r = requests.post(controller_addr + get_queriers_endpoint + "/{}".format (query_type), json={"user": username, "count": service_count})
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)

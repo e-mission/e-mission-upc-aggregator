@@ -69,7 +69,7 @@ def setupMachines (machines):
     total = 0.0
     for _, mem in machines:
         total += mem
-    for ip, mem in machine:
+    for ip, mem in machines:
         output.append (Machine (ip, swarm_port, mem / total))
     return output
 
@@ -78,7 +78,7 @@ def setupMachines (machines):
 # trying to reinvent docker swarm/kubernetes and instead trying
 # to construct a cheap replacement
 
-machines = setupMachine (machines_list) 
+machines = setupMachines (machines_list) 
 
 
 # This file should be imported by the controller when not using kubernetes

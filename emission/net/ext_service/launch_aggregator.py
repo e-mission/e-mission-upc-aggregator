@@ -1,6 +1,6 @@
 import subprocess, sys, requests
 import json
-from emission.net.int_service.machine_configs import controller_ip, controller_port
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint
 
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
@@ -10,7 +10,7 @@ username = "test_analyst"
 query_file = "query.json"
 
 def main ():
-    r = requests.post (controller_addr + "/profile/create", json={'user':username})
+    r = requests.post (controller_addr + register_user_endpoint, json={'user':username})
     with open (query_file, "r") as f:
         query = json.load (f)
         print(query)

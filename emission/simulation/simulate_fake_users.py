@@ -5,9 +5,9 @@ import argparse
 import requests
 from time import sleep
 import numpy as np
-from emission.net.int_service.machine_configs import controller_ip, controller_port
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, user_cache_endpoint, spawn_usercloud_endpoint
 
-controller_addr = "{}{}".format (controller_ip, controller_port)
+controller_addr = "{}:{}".format (controller_ip, controller_port)
 
 
 # Sample main to test out connecting to the user cloud setup with bottle
