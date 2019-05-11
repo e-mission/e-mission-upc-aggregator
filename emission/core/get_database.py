@@ -19,7 +19,7 @@ except:
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
 mongoHostPort = 27017
-
+print (url)
 _current_db = None
 #config_file.close()
 
