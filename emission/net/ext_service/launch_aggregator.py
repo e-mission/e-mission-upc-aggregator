@@ -23,6 +23,5 @@ def main (csv_file):
         sys.exit (1)
 
 if __name__ == "__main__":
-    timestamp = sys.argv[1]
-    csv_file = "time_" + timestamp + ".csv"
+    csv_file = sys.argv[1]
     main (csv_file)
