@@ -25,6 +25,7 @@ _current_db = None
 
 def _get_current_db():
     global _current_db
+    print ("here")
     if _current_db is None:
         print("Connecting to database URL "+url)
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
