@@ -127,13 +127,19 @@ def createUserProfile():
 
 @post('/get_user_addrs')
 def return_container_addrs ():
+    user_max = int (request.json['count'])
+    name_list = [name for name in list (runningclouds.keys ())] + [name for name in list (pausedclouds.keys ())]
+    name_list = list (np.random.shuffle (np.array (name_list)))
+    limit = min (len (name_list), user_max)
     addr_list = []
-    for name in list (runningclouds.keys ()):
-        addr_list.append (runningclouds[name])
-        cloudticks[name] = ticks
-    for name in list (pausedclouds.keys ())[:]:
-        unpause_cloud (name, cloudticks, runningclouds, pausedclouds)
-        addr_list.append (runningclouds[name])
+    for i in range (limit):
+        name = name_list[i]
+        if name in runningclouds:
+            addr_list.append (runningclouds[name])
+            cloudticks[name] = ticks
+        elif name in pausedclouds:
+            unpause_cloud (name, cloudticks, runningclouds, pausedclouds)
+            addr_list.append (runningclouds[name])
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr
