@@ -17,17 +17,15 @@ except:
     config_file = open('conf/storage/db.conf.sample')
 
 config_data = json.load(config_file)
-if os.getenv ('MONGOPORT'):
-    url = "db"
-else:
-    url = config_data["timeseries"]["url"]
+url = config_data["timeseries"]["url"]
 mongoHostPort = 27017
-
+print (url)
 _current_db = None
 #config_file.close()
 
 def _get_current_db():
     global _current_db
+    print ("here")
     if _current_db is None:
         print("Connecting to database URL "+url)
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database

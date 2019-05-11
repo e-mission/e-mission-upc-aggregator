@@ -1,23 +1,23 @@
 from emission.simulation.client import EmissionFakeDataGenerator
 from emission.simulation.fake_user import FakeUser
-from emission.simulation.data_sync import create_and_sync_data
-from emission.simulation.rand_helpers import get_random_email
+from emission.simulation.rand_helpers import gen_random_email
 import argparse
 import requests
 from time import sleep
 import numpy as np
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, user_cache_endpoint, spawn_usercloud_endpoint
 
-controller_addr = "http://localhost:4040"
+controller_addr = "{}:{}".format (controller_ip, controller_port)
 
 
 # Sample main to test out connecting to the user cloud setup with bottle
 def main (usercount, tripcount):
     #Step1 : specify a config object for user
     client_config = {
-        'emission_server_base_url': 'http://128.32.37.205:4040',
-        'register_user_endpoint': '/profile/create',
-        'user_cache_endpoint': '/usercache/put',
-        'spawn_usercloud_endpoint': '/usercloud'
+        'emission_server_base_url': controller_addr,
+        'register_user_endpoint': register_user_endpoint,
+        'user_cache_endpoint': user_cache_endpoint,
+        'spawn_usercloud_endpoint': spawn_usercloud_endpoint
     }
 
     base_user_config = {
@@ -60,7 +60,7 @@ def create_fake_users (usercount, base_user_config, client_config):
     fakeusers = []
     for i in range (usercount):
         user_config = base_user_config.copy ()
-        user_config["email"] = get_random_email ()
+        user_config["email"] = gen_random_email ()
         client = EmissionFakeDataGenerator (client_config)
         fakeusers.append (client.create_fake_user (user_config))
     return fakeusers

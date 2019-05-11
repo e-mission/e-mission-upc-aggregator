@@ -5,9 +5,9 @@
 # to use multiple machines in a cluster.
 
 import requests
+from emission.net.int_service.machine_configs import swarm_port, machines_list
 
 # Current port the server should be listening on
-serverPort = 54321
 
 
 class Machine ():
@@ -61,19 +61,25 @@ class Machine ():
         return False
         
 
+# Takes in a list of machine tuples, where the first element is the IP_ADDR
+# and the second element is the amount of memory available. This creates
+# machine objects for each machine with the appropriate weight.
+def setupMachines (machines):
+    output = []
+    total = 0.0
+    for _, mem in machines:
+        total += mem
+    for ip, mem in machines:
+        output.append (Machine (ip, swarm_port, mem / total))
+    return output
 
 # List consisting of the IP addresses any machines in the cluster.
 # Note we are not allowing dynamic addition because we are NOT
 # trying to reinvent docker swarm/kubernetes and instead trying
 # to construct a cheap replacement
 
-machines = []
+machines = setupMachines (machines_list) 
 
-machines.append (Machine ("http://128.32.37.205", serverPort, .75)) #ante
-machines.append (Machine ("http://34.218.199.35", serverPort, .25)) #Jack's AWS
-
-# Right now we give ante no weight cause nothing is configured. We will launch
-# the server with sudo to enable ante
 
 # This file should be imported by the controller when not using kubernetes
 

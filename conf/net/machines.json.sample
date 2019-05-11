@@ -1,9 +1,13 @@
 {
-    "controller" : "128.32.37.205:4040",
+    "controller-ip" : "http://128.32.37.205",
+    "controller-port" : "4040",
+    "tick-period" : "60",
+    "pause-ticks" : "30",
+    "kill-ticks" : "15",
     "swarm-port" : "54321",
     "machines" : 
         {
-            "128.32.37.205" : "465.3"
+            "http://128.32.37.205" : "465.3"
 
         },
     "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> Storage size, currently set to be in Disk. This is then used to proportion machines.",
@@ -13,5 +17,8 @@
     "cloud_status_endpoint" : "/cloud/status",
     "cloud_key_endpoint" : "/cloud/key",
     "cloud_profile_endpoint" : "/cloud/profile",
-    "cloud_aggregate_endpoint" : "/run/aggregate"
+    "cloud_aggregate_endpoint" : "/run/aggregate",
+    "query_endpoint" : "/receive_query",
+    "get_queriers_endpoint" : "/get_querier_addrs",
+    "get_users_endpoint" : "/get_user_addrs"
 }

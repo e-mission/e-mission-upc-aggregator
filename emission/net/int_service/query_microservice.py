@@ -9,6 +9,7 @@ import abc
 import numpy as np
 import sys
 import requests
+from emission.net.int_service.machine_configs import cloud_aggregate_endpoint
 
 class Query(abc.ABC):
     """
@@ -104,7 +105,7 @@ def receive_query():
 
     # Eventually have to add a loop that collects all the streamed data packets instead of just one.
     try:
-        cloud_response = requests.post(user_cloud_addr + "/run/aggregate", json={'query': query, 'agg': agg})
+        cloud_response = requests.post(user_cloud_addr + cloud_aggregate_endpoint, json={'query': query, 'agg': agg})
     except:
         return {'query_result': None}
     print("Cloud response: " + str(cloud_response))

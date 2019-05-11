@@ -57,6 +57,7 @@ import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
 import emission.net.int_service.swarm_controller as emissc
+from emission.net.int_service.machine_configs import controller_port, tick_period, pause_ticks, kill_ticks
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -86,12 +87,6 @@ queryinstances = dict ()
 queryticks = dict ()
 
 ticks = 0
-tick_limit = 4
-tick_time = 300.0
-
-@route ("/")
-def test():
-    return "This is a test. Please ignore"
 
 @post ("/usercloud")
 def spawn_usercloud ():
@@ -183,8 +178,8 @@ def tick_incr (unused1, unused2):
     global ticks
     print ("Ticking the timer")
     ticks += 1
-    check_timer (keylist=list (cloudticks.keys ()) [:], tickdict=cloudticks, runningdict=runningclouds, pauseddict=pausedclouds, should_kill=False)
-    check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, pauseddict=None, should_kill=True)
+    check_timer (keylist=list (cloudticks.keys ()) [:], tickdict=cloudticks, runningdict=runningclouds, pauseddict=pausedclouds, should_kill=False, tick_limit=pause_ticks)
+    check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, pauseddict=None, should_kill=True, tick_limit=kill_ticks)
     launch_timer ()
 
 
@@ -216,7 +211,7 @@ def tick_incr (unused1, unused2):
 # should_kill = False
 #
 
-def check_timer (keylist, tickdict, runningdict, pauseddict=None, should_kill=False):
+def check_timer (keylist, tickdict, runningdict, pauseddict, should_kill, tick_limit):
     for name in keylist:
         starttime = tickdict[name]
         if ticks - starttime >= tick_limit:
@@ -245,7 +240,7 @@ def pause_cloud (contents, tickdict, runningdict, pauseddict):
     pauseddict[contents] = addr
 
 def launch_timer ():
-    signal.setitimer (signal.ITIMER_REAL, tick_time)
+    signal.setitimer (signal.ITIMER_REAL, tick_period)
 
 # Auth helpers BEGIN
 # This should only be used by createUserProfile since we may not have a UUID
@@ -268,8 +263,6 @@ if __name__ == "__main__":
     signal.signal (signal.SIGALRM, tick_incr)
     launch_timer ()
     if (len (sys.argv) == 1):
-        run(host=socket.gethostbyname(socket.gethostname()), port=4040, debug=True)
-    elif (len (sys.argv) == 2):
-        run(host=socket.gethostbyname(socket.gethostname()), port= int (sys.argv[1]), debug=True)
+        run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, debug=True)
     else:
         sys.stderr.write ("Error too many arguments to launch known access location.\n")

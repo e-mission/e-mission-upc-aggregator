@@ -12,10 +12,10 @@ import autograd.numpy as np
 from autograd import grad
 import csv
 import time
+from emission.net.int_service.machine_configs import query_endpoint, get_queriers_endpoint, get_users_endpoint
 
 pool = Pool(10)
 query_file = "query.json"
-query_loc = "/receive_query"
 
 class Query(abc.ABC):
     """
@@ -165,7 +165,7 @@ class RC():
         return "ae"
 
 def get_user_addrs (controller_addr, num_users_lower_bound):
-    r = requests.post(controller_addr + "/get_user_addrs")
+    r = requests.post(controller_addr + get_users_endpoint)
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)
@@ -176,7 +176,7 @@ def get_user_addrs (controller_addr, num_users_lower_bound):
         return None
 
 def launch_query_microservices (query_type, service_count, username):
-    r = requests.post(controller_addr + "/get_querier_addrs/{}".format (query_type), json={"user": username, "count": service_count})
+    r = requests.post(controller_addr + get_queriers_endpoint + "/{}".format (query_type), json={"user": username, "count": service_count})
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)
@@ -194,7 +194,7 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
 
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
-        query_results.append(pool.apply_async(requests.post, [query_addr + query_loc, None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
+        query_results.append(pool.apply_async(requests.post, [query_addr + query_endpoint, None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
     pool.close()
     pool.join()
     results = []
