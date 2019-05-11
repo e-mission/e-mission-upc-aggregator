@@ -10,7 +10,10 @@ def main():
         envVars = {cloudVarName: "{}:{}".format (controller_port, controller_port)}
         ret = subprocess.Popen (["docker-compose", "-f", "docker/docker-compose-controller.yml", "up", "-d"], cwd="./", env=envVars)
         ret.wait ()
-    subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./", stdout=f, stderr=f)
+    else:
+        print ("hello")
+    subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./")
+
 
 if __name__ == "__main__":
     main ()
