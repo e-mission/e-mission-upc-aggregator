@@ -21,7 +21,7 @@ cloudVarName = "PORTMAP"
 
 @post('/launch_querier')
 def launch_querier():
-    name = request.json['name']
+    name = request.json['name'].replace ("-", "")
     query_type = request.json['query']
     not_spawn = True
     while (not_spawn):
@@ -35,7 +35,7 @@ def launch_querier():
 
 @post('/launch_cloud')
 def launch_cloud():
-    uuid = request.json['uuid']
+    uuid = request.json['uuid'].replace ("-", "")
     not_spawn = True
     while (not_spawn):
         # select a random port and hope it works
@@ -52,7 +52,7 @@ def launch_cloud():
 
 @post('/pause')
 def pause():
-    uuid = request.json['uuid']
+    uuid = request.json['uuid'].replace ("-", "")
     containers = get_container_names (uuid)
     for name in containers:
         if name:
@@ -61,7 +61,7 @@ def pause():
 
 @post('/unpause')
 def unpause():
-    uuid = request.json['uuid']
+    uuid = request.json['uuid'].replace ("-", "")
     containers = get_container_names (uuid)
     for name in containers:
         if name:
@@ -70,7 +70,7 @@ def unpause():
 
 @post('/kill')
 def kill():
-    uuid = request.json['uuid']
+    uuid = request.json['uuid'].replace ("-", "")
     containers = get_container_names (uuid)
     for name in containers:
         if name:
