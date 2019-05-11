@@ -127,13 +127,20 @@ def createUserProfile():
 
 @post('/get_user_addrs')
 def return_container_addrs ():
+    user_max = int (request.json['count'])
+    name_list = np.array ([name for name in list (runningclouds.keys ())] + [name for name in list (pausedclouds.keys ())])
+    np.random.shuffle (name_list)
+    name_list = list (name_list)
+    limit = min (len (name_list), user_max)
     addr_list = []
-    for name in list (runningclouds.keys ()):
-        addr_list.append (runningclouds[name])
-        cloudticks[name] = ticks
-    for name in list (pausedclouds.keys ())[:]:
-        unpause_cloud (name, cloudticks, runningclouds, pausedclouds)
-        addr_list.append (runningclouds[name])
+    for i in range (limit):
+        name = name_list[i]
+        if name in runningclouds:
+            addr_list.append (runningclouds[name])
+            cloudticks[name] = ticks
+        elif name in pausedclouds:
+            unpause_cloud (name, cloudticks, runningclouds, pausedclouds)
+            addr_list.append (runningclouds[name])
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr
@@ -156,6 +163,18 @@ def launch_queriers (query_type):
     # No way to check the updates are ready. Remove later with something more accurate 
     time.sleep (20)
     return json.dumps (ret_dict)
+
+@post('/pause_all_clouds')
+def pause_all_clouds (): 
+    namelist = list (cloudticks.keys ())[:]
+    for name in namelist:
+        pause_clouds (name, cloudticks, runningclouds, pausedclouds)
+
+@post('/kill_all_queriers')
+def kill_all_queriers ():
+    namelist = list (queryticks.keys ())[:]
+    for name in namelist:
+        kill_query (name, queryticks, queryinstances)
 
 # Container Helper functions
 def get_container_names (contents):
@@ -216,7 +235,7 @@ def check_timer (keylist, tickdict, runningdict, pauseddict, should_kill, tick_l
         starttime = tickdict[name]
         if ticks - starttime >= tick_limit:
             if should_kill:
-                kill_query (name)
+                kill_query (name, tickdict, runningdict)
             else:
                 pause_cloud (name, tickdict, runningdict, pauseddict)
 

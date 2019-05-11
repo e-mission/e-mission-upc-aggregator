@@ -75,7 +75,7 @@ class FakeUser:
 
         error = False
         try:
-            r = requests.post(self._config['upload_url'], json=data, timeout=5)
+            r = requests.post(self._config['upload_url'], json=data, timeout=300)
         except (socket.timeout) as e:
             error = True
 

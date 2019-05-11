@@ -31,7 +31,6 @@ def launch_querier():
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
-    time.sleep (10)
     return str (port)
 
 @post('/launch_cloud')
