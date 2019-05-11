@@ -239,20 +239,20 @@ def check_timer (keylist, tickdict, runningdict, pauseddict, should_kill, tick_l
             else:
                 pause_cloud (name, tickdict, runningdict, pauseddict)
 
-def kill_query (name, tickdick, runningdict):
+def kill_query (name, tickdict, runningdict):
     emissc.killQueryInstance (name)
     del runningdict[name]
     del tickdict[name]
 
 def unpause_cloud (contents, tickdict, runningdict, pauseddict):
-    emissc.unpauseCloudInstances (user_uuid)
+    emissc.unpauseCloudInstance (user_uuid)
     addr = pauseddict[contents]
     del pauseddict[contents]
     runningdict[contents] = addr
     tickdict[contents] = ticks
 
 def pause_cloud (contents, tickdict, runningdict, pauseddict):
-    emissc.pauseCloudInstances (user_uuid)
+    emissc.pauseCloudInstance (user_uuid)
     addr = runningdict[contents]
     del runningdict[contents]
     del tickdict[contents]

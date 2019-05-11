@@ -3,10 +3,6 @@ import sys
 
 def main ():
     # First we want to spawn a the controller in a new shell
-    #with open ("/dev/null", "w") as f:
-        #subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./", stdout=f, stderr=f)
-        #subprocess.Popen (["./e-mission-py.bash", "emission/net/api/controller.py"], cwd="./", stdout=f, stderr=f)
-    #time.sleep (5)
     num_users = [10, 50, 100, 500, 1000]
     num_trips = [10, 50, 100, 500, 1000]
     num_queries = 40
