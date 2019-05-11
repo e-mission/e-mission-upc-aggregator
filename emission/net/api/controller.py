@@ -168,7 +168,7 @@ def launch_queriers (query_type):
 def pause_all_clouds (): 
     namelist = list (cloudticks.keys ())[:]
     for name in namelist:
-        pause_clouds (name, cloudticks, runningclouds, pausedclouds)
+        pause_cloud (name, cloudticks, runningclouds, pausedclouds)
 
 @post('/kill_all_queriers')
 def kill_all_queriers ():

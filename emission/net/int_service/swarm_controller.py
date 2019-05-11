@@ -41,21 +41,21 @@ class Machine ():
         
 
     def pauseContainer (self, uuid):
-        if uuid in self.container:
+        if uuid in self.containers:
             resp = requests.post ("{}:{}/pause".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             return True 
         return False
 
     def unpauseContainer (self, uuid):
-        if uuid in self.container:
+        if uuid in self.containers:
             resp = requests.post ("{}:{}/unpause".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
             return True 
         return False
 
     def killContainer (self, uuid):
-        if uuid in self.container:
+        if uuid in self.containers:
             resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
-            self.container.remove (uuid)
+            self.containers.remove (uuid)
             Machine.total -= 1
             return True 
         return False
