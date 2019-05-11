@@ -178,7 +178,13 @@ def kill_all_queriers ():
 
 @post('/clear_containers')
 def clear_containers ():
+    global runningclouds, pausedclouds, cloudticks, queryinstances, queryticks
     emissc.clearContainers ()
+    runningclouds = dict ()
+    pausedclouds = dict ()
+    cloudticks = dict ()
+    queryinstances = dict ()
+    queryticks = dict ()
 
 # Container Helper functions
 def get_container_names (contents):
