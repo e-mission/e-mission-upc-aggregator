@@ -7,8 +7,10 @@ def main ():
         #subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./", stdout=f, stderr=f)
         #subprocess.Popen (["./e-mission-py.bash", "emission/net/api/controller.py"], cwd="./", stdout=f, stderr=f)
     #time.sleep (5)
-    subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", "10", "10"], cwd="./")
-    subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py"], cwd="./")
+    ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", "10", "10"], cwd="./")
+    ret.wait ()
+    ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py"], cwd="./")
+    ret.wait ()
 
 
 if __name__ == "__main__":
