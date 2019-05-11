@@ -164,6 +164,18 @@ def launch_queriers (query_type):
     time.sleep (20)
     return json.dumps (ret_dict)
 
+@post('/pause_all_clouds')
+def pause_all_clouds (): 
+    namelist = list (cloudticks.keys ())[:]
+    for name in namelist:
+        pause_clouds (name, cloudticks, runningclouds, pausedclouds)
+
+@post('/kill_all_queriers')
+def kill_all_queriers ():
+    namelist = list (queryticks.keys ())[:]
+    for name in namelist:
+        kill_query (name, queryticks, queryinstances)
+
 # Container Helper functions
 def get_container_names (contents):
     process = subprocess.Popen (['./bin/deploy/container_id.sh', contents], stdout=subprocess.PIPE)
@@ -223,7 +235,7 @@ def check_timer (keylist, tickdict, runningdict, pauseddict, should_kill, tick_l
         starttime = tickdict[name]
         if ticks - starttime >= tick_limit:
             if should_kill:
-                kill_query (name)
+                kill_query (name, tickdict, runningdict)
             else:
                 pause_cloud (name, tickdict, runningdict, pauseddict)
 
