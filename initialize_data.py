@@ -3,6 +3,7 @@ import argparse
 
 def main (user_count, trip_count):
     ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", user_count, trip_count], cwd="./")
+    ret.wait ()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")

@@ -1,5 +1,6 @@
 import subprocess, sys, requests
 import json
+import argparse
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint
 
 
@@ -14,7 +15,8 @@ def main (csv_file, upperbound):
     with open (query_file, "r") as f:
         query = json.load (f)
     if r.ok:
-        subprocess.run (["./e-mission-py.bash", "emission/net/ext_service/aggregator.py", controller_addr, "1", upperbound, username, "test-querier", csv_file])
+        ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/aggregator.py", controller_addr, "1", upperbound, username, "test-querier", csv_file])
+        ret.wait ()
     else:
         print ("Error when registering the user.", file=sys.stderr)
         sys.exit (1)
@@ -26,5 +28,5 @@ if __name__ == "__main__":
     parser.add_argument ("upper_bound", type=int,
             help="Maximum number of users to request")
     items = parser.parse_args ()
-    csv_file = "time_" + int (items.timestamp) + ".csv"
+    csv_file = "time_" + str (items.timestamp) + ".csv"
     main (csv_file, str (items.upper_bound))
