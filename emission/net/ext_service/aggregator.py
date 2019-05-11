@@ -164,7 +164,7 @@ class RC():
     def __repr__(self):
         return "ae"
 
-def get_user_addrs (controller_addr, num_users_lower_bound):
+def get_user_addrs (controller_addr, num_users_lower_bound, num_users_upper_bound):
     r = requests.post(controller_addr + get_users_endpoint)
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
@@ -232,21 +232,23 @@ if __name__ == "__main__":
     # 1) Query q
     # 2) Controller address
     # 3) Minimum number of users required for query
-    # 4) Username/email of the analyst
-    # 5) Query type
+    # 4) Maximum number of users to be polled
+    # 5) Username/email of the analyst
+    # 6) Query type
 
     with open (query_file, "r") as f:
         q = json.load (f)
 
     controller_addr = sys.argv[1]
     num_users_lower_bound = int (sys.argv[2])
-    username = sys.argv[3]
-    query_name = sys.argv[4]
+    num_users_upper_bound = int (sys.argv[3])
+    username = sys.argv[4]
+    query_name = sys.argv[5]
 
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
 
     start = time.time()
-    user_addrs = get_user_addrs( controller_addr, num_users_lower_bound)
+    user_addrs = get_user_addrs( controller_addr, num_users_lower_bound, num_users_upper_bound)
     end = time.time()
     user_addr_time = end - start
 
