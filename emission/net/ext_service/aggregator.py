@@ -242,6 +242,7 @@ if __name__ == "__main__":
     num_users_lower_bound = int (sys.argv[2])
     username = sys.argv[3]
     query_name = sys.argv[4]
+    csv_file = sys.argv[5]
 
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
 
@@ -258,7 +259,7 @@ if __name__ == "__main__":
         query_addr_time = end - start
 
         if query_micro_addrs is not None:
-            
+
             start = time.time()
             query_results = launch_query(q, username, user_addrs, query_micro_addrs)
             end = time.time()
@@ -277,7 +278,7 @@ if __name__ == "__main__":
                 # Append query component times to results.csv.
                 row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
 
-                with open('times.csv', 'a') as csvFile:
+                with open(csv_file, 'a') as csvFile:
                     writer = csv.writer(csvFile)
                     writer.writerow(row)
 
