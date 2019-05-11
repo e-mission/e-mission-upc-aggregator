@@ -3,6 +3,7 @@ services:
   controller:
     image: emission/test-controller:latest
     environment:
+      - DB_HOST=db
       - WEB_SERVER_HOST=0.0.0.0
     deploy:
       replicas: 1
