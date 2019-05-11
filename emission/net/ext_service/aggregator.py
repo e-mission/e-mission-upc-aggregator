@@ -165,7 +165,7 @@ class RC():
         return "ae"
 
 def get_user_addrs (controller_addr, num_users_lower_bound, num_users_upper_bound):
-    r = requests.post(controller_addr + get_users_endpoint, json={"upper-bound": num_users_upper_bound})
+    r = requests.post(controller_addr + get_users_endpoint, json={"count": num_users_upper_bound})
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)

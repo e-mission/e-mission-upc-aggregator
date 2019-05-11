@@ -128,8 +128,9 @@ def createUserProfile():
 @post('/get_user_addrs')
 def return_container_addrs ():
     user_max = int (request.json['count'])
-    name_list = [name for name in list (runningclouds.keys ())] + [name for name in list (pausedclouds.keys ())]
-    name_list = list (np.random.shuffle (np.array (name_list)))
+    name_list = np.array ([name for name in list (runningclouds.keys ())] + [name for name in list (pausedclouds.keys ())])
+    np.random.shuffle (name_list)
+    name_list = list (name_list)
     limit = min (len (name_list), user_max)
     addr_list = []
     for i in range (limit):
