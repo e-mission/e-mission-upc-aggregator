@@ -245,14 +245,14 @@ def kill_query (name, tickdict, runningdict):
     del tickdict[name]
 
 def unpause_cloud (contents, tickdict, runningdict, pauseddict):
-    emissc.unpauseCloudInstance (user_uuid)
+    emissc.unpauseCloudInstance (contents)
     addr = pauseddict[contents]
     del pauseddict[contents]
     runningdict[contents] = addr
     tickdict[contents] = ticks
 
 def pause_cloud (contents, tickdict, runningdict, pauseddict):
-    emissc.pauseCloudInstance (user_uuid)
+    emissc.pauseCloudInstance (contents)
     addr = runningdict[contents]
     del runningdict[contents]
     del tickdict[contents]
