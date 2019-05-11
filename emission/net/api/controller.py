@@ -161,7 +161,7 @@ def launch_queriers (query_type):
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr
     # No way to check the updates are ready. Remove later with something more accurate 
-    time.sleep (20)
+    time.sleep (10)
     return json.dumps (ret_dict)
 
 @post('/pause_all_clouds')
@@ -175,6 +175,10 @@ def kill_all_queriers ():
     namelist = list (queryticks.keys ())[:]
     for name in namelist:
         kill_query (name, queryticks, queryinstances)
+
+@post('/clear_containers')
+def clear_containers ():
+    emissc.clearContainers ()
 
 # Container Helper functions
 def get_container_names (contents):

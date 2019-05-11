@@ -60,6 +60,12 @@ class Machine ():
             Machine.total -= 1
             return True 
         return False
+
+    def clearContainers (self):
+        Machine.total -= len (self.containers)
+        resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort))
+        self.containers = []
+
         
 
 # Takes in a list of machine tuples, where the first element is the IP_ADDR
@@ -116,3 +122,7 @@ def killQueryInstance (uuid):
     for m in machines:
         if m.killContainer (uuid):
             return
+
+def clearContainers ():
+    for m in machines:
+        m.clearContainers ()

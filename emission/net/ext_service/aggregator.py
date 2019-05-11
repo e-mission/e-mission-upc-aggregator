@@ -271,7 +271,7 @@ if __name__ == "__main__":
                 # Append query component times to results.csv.
                 row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
 
-                with open(csv_file, 'a') as csvFile:
+                with open(csv_file, 'a+') as csvFile:
                     writer = csv.writer(csvFile)
                     writer.writerow(row)
 

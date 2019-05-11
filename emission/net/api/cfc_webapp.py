@@ -46,7 +46,7 @@ import emission.net.auth.auth as enaa
 import emission.net.ext_service.habitica.proxy as habitproxy
 from emission.core.wrapper.client import Client
 from emission.core.wrapper.user import User
-from emission.core.get_database import get_uuid_db, get_mode_db
+from emission.core.get_database import get_uuid_db, get_mode_db, url
 import emission.core.wrapper.motionactivity as ecwm
 import emission.storage.timeseries.timequery as estt
 import emission.storage.timeseries.tcquery as esttc
@@ -463,7 +463,7 @@ def process_key():
     else:
         key = request.json
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(("db", 27018))
+            s.connect((url, 27018))
             s.sendall (key.to_bytes (32, byteorder='big'))
             s.recv(1024)
 

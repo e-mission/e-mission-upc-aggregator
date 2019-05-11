@@ -77,6 +77,10 @@ def kill():
             res = subprocess.run (['docker', 'container', 'stop', name])
             res = subprocess.run (['docker', 'container', 'rm', name])
 
+@post('/clear_all')
+def clear_all():
+    res = subprocess.run (['./teardown_docker.sh'])
+
 # Container Helper functions
 def get_container_names (name):
     process = subprocess.Popen (['./bin/deploy/container_id.sh', name], stdout=subprocess.PIPE)

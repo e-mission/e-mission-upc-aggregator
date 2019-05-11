@@ -23,10 +23,9 @@ def main (csv_file, upperbound):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate the query request")
-    parser.add_argument ("timestamp", type=int,
+    parser.add_argument ("csv_name", type=str,
             help="Unique name to CSV file based on time")
     parser.add_argument ("upper_bound", type=int,
             help="Maximum number of users to request")
     items = parser.parse_args ()
-    csv_file = "time_" + str (items.timestamp) + ".csv"
-    main (csv_file, str (items.upper_bound))
+    main (items.csv_name, str (items.upper_bound))
