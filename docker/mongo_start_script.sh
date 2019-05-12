@@ -1,2 +1,2 @@
 python3 /encrypt.py
-mongod --bind_ip "db"
+mongod --bind_ip $DB_HOST
