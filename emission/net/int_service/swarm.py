@@ -26,14 +26,15 @@ def launch_querier():
     name = request.json['name'].replace ("-", "")
     query_type = request.json['query']
     not_spawn = True
+    old_ctr = ctr
+    ctr += 1
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (port, "6500"), "ctr": str (ctr)}
+        envVars = {cloudVarName: "{}:{}".format (port, "6500"), "ctr": str (old_ctr)}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
-    ctr += 1
     return str (port)
 
 @post('/launch_cloud')
@@ -41,16 +42,17 @@ def launch_cloud():
     global ctr
     uuid = request.json['uuid'].replace ("-", "")
     not_spawn = True
+    old_ctr = ctr
+    ctr += 1
     while (not_spawn):
         # select a random port and hope it works
         cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
         mongoPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": str (ctr)}
+        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": str (old_ctr)}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
     time.sleep (10)
-    ctr += 1
     return str (cloudPort)
 
 
