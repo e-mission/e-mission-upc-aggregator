@@ -30,6 +30,7 @@ services:
 
 networks:
   emission:
+    external: True
 
 volumes:
   mongo-data-raw:
