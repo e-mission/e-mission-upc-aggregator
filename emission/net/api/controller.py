@@ -292,6 +292,6 @@ if __name__ == "__main__":
     signal.signal (signal.SIGALRM, tick_incr)
     launch_timer ()
     if (len (sys.argv) == 1):
-        run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, debug=True)
+        run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server="cheroot", debug=True)
     else:
         sys.stderr.write ("Error too many arguments to launch known access location.\n")
