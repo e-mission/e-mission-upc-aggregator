@@ -29,7 +29,7 @@ def launch_querier():
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (port, "6500"), ctr: str (ctr)}
+        envVars = {cloudVarName: "{}:{}".format (port, "6500"), "ctr": str (ctr)}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
