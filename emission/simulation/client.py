@@ -26,7 +26,7 @@ class EmissionFakeDataGenerator(Client):
         key = gen_random_key ()
         profile = gp.AlgProfile ()
         # Add all known algs to default algs.
-        profile.add_to_aggs("test_analyst")
+        #profile.add_to_aggs("test_analyst")
         profile.add_all_to_default_algs()
         self._usercloud = escu.UserCloud (key, profile)
 

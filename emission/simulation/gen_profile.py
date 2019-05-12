@@ -22,11 +22,13 @@ class AlgProfile:
     # expect the file to be large at least initially
     is_read = False
     
-    # Class variable holding a mapping of algorithm names to hashes
+    # Class variable holding a mapping of algorithm/agg names to hashes
     alg_dict = None  
+    agg_dict = None
 
-    # Default location of known algorithms relative to this file
+    # Default location of known algorithms and aggs relative to this file
     alg_file = "emission/simulation/known_algs.json"
+    agg_file = "emission/simulation/known_aggs.json"
 
     # Default value for number of algorithms
     LAMBDA_ALG = 4
@@ -34,6 +36,7 @@ class AlgProfile:
     def __init__ (self, mean=LAMBDA_ALG, default_algs=set()):
         if not AlgProfile.is_read:
             self.read_algorithms ()
+            self.read_aggregators ()
             AlgProfile.is_read = True
 
         # List of allowed aggregators and algs.
@@ -52,6 +55,7 @@ class AlgProfile:
        
         # Select up to count elements from the array
         alg_names = AlgProfile.alg_dict.keys ()
+        agg_names = AlgProfile.agg_dict.keys ()
         # names_array = np.array (list (alg_names))
         # np.random.shuffle (names_array)
         # selected_names = list (names_array) [:count]
@@ -59,6 +63,13 @@ class AlgProfile:
         #     self.algs[name] = AlgProfile.alg_dict[name]
         for name in alg_names:
             self.algs[name] = AlgProfile.alg_dict[name]
+        for name in agg_names:
+            self.aggs.add(name)
+
+        # For experiments, take out once they are done.
+        for agg in self.aggs:
+            for alg in alg_names:
+                self.add_to_alg_map(agg, alg)
 
     def to_json(self):
         agg_alg_list_map = {}
@@ -72,6 +83,10 @@ class AlgProfile:
         with open (AlgProfile.alg_file, "r") as f:
             AlgProfile.alg_dict = json.load (f)
 
+    # Method for initializing the data from the json of known algorithms
+    def read_aggregators (self):
+        with open (AlgProfile.agg_file, "r") as f:
+            AlgProfile.agg_dict = json.load (f)
 
     # Policy check method.
     def check_policies(self, agg, alg):

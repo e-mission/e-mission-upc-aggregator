@@ -515,8 +515,8 @@ def run_aggregate ():
   # TODO pass in agg.
   agg = request.json['agg']
   query = request.json['query']
-  # if check_policies(agg, query) == False:
-  #   abort (403, "Failed to pass user policy checks in profile.\n")
+  if check_policies(agg, query['query_type']) == False:
+    abort (403, "Failed to pass user policy checks in profile.\n")
 
   # Time filtering.
   start_time = query['start_ts']
@@ -548,17 +548,17 @@ def run_aggregate ():
   return {'phone_data': loc_entry_list}
 
 def check_policies(agg, alg):
-  if agg not in self.aggs:
+  if agg not in profile.aggs:
       return False
 
-  if alg not in self.algs:
+  if alg not in profile.algs:
       return False
 
-  if agg in self.agg_alg_map:
-      if alg not in self.agg_alg_map[agg]:
+  if agg in profile.agg_alg_map:
+      if alg not in profile.agg_alg_map[agg]:
           return False
   else:
-      if alg not in self.default_algs:
+      if alg not in profile.default_algs:
           return False
 
   return True

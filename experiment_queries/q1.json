@@ -1,0 +1,7 @@
+{
+    "query_type": "ae",
+    "offset": 5.0,
+    "alpha": 0.05,
+    "start_ts": 1501592400,
+    "end_ts": 1564664400
+}
