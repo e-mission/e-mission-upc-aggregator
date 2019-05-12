@@ -20,7 +20,7 @@ def main ():
     num_users = 50
     num_trips = 10
     num_queries = 100
-    ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", num_users, num_trips], cwd="./")
+    ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(num_users), str(num_trips)], cwd="./")
     ret.wait ()
     for query_file in query_files:
         for alpha in alphas:

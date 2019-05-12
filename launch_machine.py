@@ -9,7 +9,7 @@ def main():
     if "http://" + socket.gethostbyname(socket.gethostname()) == controller_ip:
         ret = subprocess.Popen (["docker", "create", "network", "emission"], cwd="./")
         ret.wait ()
-        envVars = {cloudVarName: "{}:{}".format (controller_port, controller_port), ctr: "0"}
+        envVars = {cloudVarName: "{}:{}".format (controller_port, controller_port), "ctr": "0"}
         ret = subprocess.Popen (["docker-compose", "-f", "docker/docker-compose-controller.yml", "up", "-d"], cwd="./", env=envVars)
         ret.wait ()
     else:
