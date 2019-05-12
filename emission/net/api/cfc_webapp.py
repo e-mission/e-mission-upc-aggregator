@@ -9,6 +9,7 @@ from builtins import str
 from builtins import *
 from past.utils import old_div
 import json
+import numpy as np
 from random import randrange
 from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 import emission.net.api.bottle as bt
@@ -515,8 +516,12 @@ def run_aggregate ():
   # TODO pass in agg.
   agg = request.json['agg']
   query = request.json['query']
-  if check_policies(agg, query['query_type']) == False:
+  alg = query['query_type']
+  if check_policies(agg, alg) == False:
     abort (403, "Failed to pass user policy checks in profile.\n")
+
+  if privacy_budget_pass(query['alpha'], query['offset']) == False:
+    abort (403, "Out of privacy budget.\n")
 
   # Time filtering.
   start_time = query['start_ts']
@@ -548,6 +553,7 @@ def run_aggregate ():
   return {'phone_data': loc_entry_list}
 
 def check_policies(agg, alg):
+  global profile
   if agg not in profile.aggs:
       return False
 
@@ -562,6 +568,31 @@ def check_policies(agg, alg):
           return False
 
   return True
+
+def privacy_budget_pass(query):
+  global profile
+  # Only currently supports "ae" algs
+
+  if profile.privacy_budget == None:
+    return True
+
+  alpha = query['alpha']
+  query_type = query['query_type']
+
+  if query_type == "ae":
+    offset = query['offset']
+    curr_pb = -1 * np.log(alpha) / offset
+    if profile.privacy_budget >= curr_pb:
+      profile.privacy_budget -= curr_pb
+      return True
+  elif query_type == "rc":
+    offset = (query['r_end'] - query['r_start']) / 2
+    curr_pb = -1 * np.log(alpha) / offset
+    if profile.privacy_budget >= curr_pb:
+      profile.privacy_budget -= curr_pb
+      return True
+
+  return False
 
 
 

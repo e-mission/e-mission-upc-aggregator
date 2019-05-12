@@ -30,6 +30,9 @@ class AlgProfile:
     alg_file = "emission/simulation/known_algs.json"
     agg_file = "emission/simulation/known_aggs.json"
 
+    privacy_budget_file = "emission/simulation/priv_budget.json"
+    privacy_budget = None
+
     # Default value for number of algorithms
     LAMBDA_ALG = 4
     
@@ -37,6 +40,7 @@ class AlgProfile:
         if not AlgProfile.is_read:
             self.read_algorithms ()
             self.read_aggregators ()
+            self.read_privacy_budget ()
             AlgProfile.is_read = True
 
         # List of allowed aggregators and algs.
@@ -71,6 +75,8 @@ class AlgProfile:
             for alg in alg_names:
                 self.add_to_alg_map(agg, alg)
 
+        self.privacy_budget = AlgProfile.privacy_budget
+
     def to_json(self):
         agg_alg_list_map = {}
         for key in self.agg_alg_map.keys():
@@ -87,6 +93,13 @@ class AlgProfile:
     def read_aggregators (self):
         with open (AlgProfile.agg_file, "r") as f:
             AlgProfile.agg_dict = json.load (f)
+
+    def read_privacy_budget(self):
+        with open (AlgProfile.privacy_budget_file, "r") as f:
+            pb_data = json.load (f)
+            AlgProfile.privacy_budget = pb_data['privacy_budget']
+            if AlgProfile.privacy_budget == "None":
+                AlgProfile.privacy_budget = None
 
     # Policy check method.
     def check_policies(self, agg, alg):
