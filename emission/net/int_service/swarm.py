@@ -47,7 +47,6 @@ def launch_cloud():
     while (not_spawn):
         # select a random port and hope it works
         cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        mongoPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
         envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": str (old_ctr)}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
         if res.returncode == 0:
@@ -69,7 +68,7 @@ def pause():
 @post('/unpause')
 def unpause():
     uuid = request.json['uuid'].replace ("-", "")
-    containers = get_container_names (uuid)
+   containers = get_container_names (uuid)
     for name in containers:
         if name:
             res = subprocess.run (['docker', 'container', 'unpause', name])
