@@ -7,7 +7,7 @@ from emission.net.int_service.machine_configs import controller_ip, controller_p
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
 def main ():
-    # First we want to spawn a the controller in a new shell
+    query_file = "query.json"
     num_users = [10, 50, 100, 500, 1000]
     num_trips = [10, 50, 100, 500, 1000]
     num_queries = 40
@@ -23,7 +23,7 @@ def main ():
                     requests.post (controller_addr + "/kill_all_queriers")
                     requests.post (controller_addr + "/pause_all_clouds")
                     csv_file_name = "csvs/time_" + str(curr_num_users) + "_" + str(curr_num_trips) + "_" + str (i * 100) + ".csv"
-                    ret = subprocess.Popen (["./e-mission-py.bash", "launch_aggregator.py", csv_file_name, str (curr_num_users * i)], cwd="./")
+                    ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py", query_file, csv_file_name, str (curr_num_users * i)], cwd="./")
                     ret.wait ()
             requests.post (controller_addr + "/clear_containers")
 

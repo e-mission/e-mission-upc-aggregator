@@ -15,7 +15,7 @@ import time
 from emission.net.int_service.machine_configs import query_endpoint, get_queriers_endpoint, get_users_endpoint
 
 pool = Pool(10)
-query_file = "query.json"
+# query_file = "query.json"
 
 class Query(abc.ABC):
     """
@@ -152,14 +152,14 @@ class RC():
         if query_result >= query_json['r_end'] + query_json['r_start'] or query_result == query_json['r_start'] or query_result == query_json['r_end']:
             p = np.random.uniform()
             if p < query_json['alpha']:
-                return "In range"
+                return 1 # In range.
             else:
-                return "NOT in range"
+                return 0 # Not in range.
         asym_val = self.get_asym_noise(query_result, query_json)
         if asym_val > query_json['r_start'] and asym_val < query_json['r_end']:
-            return "In range"
+            return 1 # In range.
         else:
-            return "NOT in range"
+            return 0 # Not in range.
 
     def __repr__(self):
         return "ae"
@@ -226,16 +226,17 @@ if __name__ == "__main__":
     # 4) Maximum number of users to be polled
     # 5) Username/email of the analyst
     # 6) Query type
-
+    #7) Csv results file
+    query_file = sys.argv[1]
     with open (query_file, "r") as f:
         q = json.load (f)
 
-    controller_addr = sys.argv[1]
-    num_users_lower_bound = int (sys.argv[2])
-    num_users_upper_bound = int (sys.argv[3])
-    username = sys.argv[4]
-    query_name = sys.argv[5]
-    csv_file = sys.argv[6]
+    controller_addr = sys.argv[2]
+    num_users_lower_bound = int (sys.argv[3])
+    num_users_upper_bound = int (sys.argv[4])
+    username = sys.argv[5]
+    query_name = sys.argv[6]
+    csv_file = sys.argv[7]
 
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
 
@@ -264,15 +265,26 @@ if __name__ == "__main__":
                 query_object = query_type_mapping[q['query_type']]
 
                 start = time.time()
-                print (aggregate(query_object, query_results, q)) # FIXME
+                agg_result = aggregate(query_object, query_results, q) # FIXME
                 end = time.time()
                 agg_time = end - start
 
-                # Append query component times to results.csv.
-                row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
+                if "query_correctness" in csv_file:
+                    # Append query component times to results.csv.
+                    row = [str(agg_result)]
 
-                with open(csv_file, 'a+') as csvFile:
-                    writer = csv.writer(csvFile)
-                    writer.writerow(row)
+                    with open(csv_file, 'a+') as csvFile:
+                        writer = csv.writer(csvFile)
+                        writer.writerow(row)
 
-                csvFile.close()
+                    csvFile.close()
+
+                if "time" in csv_file:
+                    # Append query component times to results.csv.
+                    row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
+
+                    with open(csv_file, 'a+') as csvFile:
+                        writer = csv.writer(csvFile)
+                        writer.writerow(row)
+
+                    csvFile.close()
