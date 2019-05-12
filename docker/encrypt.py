@@ -4,7 +4,7 @@ import subprocess
 import tempfile
 import time
 
-HOST="db"
+HOST=os.environ.get('DB_HOST')
 PORT=27018
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:

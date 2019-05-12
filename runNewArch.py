@@ -13,7 +13,7 @@ def main ():
     num_queries = 40
     for curr_num_users in num_users:
         for curr_num_trips in num_trips:
-            ret = subprocess.Popen (["docker", "create", "network", "emission"], cwd="./")
+            ret = subprocess.Popen (["docker", "network", "create", "emission"], cwd="./")
             ret.wait ()
             ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(curr_num_users), str(curr_num_trips)], cwd="./")
             ret.wait ()
