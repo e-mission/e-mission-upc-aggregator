@@ -27,6 +27,7 @@ class UserCloud:
 
     # Registers the user to controller
     def register_with_controller (self, controller_addr):
+        print (controller_addr)
         print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}))
 
     def init_usercloud (self, username, controller_addr):
