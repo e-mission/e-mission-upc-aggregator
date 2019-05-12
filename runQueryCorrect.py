@@ -25,10 +25,10 @@ def main ():
     for query_file in query_files:
         for alpha in alphas:
             set_alpha_to_json_file(query_file, alpha)
+            csv_file_name = "csvs/query_correctness_" + query_file + "_" + str(alpha) + "_" + str(num_users) + "_" + str(num_trips) + ".csv"
             for _ in range(num_queries):
                 requests.post (controller_addr + "/kill_all_queriers")
                 requests.post (controller_addr + "/pause_all_clouds")
-                csv_file_name = "csvs/query_correctness_" + str(num_users) + "_" + str(num_trips) + ".csv"
                 ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py", query_file, csv_file_name, str(curr_num_users)], cwd="./")
                 ret.wait ()
     requests.post (controller_addr + "/clear_containers")

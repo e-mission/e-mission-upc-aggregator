@@ -12,10 +12,8 @@ username = "test_analyst"
 
 def main (query_file, csv_file, upperbound):
     r = requests.post (controller_addr + register_user_endpoint, json={'user':username})
-    with open (query_file, "r") as f:
-        query = json.load (f)
     if r.ok:
-        ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/aggregator.py", query, controller_addr, "1", upperbound, username, "test-querier", csv_file])
+        ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/aggregator.py", query_file, controller_addr, "1", upperbound, username, "test-querier", csv_file])
         ret.wait ()
     else:
         print ("Error when registering the user.", file=sys.stderr)

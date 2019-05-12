@@ -152,14 +152,14 @@ class RC():
         if query_result >= query_json['r_end'] + query_json['r_start'] or query_result == query_json['r_start'] or query_result == query_json['r_end']:
             p = np.random.uniform()
             if p < query_json['alpha']:
-                return "In range"
+                return 1 # In range.
             else:
-                return "NOT in range"
+                return 0 # Not in range.
         asym_val = self.get_asym_noise(query_result, query_json)
         if asym_val > query_json['r_start'] and asym_val < query_json['r_end']:
-            return "In range"
+            return 1 # In range.
         else:
-            return "NOT in range"
+            return 0 # Not in range.
 
     def __repr__(self):
         return "ae"
@@ -230,7 +230,6 @@ if __name__ == "__main__":
     query_file = sys.argv[1]
     with open (query_file, "r") as f:
         q = json.load (f)
-
 
     controller_addr = sys.argv[2]
     num_users_lower_bound = int (sys.argv[3])
