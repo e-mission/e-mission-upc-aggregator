@@ -3,7 +3,7 @@ services:
   controller:
     image: emission/test-controller:latest
     environment:
-      - DB_HOST=db
+      - DB_HOST=db$ctr
       - WEB_SERVER_HOST=0.0.0.0
     deploy:
       replicas: 1
@@ -12,6 +12,8 @@ services:
     ports:
       #ENV VAR FOR RUNTIME PORT MAPPING
       - $PORTMAP
+    links:
+      - db:db$ctr
     networks:
       - emission
   db:
@@ -30,6 +32,7 @@ services:
 
 networks:
   emission:
+    external: True
 
 volumes:
   mongo-data:
