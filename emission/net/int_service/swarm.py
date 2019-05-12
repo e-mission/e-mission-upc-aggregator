@@ -45,7 +45,7 @@ def launch_cloud():
         # select a random port and hope it works
         cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
         mongoPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), ctr: str (ctr)}
+        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": str (ctr)}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
