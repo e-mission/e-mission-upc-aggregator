@@ -269,9 +269,9 @@ if __name__ == "__main__":
                 end = time.time()
                 agg_time = end - start
 
-                if "query_correctness" in csv_file:
+                if "time" in csv_file:
                     # Append query component times to results.csv.
-                    row = [str(agg_result)]
+                    row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
 
                     with open(csv_file, 'a+') as csvFile:
                         writer = csv.writer(csvFile)
@@ -279,9 +279,9 @@ if __name__ == "__main__":
 
                     csvFile.close()
 
-                if "time" in csv_file:
+                if "query_correctness" in csv_file or "policy" in csv_file or "pb" in csv_file:
                     # Append query component times to results.csv.
-                    row = [str(user_addr_time), str(query_addr_time), str(query_results_time), str(agg_time)]
+                    row = [str(agg_result)]
 
                     with open(csv_file, 'a+') as csvFile:
                         writer = csv.writer(csvFile)
