@@ -204,10 +204,10 @@ def get_container_names (contents):
     return result.decode ('utf-8').split ('\n')
 
 
-def launch_query (query_type, instance_number, uuid, lock):
+def launch_query (query_type, instance_number, uuid):
     # First make sure the queries are unique to the user
     name = "{}{}".format (uuid, instance_number)
-    addr = emissc.createQueryInstance (name, query_type, lock)
+    addr = emissc.createQueryInstance (name, query_type)
     queryinstances[name] = addr
     queryticks[name] = ticks
     return addr 
