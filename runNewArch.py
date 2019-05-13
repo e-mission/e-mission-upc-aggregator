@@ -19,7 +19,7 @@ def main ():
             # for i in range (1, 11, 1):
             #     i = i * .1
             for _ in range(num_queries):
-                requests.post (controller_addr + "/kill_all_queriers")
+                #requests.post (controller_addr + "/kill_all_queriers")
                 requests.post (controller_addr + "/pause_all_clouds")
                 csv_file_name = "csvs/time_" + str(curr_num_users) + "_" + str(curr_num_trips) + ".csv"
                 ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py", query_file, csv_file_name, str (curr_num_users)], cwd="./")

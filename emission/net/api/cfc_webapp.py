@@ -517,11 +517,11 @@ def run_aggregate ():
   agg = request.json['agg']
   query = request.json['query']
   alg = query['query_type']
-  if check_policies(agg, alg) == False:
-    abort (403, "Failed to pass user policy checks in profile.\n")
+  #if check_policies(agg, alg) == False:
+  #  abort (403, "Failed to pass user policy checks in profile.\n")
 
-  if privacy_budget_pass(query['alpha'], query['offset']) == False:
-    abort (403, "Out of privacy budget.\n")
+  #if privacy_budget_pass(query['alpha'], query['offset']) == False:
+  #  abort (403, "Out of privacy budget.\n")
 
   # Time filtering.
   start_time = query['start_ts']
