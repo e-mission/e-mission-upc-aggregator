@@ -554,7 +554,8 @@ def run_aggregate ():
 
 def check_policies(agg, alg):
   global profile
-  if agg not in profile.aggs:
+  """
+  if agg not in profile.algs:
       return False
 
   if alg not in profile.algs:
@@ -566,13 +567,13 @@ def check_policies(agg, alg):
   else:
       if alg not in profile.default_algs:
           return False
-
+  """
   return True
 
 def privacy_budget_pass(query):
   global profile
   # Only currently supports "ae" algs
-
+  """
   if profile.privacy_budget == None:
     return True
 
@@ -591,8 +592,9 @@ def privacy_budget_pass(query):
     if profile.privacy_budget >= curr_pb:
       profile.privacy_budget -= curr_pb
       return True
-
-  return False
+  """
+  return True
+  #return False
 
 
 
