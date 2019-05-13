@@ -88,7 +88,6 @@ queryinstances = dict ()
 queryticks = dict ()
 
 ticks = 0
-pool = Pool()
 
 @post ("/usercloud")
 def spawn_usercloud ():
@@ -157,13 +156,16 @@ def launch_queriers (query_type):
     user_uuid = str (uuid)
     querier_count = int (request.json['count'])
 
-    addr_list = pool.starmap_async(launch_query, [(query_time, i, user_uuid) for i in range(querier_count)])
-
-    # for i in range (querier_count):
-    #    addr_list.append (launch_query (query_type, i, user_uuid))
+    pool = Pool(querier_count + 1)
+    addr_list = []
+    for i in range (querier_count):
+        addr_list.append (pool.apply_async(launch_query, [query_type, i, user_uuid]))
+    pool.close()
+    [result.wait () for result in addr_list]
+    pool.join()
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
-        ret_dict[i] = addr
+        ret_dict[i] = addr.get ()
     # No way to check the updates are ready. Remove later with something more accurate 
     time.sleep (10)
     return json.dumps (ret_dict)
