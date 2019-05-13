@@ -66,6 +66,9 @@ class Machine ():
         Machine.total -= len (self.containers)
         resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort))
         self.containers = []
+    
+    def setupNetwork (self):
+        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort))
 
         
 
@@ -127,3 +130,7 @@ def killQueryInstance (uuid):
 def clearContainers ():
     for m in machines:
         m.clearContainers ()
+
+def setupNetworks ():
+    for m in machines:
+        m.setupNetwork ()

@@ -91,6 +91,10 @@ def kill():
 def clear_all():
     res = subprocess.run (['./teardown_docker.sh'])
 
+@post('/create_network')
+def create_network():
+    ret = subprocess.run (["docker", "network", "create", "emission"], cwd="./")
+
 # Container Helper functions
 def get_container_names (name):
     process = subprocess.Popen (['./bin/deploy/container_id.sh', name], stdout=subprocess.PIPE)

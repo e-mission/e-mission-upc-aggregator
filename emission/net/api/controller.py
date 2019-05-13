@@ -191,6 +191,10 @@ def clear_containers ():
     queryinstances = dict ()
     queryticks = dict ()
 
+@post('/setup_networks')
+def setup_networks ():
+    emissc.setupNetworks ()
+
 # Container Helper functions
 def get_container_names (contents):
     process = subprocess.Popen (['./bin/deploy/container_id.sh', contents], stdout=subprocess.PIPE)
