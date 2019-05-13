@@ -14,7 +14,6 @@ import csv
 import time
 from emission.net.int_service.machine_configs import query_endpoint, get_queriers_endpoint, get_users_endpoint
 
-pool = Pool(10)
 # query_file = "query.json"
 
 class Query(abc.ABC):
@@ -189,15 +188,16 @@ def launch_query_microservices (query_type, service_count, username):
 
 def launch_query(q, username, user_addrs, query_micro_addrs):
     assert(len(user_addrs) == len(query_micro_addrs))
+    pool = Pool(len (user_addrs) + 1)
     query_results = []
 
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
         query_results.append(pool.apply_async(requests.post, [query_addr + query_endpoint, None, {'query': q, 'user_cloud_addr': user_addr, 'agg': username}]))
     pool.close()
-    pool.join()
     results = []
     [result.wait () for result in query_results]
+    pool.join()
     try:
         for result in query_results:
             curr_resp = result.get()

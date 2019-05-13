@@ -12,5 +12,8 @@ def random_64s (count):
 def gen_random_key ():
     return random_64s (4)
 
+def gen_random_key_string ():
+    return str (random_64s (4))
+
 def gen_random_email ():
-    return str (random_64s (4)) + "@emission-test"
+    return get_random_key_string () + "@emission-test"

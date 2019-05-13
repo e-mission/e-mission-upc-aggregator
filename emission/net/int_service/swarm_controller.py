@@ -6,7 +6,6 @@
 
 import requests
 from emission.net.int_service.machine_configs import swarm_port, machines_list
-from multiprocessing import Lock
 
 # Current port the server should be listening on
 
@@ -29,11 +28,11 @@ class Machine ():
             return "{}:{}".format (self.baseaddr, resp.text)
         return ""
 
-    def addQuery (self, name, query_type, lock):
+    def addQuery (self, name, query_type):
         if self.weight == 0.0:
             return
         if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-            json_dict = {"name": name, "query": query_type, "lock": lock}
+            json_dict = {"name": name, "query": query_type}
             resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
             self.containers.append (name)
             Machine.total += 1
@@ -66,9 +65,6 @@ class Machine ():
         Machine.total -= len (self.containers)
         resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort))
         self.containers = []
-    
-    def setupNetwork (self):
-        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort))
 
         
 
@@ -115,9 +111,9 @@ def unpauseCloudInstance (uuid):
         if m.unpauseContainer (uuid):
             return
 
-def createQueryInstance (name, query_type, lock):
+def createQueryInstance (name, query_type):
     for m in machines:
-        res = m.addQuery (name, query_type, lock)
+        res = m.addQuery (name, query_type)
         if res:
             return res
     return ""
@@ -130,7 +126,3 @@ def killQueryInstance (uuid):
 def clearContainers ():
     for m in machines:
         m.clearContainers ()
-
-def setupNetworks ():
-    for m in machines:
-        m.setupNetwork ()

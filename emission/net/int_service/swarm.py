@@ -17,9 +17,9 @@ import time
 import numpy as np
 from emission.net.int_service.machine_configs import swarm_port
 from multiprocessing import Lock
+from emission.simulation.rand_helpers import gen_random_key_string
 
 cloudVarName = "PORTMAP"
-ctr = 1
 
 @post('/launch_querier')
 def launch_querier():
@@ -29,13 +29,11 @@ def launch_querier():
     not_spawn = True
     lock = request.json['lock']
     lock.acquire()
-    old_ctr = ctr
-    ctr += 1
     lock.release()
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (port, "6500"), "ctr": str (old_ctr)}
+        envVars = {cloudVarName: "{}:{}".format (port, "6500"), "ctr": get_random_key_string ()}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
@@ -46,12 +44,10 @@ def launch_cloud():
     global ctr
     uuid = request.json['uuid'].replace ("-", "")
     not_spawn = True
-    old_ctr = ctr
-    ctr += 1
     while (not_spawn):
         # select a random port and hope it works
         cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": str (old_ctr)}
+        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": get_random_key_string ()}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
