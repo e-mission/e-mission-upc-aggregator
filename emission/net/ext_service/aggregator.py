@@ -14,7 +14,7 @@ import csv
 import time
 from emission.net.int_service.machine_configs import query_endpoint, get_queriers_endpoint, get_users_endpoint
 
-pool = Pool(10)
+pool = Pool()
 # query_file = "query.json"
 
 class Query(abc.ABC):
