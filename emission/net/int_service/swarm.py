@@ -16,6 +16,7 @@ import requests
 import time
 import numpy as np
 from emission.net.int_service.machine_configs import swarm_port
+from multiprocessing import Lock
 
 cloudVarName = "PORTMAP"
 ctr = 1
@@ -26,8 +27,11 @@ def launch_querier():
     name = request.json['name'].replace ("-", "")
     query_type = request.json['query']
     not_spawn = True
+    lock = request.json['lock']
+    lock.acquire()
     old_ctr = ctr
     ctr += 1
+    lock.release()
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))

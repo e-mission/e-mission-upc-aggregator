@@ -10,6 +10,7 @@ from builtins import *
 from past.utils import old_div
 import json
 import numpy as np
+import multiprocessing
 from random import randrange
 from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 import emission.net.api.bottle as bt
@@ -154,9 +155,13 @@ def launch_queriers (query_type):
        uuid = None #Maybe this should error
     user_uuid = str (uuid)
     querier_count = int (request.json['count'])
-    addr_list = []
-    for i in range (querier_count):
-       addr_list.append (launch_query (query_type, i, user_uuid))
+
+    with multiprocessing.Pool(processes=10) as pool:
+        lock = multiprocessing.Lock()
+        addr_list = pool.starmap(launch_query, [(query_time, i, user_uuid, lock) for i in range(querier_count)])
+
+    # for i in range (querier_count):
+    #    addr_list.append (launch_query (query_type, i, user_uuid))
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr
@@ -194,10 +199,10 @@ def get_container_names (contents):
     return result.decode ('utf-8').split ('\n')
 
 
-def launch_query (query_type, instance_number, uuid):
+def launch_query (query_type, instance_number, uuid, lock):
     # First make sure the queries are unique to the user
     name = "{}{}".format (uuid, instance_number)
-    addr = emissc.createQueryInstance (name, query_type)
+    addr = emissc.createQueryInstance (name, query_type, lock)
     queryinstances[name] = addr
     queryticks[name] = ticks
     return addr 

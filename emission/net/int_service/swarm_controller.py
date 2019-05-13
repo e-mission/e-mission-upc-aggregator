@@ -6,6 +6,7 @@
 
 import requests
 from emission.net.int_service.machine_configs import swarm_port, machines_list
+from multiprocessing import Lock
 
 # Current port the server should be listening on
 
@@ -28,11 +29,11 @@ class Machine ():
             return "{}:{}".format (self.baseaddr, resp.text)
         return ""
 
-    def addQuery (self, name, query_type):
+    def addQuery (self, name, query_type, lock):
         if self.weight == 0.0:
             return
         if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-            json_dict = {"name": name, "query": query_type}
+            json_dict = {"name": name, "query": query_type, "lock": lock}
             resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
             self.containers.append (name)
             Machine.total += 1
@@ -111,9 +112,9 @@ def unpauseCloudInstance (uuid):
         if m.unpauseContainer (uuid):
             return
 
-def createQueryInstance (name, query_type):
+def createQueryInstance (name, query_type, lock):
     for m in machines:
-        res = m.addQuery (name, query_type)
+        res = m.addQuery (name, query_type, lock)
         if res:
             return res
     return ""
