@@ -68,7 +68,7 @@ def pause():
 @post('/unpause')
 def unpause():
     uuid = request.json['uuid'].replace ("-", "")
-   containers = get_container_names (uuid)
+    containers = get_container_names (uuid)
     for name in containers:
         if name:
             res = subprocess.run (['docker', 'container', 'unpause', name])

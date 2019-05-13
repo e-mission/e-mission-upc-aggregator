@@ -5,7 +5,7 @@
     "pause-ticks" : "30",
     "kill-ticks" : "15",
     "swarm-port" : "54321",
-    "machines" : 
+    "machines" :
         {
             "http://169.229.49.171" : "246",
             "http://169.229.49.172" : "139",
