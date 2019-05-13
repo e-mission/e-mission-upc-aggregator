@@ -27,9 +27,6 @@ def launch_querier():
     name = request.json['name'].replace ("-", "")
     query_type = request.json['query']
     not_spawn = True
-    lock = request.json['lock']
-    lock.acquire()
-    lock.release()
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
