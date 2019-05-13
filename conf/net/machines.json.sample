@@ -1,15 +1,18 @@
 {
     "controller-ip" : "http://128.32.37.205",
-    "controller-port" : "4040",
+    "controller-port" : "4041",
     "tick-period" : "60",
     "pause-ticks" : "30",
     "kill-ticks" : "15",
     "swarm-port" : "54321",
     "machines" : 
         {
-            "http://128.32.37.205" : "1"
+            "http://169.229.49.171" : "246",
+            "http://169.229.49.172" : "139",
+            "http://169.229.49.176" : "144",
+            "http://169.229.49.179" : "92"
         },
-    "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> Storage size, currently set to be in Disk. This is then used to proportion machines.",
+    "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> Storage size, currently set to be in RAM. This is then used to proportion machines.",
     "register_user_endpoint" : "/profile/create",
     "user_cache_endpoint" : "/usercache/put",
     "spawn_usercloud_endpoint" : "/usercloud",
