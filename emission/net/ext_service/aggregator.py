@@ -46,7 +46,7 @@ class Sum(Query):
         offset = query_json['offset']
         alpha = query_json['alpha']
         privacy_budget = -1 * np.log(alpha) / offset
-        return query_result + np.random.laplace(scale=1.0/float(privacy_budget))
+        return min(query_result + np.random.laplace(scale=1.0/float(privacy_budget)), 0)
 
     def __repr__(self):
         return "sum"
@@ -65,7 +65,7 @@ class AE(Query):
         offset = query_json['offset']
         alpha = query_json['alpha']
         privacy_budget = -1 * np.log(alpha) / offset
-        return query_result + np.random.laplace(scale=1.0/float(privacy_budget))
+        return min(query_result + np.random.laplace(scale=1.0/float(privacy_budget)), 0)
 
     def __repr__(self):
         return "ae"
