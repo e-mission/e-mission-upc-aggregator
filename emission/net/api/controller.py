@@ -176,8 +176,7 @@ def launch_queriers (query_type):
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr.get ()
     for i, name in enumerate(paused_list):
-        addr = pausedqueries[name]
-        ret_dict[i + len (addr_list)] = addr
+        ret_dict[i + len (addr_list)] = pausedqueriers[name]
         unpause_cloud (name, queryticks, queryinstances, pausedqueries)
     return json.dumps (ret_dict)
 
