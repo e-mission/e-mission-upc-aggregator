@@ -190,7 +190,7 @@ def pause_all_clouds ():
 def pause_all_queriers ():
     namelist = list (queryticks.keys ())[:]
     for name in namelist:
-        kill_query (name, queryticks, queryinstances, pausedqueries)
+        pause_cloud (name, queryticks, queryinstances, pausedqueries)
 
 @post('/kill_all_queriers')
 def kill_all_queriers ():
