@@ -5,10 +5,12 @@
 # to use multiple machines in a cluster.
 
 import requests
+import numpy as np
 from emission.net.int_service.machine_configs import swarm_port, machines_list
 
 # Current port the server should be listening on
 
+randlist = []
 
 class Machine ():
     total = 0
@@ -21,23 +23,23 @@ class Machine ():
     def addCloud (self, uuid):
         if self.weight == 0.0:
             return
-        if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-            resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
-            self.containers.append (uuid)
-            Machine.total += 1
-            return "{}:{}".format (self.baseaddr, resp.text)
-        return ""
+        #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
+        resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
+        self.containers.append (uuid)
+        Machine.total += 1
+        return "{}:{}".format (self.baseaddr, resp.text)
+        #return ""
 
     def addQuery (self, name, query_type):
         if self.weight == 0.0:
             return
-        if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-            json_dict = {"name": name, "query": query_type}
-            resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
-            self.containers.append (name)
-            Machine.total += 1
-            return "{}:{}".format (self.baseaddr, resp.text)
-        return ""
+        #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
+        json_dict = {"name": name, "query": query_type}
+        resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
+        self.containers.append (name)
+        Machine.total += 1
+        return "{}:{}".format (self.baseaddr, resp.text)
+       # return ""
         
 
     def pauseContainer (self, uuid):
@@ -78,8 +80,11 @@ def setupMachines (machines):
     total = 0.0
     for _, mem in machines:
         total += mem
+    total_rand = 0.0
     for ip, mem in machines:
         output.append (Machine (ip, swarm_port, mem / total))
+        total_rand += mem / total
+        randlist.append (total_rand)
     return output
 
 # List consisting of the IP addresses any machines in the cluster.
@@ -94,11 +99,11 @@ machines = setupMachines (machines_list)
 
 # Helper function to allocate the Cloud instance
 def createCloudInstance (uuid):
-    for m in machines:
-        res = m.addCloud (uuid)
-        if res:
-            return res
-    return ""
+    val = np.random.random ()
+    i = 0
+    while val > randlist[i]:
+        i += 1
+    return machines[i].addCloud (uuid)
 
 # Helper function to pause the Cloud instance
 def pauseCloudInstance (uuid):
@@ -114,11 +119,11 @@ def unpauseCloudInstance (uuid):
             return
 
 def createQueryInstance (name, query_type):
-    for m in machines:
-        res = m.addQuery (name, query_type)
-        if res:
-            return res
-    return ""
+    val = np.random.random ()
+    i = 0
+    while val > randlist[i]:
+        i += 1
+    return machines[i].addQuery (name, query_type)
 
 def killQueryInstance (uuid):
     for m in machines:

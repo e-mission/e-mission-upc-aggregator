@@ -44,7 +44,7 @@ class Sum(Query):
             return 0
 
     def update_current_query_result(self, query_result):
-        self.query_value += query_result
+        self.query_value = query_result
 
     def get_current_query_result(self):
         return self.query_value
@@ -65,7 +65,7 @@ class AE(Query):
             return 0
 
     def update_current_query_result(self, query_result):
-        self.query_value += query_result
+        self.query_value = query_result
 
     def get_current_query_result(self):
         return self.query_value
@@ -86,7 +86,7 @@ class RC(Query):
             return 0
 
     def update_current_query_result(self, query_result):
-        self.query_value += query_result
+        self.query_value = query_result
 
     def get_current_query_result(self):
         return self.query_value

@@ -5,6 +5,7 @@
 # Inspired by https://stackoverflow.com/questions/34417279/sending-a-json-string-as-a-post-request/34418733
 import requests
 from emission.net.int_service.machine_configs import register_user_endpoint, spawn_usercloud_endpoint, cloud_status_endpoint, cloud_key_endpoint, cloud_profile_endpoint
+import emission.simulation.profile_json as profile_json
 
 class UserCloud:
 
@@ -18,7 +19,7 @@ class UserCloud:
     def send_contents (self, addr):
         print (requests.get (addr + cloud_status_endpoint).text)
         print (requests.post (addr + cloud_key_endpoint, json=self.key).text)
-        print (requests.post (addr + cloud_profile_endpoint, json=self.profile.to_json()).text)
+        print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile)).text)
 
 
     # Method used to get the address from speaking to the KAL

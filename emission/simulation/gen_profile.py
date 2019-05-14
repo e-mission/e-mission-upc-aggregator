@@ -77,11 +77,13 @@ class AlgProfile:
 
         self.privacy_budget = AlgProfile.privacy_budget
 
-    def to_json(self):
-        agg_alg_list_map = {}
-        for key in self.agg_alg_map.keys():
-            agg_alg_list_map[key] = list(self.agg_alg_map[key])
-        return {"aggs": list(self.aggs), "algs": self.algs, "agg_alg_map": agg_alg_list_map, "default_algs": list(self.default_algs)}
+    # def to_json(self):
+    #     agg_alg_list_map = {}
+    #     for key in self.agg_alg_map.keys():
+    #         agg_alg_list_map[key] = list(self.agg_alg_map[key])
+    #     return {"aggs": list(self.aggs), "algs": self.algs, "agg_alg_map": agg_alg_list_map, "default_algs": list(self.default_algs), "privacy_budget": self.privacy_budget}
+
+    
 
 
     # Method for initializing the data from the json of known algorithms

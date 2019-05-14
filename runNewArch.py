@@ -8,8 +8,9 @@ controller_addr = "{}:{}".format (controller_ip, controller_port)
 
 def main ():
     query_file = "query.json"
+    subprocess.Popen (["mkdir", "-p", "csvs"], cwd="./")
     num_users = [10, 50, 100, 500, 1000]
-    num_trips = [10, 50, 100, 500, 1000]
+    num_trips = [10, 50, 100]
     num_queries = 40
     for curr_num_users in num_users:
         for curr_num_trips in num_trips:
@@ -19,7 +20,7 @@ def main ():
             # for i in range (1, 11, 1):
             #     i = i * .1
             for _ in range(num_queries):
-                requests.post (controller_addr + "/kill_all_queriers")
+                requests.post (controller_addr + "/pause_all_queriers")
                 requests.post (controller_addr + "/pause_all_clouds")
                 csv_file_name = "csvs/time_" + str(curr_num_users) + "_" + str(curr_num_trips) + ".csv"
                 ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py", query_file, csv_file_name, str (curr_num_users)], cwd="./")

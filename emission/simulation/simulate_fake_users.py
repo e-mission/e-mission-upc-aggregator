@@ -97,7 +97,7 @@ def create_user_data (user, numTrips):
 
 def sync_user_data (user):
     old_len = len (user._measurements_cache)
-    userlist[i].sync_data_to_server ()
+    user.sync_data_to_server ()
     new_len = len (user._measurements_cache)
     return (old_len, new_len)
 

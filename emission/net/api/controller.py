@@ -85,6 +85,7 @@ runningclouds = dict ()
 pausedclouds = dict ()
 cloudticks = dict ()
 queryinstances = dict ()
+pausedqueries = dict ()
 queryticks = dict ()
 
 ticks = 0
@@ -156,18 +157,27 @@ def launch_queriers (query_type):
     user_uuid = str (uuid)
     querier_count = int (request.json['count'])
 
-    pool = Pool(querier_count + 1)
-    addr_list = []
-    for i in range (querier_count):
-        addr_list.append (pool.apply_async(launch_query, [query_type, i, user_uuid]))
-    pool.close()
-    [result.wait () for result in addr_list]
-    pool.join()
+    paused_list = list (pausedqueries.keys ())[:]
+    gen_count = querier_count - len (paused_list)
+    
+    if gen_count:
+        pool = Pool(gen_count + 1)
+        addr_list = []
+        for i in range (gen_count):
+            addr_list.append (pool.apply_async(launch_query, [query_type, i, user_uuid]))
+        pool.close()
+        [result.wait () for result in addr_list]
+        pool.join()
+        # No way to check the updates are ready. Remove later with something more accurate 
+        time.sleep (10)
+    else:
+        addr_list = []
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr.get ()
-    # No way to check the updates are ready. Remove later with something more accurate 
-    time.sleep (10)
+    for i, name in enumerate(paused_list):
+        ret_dict[i + len (addr_list)] = pausedqueries[name]
+        unpause_cloud (name, queryticks, queryinstances, pausedqueries)
     return json.dumps (ret_dict)
 
 @post('/pause_all_clouds')
@@ -175,6 +185,12 @@ def pause_all_clouds ():
     namelist = list (cloudticks.keys ())[:]
     for name in namelist:
         pause_cloud (name, cloudticks, runningclouds, pausedclouds)
+
+@post('/pause_all_queriers')
+def pause_all_queriers ():
+    namelist = list (queryticks.keys ())[:]
+    for name in namelist:
+        pause_cloud (name, queryticks, queryinstances, pausedqueries)
 
 @post('/kill_all_queriers')
 def kill_all_queriers ():
@@ -190,6 +206,7 @@ def clear_containers ():
     pausedclouds = dict ()
     cloudticks = dict ()
     queryinstances = dict ()
+    pausedqueries = dict ()
     queryticks = dict ()
 
 @post('/setup_networks')
@@ -204,10 +221,10 @@ def get_container_names (contents):
     return result.decode ('utf-8').split ('\n')
 
 
-def launch_query (query_type, instance_number, uuid, lock):
+def launch_query (query_type, instance_number, uuid):
     # First make sure the queries are unique to the user
     name = "{}{}".format (uuid, instance_number)
-    addr = emissc.createQueryInstance (name, query_type, lock)
+    addr = emissc.createQueryInstance (name, query_type)
     queryinstances[name] = addr
     queryticks[name] = ticks
     return addr 
@@ -218,7 +235,8 @@ def tick_incr (unused1, unused2):
     print ("Ticking the timer")
     ticks += 1
     check_timer (keylist=list (cloudticks.keys ()) [:], tickdict=cloudticks, runningdict=runningclouds, pauseddict=pausedclouds, should_kill=False, tick_limit=pause_ticks)
-    check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, pauseddict=None, should_kill=True, tick_limit=kill_ticks)
+    #check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, pauseddict=None, should_kill=True, tick_limit=kill_ticks)
+    check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, pauseddict=pausedqueries, should_kill=False, tick_limit=kill_ticks)
     launch_timer ()
 
 

@@ -57,6 +57,7 @@ import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
 import emission.storage.timeseries.geoquery as estg
+import emission.simulation.profile_json as profile_json
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -474,7 +475,7 @@ def process_profile():
     if profile:
         abort (403, "Profile already given\n")
     else:
-        profile = request.json
+        profile = profile_json.from_json(request.json)
     
 @get ("/cloud/status")
 def check_status ():
@@ -517,11 +518,11 @@ def run_aggregate ():
   agg = request.json['agg']
   query = request.json['query']
   alg = query['query_type']
-  if check_policies(agg, alg) == False:
-    abort (403, "Failed to pass user policy checks in profile.\n")
+  #if check_policies(agg, alg) == False:
+  #  abort (403, "Failed to pass user policy checks in profile.\n")
 
-  if privacy_budget_pass(query['alpha'], query['offset']) == False:
-    abort (403, "Out of privacy budget.\n")
+  #if privacy_budget_pass(query) == False:
+  #  abort (403, "Out of privacy budget.\n")
 
   # Time filtering.
   start_time = query['start_ts']
@@ -554,7 +555,7 @@ def run_aggregate ():
 
 def check_policies(agg, alg):
   global profile
-  if agg not in profile.aggs:
+  if agg not in profile.algs:
       return False
 
   if alg not in profile.algs:
@@ -566,13 +567,10 @@ def check_policies(agg, alg):
   else:
       if alg not in profile.default_algs:
           return False
-
   return True
 
 def privacy_budget_pass(query):
   global profile
-  # Only currently supports "ae" algs
-
   if profile.privacy_budget == None:
     return True
 
@@ -591,10 +589,7 @@ def privacy_budget_pass(query):
     if profile.privacy_budget >= curr_pb:
       profile.privacy_budget -= curr_pb
       return True
-
   return False
-
-
 
 ##### END OF NICK'S CHANGES FOR THE NEW ARCH
 
