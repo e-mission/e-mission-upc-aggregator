@@ -8,6 +8,7 @@ controller_addr = "{}:{}".format (controller_ip, controller_port)
 
 def main ():
     query_file = "query.json"
+    subprocess.Popen (["mkdir", "-p", "csvs"], cwd="./")
     num_users = [10, 50, 100, 500, 1000]
     num_trips = [10, 50, 100, 500, 1000]
     num_queries = 40
