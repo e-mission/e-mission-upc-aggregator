@@ -14,7 +14,7 @@ def main():
     ret.wait ()
 #    else:
 #        print ("hello")
-    subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./")
+#    subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./")
 
 
 if __name__ == "__main__":
