@@ -29,7 +29,7 @@ def main ():
         set_priv_budget("emission/simulation/privacy_budget.json", 6)
         ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(num_users / 2), str(num_trips)], cwd="./")
         ret.wait ()
-        csv_file_name = "csvs/pb_" + query_file + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
+        csv_file_name = "csvs/pb_" + query_file.split("/")[1] + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
         for _ in range(num_queries):
             requests.post (controller_addr + "/pause_all_queriers")
             requests.post (controller_addr + "/pause_all_clouds")

@@ -25,7 +25,7 @@ def main ():
     ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(num_users), str(num_trips)], cwd="./")
     ret.wait ()
     for query_file in query_files:
-        csv_file_name = "csvs/policy_all_correctness_" + query_file + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
+        csv_file_name = "csvs/policy_all_correctness_" + query_file.split("/")[1] + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
         for _ in range(num_queries):
             requests.post (controller_addr + "/pause_all_queriers")
             requests.post (controller_addr + "/pause_all_clouds")
@@ -40,7 +40,7 @@ def main ():
     ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(num_users / 2), str(num_trips)], cwd="./")
     ret.wait ()
     for query_file in query_files:
-        csv_file_name = "csvs/policy_half_correctness_" + query_file + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
+        csv_file_name = "csvs/policy_half_correctness_" + query_file.split("/")[1] + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
         for _ in range(num_queries):
             requests.post (controller_addr + "/pause_all_queriers")
             requests.post (controller_addr + "/pause_all_clouds")
