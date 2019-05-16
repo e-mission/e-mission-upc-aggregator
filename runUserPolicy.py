@@ -5,6 +5,7 @@ import json
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
+print(controller_addr)
 
 def wipe_agg_json(f):
     with open(f, "w") as jsonFile:
