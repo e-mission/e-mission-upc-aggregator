@@ -332,22 +332,22 @@ def summarize_metrics(time_type):
         ret_val['aggregate_metrics'] = ret_val['aggregate_metrics'][0]
     return ret_val
 
-@post('/join.group/<group_id>')
-def habiticaJoinGroup(group_id):
-    if 'user' in request.json:
-        user_uuid = getUUID(request)
-    else:
-        user_uuid = None
-    inviter_id = request.json['inviter']
-    logging.debug("%s about to join party %s after invite from %s" %
-                  (user_uuid, group_id, inviter_id))
-    try:
-        ret_val = habitproxy.setup_party(user_uuid, group_id, inviter_id)
-        logging.debug("ret_val = %s after joining group" % bson.json_util.dumps(ret_val))
-        return {'result': ret_val}
-    except RuntimeError as e:
-        logging.info("Aborting call with message %s" % e.message)
-        abort(400, e.message)
+# @post('/join.group/<group_id>')
+# def habiticaJoinGroup(group_id):
+#     if 'user' in request.json:
+#         user_uuid = getUUID(request)
+#     else:
+#         user_uuid = None
+#     inviter_id = request.json['inviter']
+#     logging.debug("%s about to join party %s after invite from %s" %
+#                   (user_uuid, group_id, inviter_id))
+#     try:
+#         ret_val = habitproxy.setup_party(user_uuid, group_id, inviter_id)
+#         logging.debug("ret_val = %s after joining group" % bson.json_util.dumps(ret_val))
+#         return {'result': ret_val}
+#     except RuntimeError as e:
+#         logging.info("Aborting call with message %s" % e.message)
+#         abort(400, e.message)
 
 # Small utilities to make client software easier START
 
@@ -380,32 +380,32 @@ def xmlProxy(originalXMLWebserviceURL):
 
 # Small utilities to make client software easier END
 
-@post('/habiticaRegister')
-def habiticaRegister():
-  logging.debug("habitica registration request %s from user = %s" %
-                (request.json, request))
-  user_uuid = getUUID(request)
-  assert(user_uuid is not None)
-  username = request.json['regConfig']['username']
-  # TODO: Move this logic into register since there is no point in
-  # regenerating the password if we already have the user
-  autogen_id = requests.get("http://www.dinopass.com/password/simple").text
-  logging.debug("generated id %s through dinopass" % autogen_id)
-  autogen_email = "%s@save.world" % autogen_id
-  autogen_password = autogen_id
-  return habitproxy.habiticaRegister(username, autogen_email,
-                              autogen_password, user_uuid)
+# @post('/habiticaRegister')
+# def habiticaRegister():
+#   logging.debug("habitica registration request %s from user = %s" %
+#                 (request.json, request))
+#   user_uuid = getUUID(request)
+#   assert(user_uuid is not None)
+#   username = request.json['regConfig']['username']
+#   # TODO: Move this logic into register since there is no point in
+#   # regenerating the password if we already have the user
+#   autogen_id = requests.get("http://www.dinopass.com/password/simple").text
+#   logging.debug("generated id %s through dinopass" % autogen_id)
+#   autogen_email = "%s@save.world" % autogen_id
+#   autogen_password = autogen_id
+#   return habitproxy.habiticaRegister(username, autogen_email,
+#                               autogen_password, user_uuid)
 
-@post('/habiticaProxy')
-def habiticaProxy():
-    logging.debug("habitica registration request %s" % (request))
-    user_uuid = getUUID(request)
-    assert(user_uuid is not None)
-    method = request.json['callOpts']['method']
-    method_url = request.json['callOpts']['method_url']
-    method_args = request.json['callOpts']['method_args']
-    return habitproxy.habiticaProxy(user_uuid, method, method_url,
-                                    method_args)
+# @post('/habiticaProxy')
+# def habiticaProxy():
+#     logging.debug("habitica registration request %s" % (request))
+#     user_uuid = getUUID(request)
+#     assert(user_uuid is not None)
+#     method = request.json['callOpts']['method']
+#     method_url = request.json['callOpts']['method_url']
+#     method_args = request.json['callOpts']['method_args']
+#     return habitproxy.habiticaProxy(user_uuid, method, method_url,
+#                                     method_args)
 # Data source integration END
 
 @app.hook('before_request')
