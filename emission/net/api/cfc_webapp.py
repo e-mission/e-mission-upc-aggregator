@@ -57,7 +57,7 @@ import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
 import emission.storage.timeseries.geoquery as estg
-import emission.simulation.profile_json as profile_json
+import emission.simulation.profile_json as pj
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -475,7 +475,7 @@ def process_profile():
     if profile:
         abort (403, "Profile already given\n")
     else:
-        profile = profile_json.from_json(request.json)
+        profile = pj.from_json(request.json)
     
 @get ("/cloud/status")
 def check_status ():
@@ -519,10 +519,14 @@ def run_aggregate ():
   query = request.json['query']
   alg = query['query_type']
   if check_policies(agg, alg) == False:
-   abort (403, "Failed to pass user policy checks in profile.\n")
+   #abort (403, "Failed to pass user policy checks in profile.\n")
+   print("Failed to pass user policy checks in profile.")
+   return {'phone_data': ""}
 
   if privacy_budget_pass(query) == False:
-   abort (403, "Out of privacy budget.\n")
+    # abort (403, "Out of privacy budget.\n")
+    print("Out of privacy budget.")
+    return {'phone_data': ""}
 
   # Time filtering.
   start_time = query['start_ts']
