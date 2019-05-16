@@ -559,7 +559,7 @@ def run_aggregate ():
 
 def check_policies(agg, alg):
   global profile
-  if agg not in profile.algs:
+  if agg not in profile.aggs:
       return False
 
   if alg not in profile.algs:
