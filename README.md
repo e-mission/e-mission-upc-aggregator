@@ -94,10 +94,21 @@ We also interact with existing e-mission files as well as some possible helper s
 
 ### Data Simulation
 
+Data simulation is almost entirely consistent with the main branch of the e-mission server. We use the same fake data generator and we have only modified the example script that generates user data to support our examples. This was primarily done by moving the code from `Data Generator - Demo.ipyn` to `initialize_data.py` so that it could run without `iPython notebook`.
+
+Additionally we opted to modify the example to deterministically alternate between two fixed locations (so that we could have a consistent and fixed amount of data). This may or may not be a useful method moving forward.
+
 ### Data Aggregation
 
+In implementing algorithms we opted to split algorithms into 2 components:
+
+1. An aggregation component that process the whole dataset.
+2. A set of queriers that collect data from users one at a time, possibly with one querier per user.
+
+Our primary example use case was `Jack Sullivan's` work on differentially private queriers, which is why we opted to struct code in this manner. You can find the relevant code in many locations, but we opted to stick with the same `POST Request` server model for all components (i.e. a research launches an aggregator server which gets many queriers launched through the controller). We currently only use functionality that we added (for example to support being able to ask if data exists for a particular range and if so to retrieve it). We have not shown any support for an aggregator that for example wants to run the e-mission pipeline on some subset of users. We also do not have any work on modifying how users are requested/sampled and how to ensure it is done in a fair process.
+
 #### Files
-The actually files used to implement the controller (relative to the e-mission-server base directory) are:
+The actually files used to implement the aggregator (relative to the e-mission-server base directory) are:
 
 * `launch_machine.py` - Helper script to launch the controller.
 * `conf/net/machines.json.sample` - Example configuration used to specify the controller
@@ -106,6 +117,7 @@ The actually files used to implement the controller (relative to the e-mission-s
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
 ### Data Querying
+
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
 
