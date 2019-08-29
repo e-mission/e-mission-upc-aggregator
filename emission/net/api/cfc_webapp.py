@@ -57,7 +57,7 @@ import emission.storage.timeseries.cache_series as esdc
 import emission.core.timer as ect
 import emission.core.get_database as edb
 import emission.storage.timeseries.geoquery as estg
-import emission.simulation.profile_json as profile_json
+import emission.simulation.profile_json as pj
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -332,22 +332,22 @@ def summarize_metrics(time_type):
         ret_val['aggregate_metrics'] = ret_val['aggregate_metrics'][0]
     return ret_val
 
-@post('/join.group/<group_id>')
-def habiticaJoinGroup(group_id):
-    if 'user' in request.json:
-        user_uuid = getUUID(request)
-    else:
-        user_uuid = None
-    inviter_id = request.json['inviter']
-    logging.debug("%s about to join party %s after invite from %s" %
-                  (user_uuid, group_id, inviter_id))
-    try:
-        ret_val = habitproxy.setup_party(user_uuid, group_id, inviter_id)
-        logging.debug("ret_val = %s after joining group" % bson.json_util.dumps(ret_val))
-        return {'result': ret_val}
-    except RuntimeError as e:
-        logging.info("Aborting call with message %s" % e.message)
-        abort(400, e.message)
+# @post('/join.group/<group_id>')
+# def habiticaJoinGroup(group_id):
+#     if 'user' in request.json:
+#         user_uuid = getUUID(request)
+#     else:
+#         user_uuid = None
+#     inviter_id = request.json['inviter']
+#     logging.debug("%s about to join party %s after invite from %s" %
+#                   (user_uuid, group_id, inviter_id))
+#     try:
+#         ret_val = habitproxy.setup_party(user_uuid, group_id, inviter_id)
+#         logging.debug("ret_val = %s after joining group" % bson.json_util.dumps(ret_val))
+#         return {'result': ret_val}
+#     except RuntimeError as e:
+#         logging.info("Aborting call with message %s" % e.message)
+#         abort(400, e.message)
 
 # Small utilities to make client software easier START
 
@@ -380,32 +380,32 @@ def xmlProxy(originalXMLWebserviceURL):
 
 # Small utilities to make client software easier END
 
-@post('/habiticaRegister')
-def habiticaRegister():
-  logging.debug("habitica registration request %s from user = %s" %
-                (request.json, request))
-  user_uuid = getUUID(request)
-  assert(user_uuid is not None)
-  username = request.json['regConfig']['username']
-  # TODO: Move this logic into register since there is no point in
-  # regenerating the password if we already have the user
-  autogen_id = requests.get("http://www.dinopass.com/password/simple").text
-  logging.debug("generated id %s through dinopass" % autogen_id)
-  autogen_email = "%s@save.world" % autogen_id
-  autogen_password = autogen_id
-  return habitproxy.habiticaRegister(username, autogen_email,
-                              autogen_password, user_uuid)
+# @post('/habiticaRegister')
+# def habiticaRegister():
+#   logging.debug("habitica registration request %s from user = %s" %
+#                 (request.json, request))
+#   user_uuid = getUUID(request)
+#   assert(user_uuid is not None)
+#   username = request.json['regConfig']['username']
+#   # TODO: Move this logic into register since there is no point in
+#   # regenerating the password if we already have the user
+#   autogen_id = requests.get("http://www.dinopass.com/password/simple").text
+#   logging.debug("generated id %s through dinopass" % autogen_id)
+#   autogen_email = "%s@save.world" % autogen_id
+#   autogen_password = autogen_id
+#   return habitproxy.habiticaRegister(username, autogen_email,
+#                               autogen_password, user_uuid)
 
-@post('/habiticaProxy')
-def habiticaProxy():
-    logging.debug("habitica registration request %s" % (request))
-    user_uuid = getUUID(request)
-    assert(user_uuid is not None)
-    method = request.json['callOpts']['method']
-    method_url = request.json['callOpts']['method_url']
-    method_args = request.json['callOpts']['method_args']
-    return habitproxy.habiticaProxy(user_uuid, method, method_url,
-                                    method_args)
+# @post('/habiticaProxy')
+# def habiticaProxy():
+#     logging.debug("habitica registration request %s" % (request))
+#     user_uuid = getUUID(request)
+#     assert(user_uuid is not None)
+#     method = request.json['callOpts']['method']
+#     method_url = request.json['callOpts']['method_url']
+#     method_args = request.json['callOpts']['method_args']
+#     return habitproxy.habiticaProxy(user_uuid, method, method_url,
+#                                     method_args)
 # Data source integration END
 
 @app.hook('before_request')
@@ -475,7 +475,7 @@ def process_profile():
     if profile:
         abort (403, "Profile already given\n")
     else:
-        profile = profile_json.from_json(request.json)
+        profile = pj.from_json(request.json)
     
 @get ("/cloud/status")
 def check_status ():
@@ -518,11 +518,15 @@ def run_aggregate ():
   agg = request.json['agg']
   query = request.json['query']
   alg = query['query_type']
-  #if check_policies(agg, alg) == False:
-  #  abort (403, "Failed to pass user policy checks in profile.\n")
+  if check_policies(agg, alg) == False:
+   #abort (403, "Failed to pass user policy checks in profile.\n")
+   print("Failed to pass user policy checks in profile.")
+   return {'phone_data': ""}
 
-  #if privacy_budget_pass(query) == False:
-  #  abort (403, "Out of privacy budget.\n")
+  if privacy_budget_pass(query) == False:
+    # abort (403, "Out of privacy budget.\n")
+    print("Out of privacy budget.")
+    return {'phone_data': ""}
 
   # Time filtering.
   start_time = query['start_ts']
@@ -555,7 +559,7 @@ def run_aggregate ():
 
 def check_policies(agg, alg):
   global profile
-  if agg not in profile.algs:
+  if agg not in profile.aggs:
       return False
 
   if alg not in profile.algs:

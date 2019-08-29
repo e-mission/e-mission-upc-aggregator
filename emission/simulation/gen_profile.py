@@ -129,8 +129,8 @@ class AlgProfile:
 
     def add_to_alg_map(self, new_agg, alg):
         if new_agg not in self.agg_alg_map:
-            self.agg_alg_map[new_agg] = set()
-        self.agg_alg_map[new_agg].add(alg)
+            self.agg_alg_map[new_agg] = list()
+        self.agg_alg_map[new_agg].append(alg)
 
     def remove_from_alg_map(self, agg, alg):
         if agg not in self.agg_alg_map:

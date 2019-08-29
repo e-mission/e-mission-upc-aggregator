@@ -17,19 +17,25 @@ def set_priv_budget(f, val):
 
 def main ():
     query_files = ["experiment_queries/q1_offset_25.json", "experiment_queries/q2_offset_25.json"]
-    num_users = 100
-    num_trips = 5
-    num_queries = 75
+    num_users = 60
+    num_trips = 3
+    num_queries = 40
     for query_file in query_files:
-        set_priv_budget("emission/simulation/privacy_budget.json", 3)
-        ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(num_users / 2), str(num_trips)], cwd="./")
+        set_priv_budget("emission/simulation/privacy_budget.json", 2)
+        requests.post (controller_addr + "/setup_networks")
+        ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(int(num_users / 3)), str(num_trips)], cwd="./")
         ret.wait ()
+        requests.post (controller_addr + "/setup_networks")
+        set_priv_budget("emission/simulation/privacy_budget.json", 4)
+        ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(int(num_users / 3)), str(num_trips)], cwd="./")
+        ret.wait ()
+        requests.post (controller_addr + "/setup_networks")
         set_priv_budget("emission/simulation/privacy_budget.json", 6)
-        ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(num_users / 2), str(num_trips)], cwd="./")
+        ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(int(num_users / 3)), str(num_trips)], cwd="./")
         ret.wait ()
-        csv_file_name = "csvs/pb_" + query_file + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
+        csv_file_name = "csvs/pb_" + query_file.split("/")[1] + "_0.05_" + str(num_users) + "_" + str(num_trips) + ".csv"
         for _ in range(num_queries):
-            requests.post (controller_addr + "/kill_all_queriers")
+            requests.post (controller_addr + "/pause_all_queriers")
             requests.post (controller_addr + "/pause_all_clouds")
             ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py", query_file, csv_file_name, str(num_users)], cwd="./")
             ret.wait ()
