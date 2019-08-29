@@ -1,6 +1,7 @@
 # E-MISSION NEW ARCHITECTURE
 
 The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are:
+
     * System Controller
     * User Data Storage
     * Data Simulation
@@ -12,6 +13,7 @@ Each of these will sections covered in more detail, along with the code added/ch
 
 ## Installation
 To get everything to work properly with the current implementation, you need a linux machine with the following installations:
+
     * Anaconda Python3
     * Ecryptfs
     * Docker
@@ -48,6 +50,7 @@ Here we have opted to rely on default `docker` rather than a more robust microse
 To facilitate our new architecture we have added new code and docker functionality in a variety of locations. Regretably these are probably not the best locations to place this code and our changes can seem a bit disjoint in their placement. I will do my best to list what is located where and what its purpose is. Additionally with each section we will present a brief higher level overview of the intended purpose of each component, but this is not meant asa substitute for a detailed description of the architecture (which is in progress).
 
 However before we can detail the exact component we need an overview of the components. Our new architecture basically consists of 3 components:
+
     1. Users
     2. Algorithm Providers
     3. A system controller
@@ -57,6 +60,7 @@ These components are then split further into various subcomponents but at a very
 ### System Controller
 
 The system controller is basically a central server that all participants connect to. It can perform a variety of tasks, some of which are:
+
     * Tell an algorithm instance where to find users.
     * Tell users where their user cloud is located.
     * Create a user cloud for a newly signed up user.
@@ -68,6 +72,7 @@ Our actually implementation of this involves using `bottle.py` to create a serve
 
 #### Files
 The actually files changed or added to implement the controller (relative to the e-mission-server base directory) are:
+
     * `launch_machine.py` - Helper script to launch the controller.
     * `conf/net/machines.json.sample` - Example configuration used to specify the controller
     * `emission/net/api/controller.py` - Actual code used to provide the server.
@@ -82,6 +87,7 @@ The presence of additional user clouds per machine also required us to provision
 
 #### Files
 The actually files changed or added to implement the user cloud (relative to the e-mission-server base directory) are:
+
     * `emission/net/api/cfc_webapp.py` - Actual code for the e-mission web server. You can find my changes in a section commented "Nick's changes"
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
@@ -92,6 +98,7 @@ We also interact with existing e-mission files as well as some possible helper s
 
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
+
     * `launch_machine.py` - Helper script to launch the controller.
     * `conf/net/machines.json.sample` - Example configuration used to specify the controller
     * `emission/net/api/controller.py` - Actual code used to provide the server.
@@ -101,6 +108,7 @@ We also interact with existing e-mission files as well as some possible helper s
 ### Data Querying
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
+
     * `launch_machine.py` - Helper script to launch the controller.
     * `conf/net/machines.json.sample` - Example configuration used to specify the controller
     * `emission/net/api/controller.py` - Actual code used to provide the server.
@@ -111,6 +119,7 @@ We also interact with existing e-mission files as well as some possible helper s
 
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
+
     * `launch_machine.py` - Helper script to launch the controller.
     * `conf/net/machines.json.sample` - Example configuration used to specify the controller
     * `emission/net/api/controller.py` - Actual code used to provide the server.
