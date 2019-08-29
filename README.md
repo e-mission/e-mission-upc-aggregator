@@ -1,6 +1,6 @@
 # E-MISSION NEW ARCHITECTURE
 
-The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are:
+The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are\:
 
     * System Controller
     * User Data Storage
