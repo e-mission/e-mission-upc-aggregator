@@ -19,7 +19,7 @@ To get everything to work properly with the current implementation, you need a l
 * Docker
 * Docker-Compose
 
-### `Anaconda Python3`
+### Anaconda Python3
 On each machine we need a host process to provision docker instances which means you need access to `Python 3.5` or greater. Depending on the data analysis you wish to run you may need access to additional libraries, most of which should be supported by the `conda env` produced for the base e-mission server. You find the installation instructions on the main branch of the e-mission docs. Unfortunately the link to manual installation appears to be broken right now so I will link it when it returns.
 
 It shouldn't be necessary to have as large an environment as the existing `conda env` provisions, but this sticks with some of the core design decisions we made in working on these changes "don't remove/optimize features until we get a working product." It for this reason that you see huge chunks of the e-mission code copied over (and consequentially creating a need to merge with the main repository) when we could probably succeed with a only including a much smaller subset.
@@ -61,10 +61,10 @@ These components are then split further into various subcomponents but at a very
 
 The system controller is basically a central server that all participants connect to. It can perform a variety of tasks, some of which are:
 
-    * Tell an algorithm instance where to find users.
-    * Tell users where their user cloud is located.
-    * Create a user cloud for a newly signed up user.
-    * Pause and unpause the physical container for each cloud.
+* Tell an algorithm instance where to find users.
+* Tell users where their user cloud is located.
+* Create a user cloud for a newly signed up user.
+* Pause and unpause the physical container for each cloud.
 
 The last task is particularly important to us because our focus on placing everything in containers for increased isolation relies on an assumption that most of time each user cloud will not be processing data. This allows us to pause that instance which makes us better capable to provision our CPU resources more effectively (presumably at some cost to storing on disk).
 
@@ -73,9 +73,9 @@ Our actually implementation of this involves using `bottle.py` to create a serve
 #### Files
 The actually files changed or added to implement the controller (relative to the e-mission-server base directory) are:
 
-    * `launch_machine.py` - Helper script to launch the controller.
-    * `conf/net/machines.json.sample` - Example configuration used to specify the controller
-    * `emission/net/api/controller.py` - Actual code used to provide the server.
+* `launch_machine.py` - Helper script to launch the controller.
+* `conf/net/machines.json.sample` - Example configuration used to specify the controller
+* `emission/net/api/controller.py` - Actual code used to provide the server.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
@@ -88,7 +88,7 @@ The presence of additional user clouds per machine also required us to provision
 #### Files
 The actually files changed or added to implement the user cloud (relative to the e-mission-server base directory) are:
 
-    * `emission/net/api/cfc_webapp.py` - Actual code for the e-mission web server. You can find my changes in a section commented "Nick's changes"
+* `emission/net/api/cfc_webapp.py` - Actual code for the e-mission web server. You can find my changes in a section commented "Nick's changes"
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
@@ -99,9 +99,9 @@ We also interact with existing e-mission files as well as some possible helper s
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
 
-    * `launch_machine.py` - Helper script to launch the controller.
-    * `conf/net/machines.json.sample` - Example configuration used to specify the controller
-    * `emission/net/api/controller.py` - Actual code used to provide the server.
+* `launch_machine.py` - Helper script to launch the controller.
+* `conf/net/machines.json.sample` - Example configuration used to specify the controller
+* `emission/net/api/controller.py` - Actual code used to provide the server.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
@@ -109,9 +109,9 @@ We also interact with existing e-mission files as well as some possible helper s
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
 
-    * `launch_machine.py` - Helper script to launch the controller.
-    * `conf/net/machines.json.sample` - Example configuration used to specify the controller
-    * `emission/net/api/controller.py` - Actual code used to provide the server.
+* `launch_machine.py` - Helper script to launch the controller.
+* `conf/net/machines.json.sample` - Example configuration used to specify the controller
+* `emission/net/api/controller.py` - Actual code used to provide the server.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
@@ -120,9 +120,9 @@ We also interact with existing e-mission files as well as some possible helper s
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
 
-    * `launch_machine.py` - Helper script to launch the controller.
-    * `conf/net/machines.json.sample` - Example configuration used to specify the controller
-    * `emission/net/api/controller.py` - Actual code used to provide the server.
+* `launch_machine.py` - Helper script to launch the controller.
+* `conf/net/machines.json.sample` - Example configuration used to specify the controller
+* `emission/net/api/controller.py` - Actual code used to provide the server.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
