@@ -1,23 +1,23 @@
 # E-MISSION NEW ARCHITECTURE
 
-The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are\:
+The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are:
 
-    * System Controller
-    * User Data Storage
-    * Data Simulation
-    * Data Aggregation
-    * Data Querying
-    * Multimachine Communication
+* System Controller
+* User Data Storage
+* Data Simulation
+* Data Aggregation
+* Data Querying
+* Multimachine Communication
 
 Each of these will sections covered in more detail, along with the code added/changed to implement it. Additionally we made changes to produce a variety of new images for containers, 
 
 ## Installation
 To get everything to work properly with the current implementation, you need a linux machine with the following installations:
 
-    * Anaconda Python3
-    * Ecryptfs
-    * Docker
-    * Docker-Compose
+* Anaconda Python3
+* Ecryptfs
+* Docker
+* Docker-Compose
 
 ### `Anaconda Python3`
 On each machine we need a host process to provision docker instances which means you need access to `Python 3.5` or greater. Depending on the data analysis you wish to run you may need access to additional libraries, most of which should be supported by the `conda env` produced for the base e-mission server. You find the installation instructions on the main branch of the e-mission docs. Unfortunately the link to manual installation appears to be broken right now so I will link it when it returns.
@@ -51,9 +51,9 @@ To facilitate our new architecture we have added new code and docker functionali
 
 However before we can detail the exact component we need an overview of the components. Our new architecture basically consists of 3 components:
 
-    1. Users
-    2. Algorithm Providers
-    3. A system controller
+1. Users
+2. Algorithm Providers
+3. A system controller
 
 These components are then split further into various subcomponents but at a very high level users provide their data and have an abstraction of an individualized workstation through our "user cloud" abstraction. Algorithm providers interact directly which each user to acquire their necessary data and then aggregate their results as necessary. The system controller is responsible for providing the connection between users and their storage as well as algorithm providers access to users. By abstracting this component into a controller it allows us to dynamically reallocate resources.
 
