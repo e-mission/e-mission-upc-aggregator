@@ -108,33 +108,39 @@ In implementing algorithms we opted to split algorithms into 2 components:
 Our primary example use case was `Jack Sullivan's` work on differentially private queriers, which is why we opted to struct code in this manner. You can find the relevant code in many locations, but we opted to stick with the same `POST Request` server model for all components (i.e. a research launches an aggregator server which gets many queriers launched through the controller). We currently only use functionality that we added (for example to support being able to ask if data exists for a particular range and if so to retrieve it). We have not shown any support for an aggregator that for example wants to run the e-mission pipeline on some subset of users. We also do not have any work on modifying how users are requested/sampled and how to ensure it is done in a fair process.
 
 #### Files
-The actually files used to implement the aggregator (relative to the e-mission-server base directory) are:
+The actually files used to implement aggregation (relative to the e-mission-server base directory) are:
 
-* `launch_machine.py` - Helper script to launch the controller.
-* `conf/net/machines.json.sample` - Example configuration used to specify the controller
-* `emission/net/api/controller.py` - Actual code used to provide the server.
+* `emission/net/ext_service/launch_aggregator.py` - Helper script to launch the sample aggregator.
+* `emission/net/ext_service/aggregator.py` - Actual code for the server component of the sample aggregator.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
 ### Data Querying
 
-#### Files
-The actually files used to implement the controller (relative to the e-mission-server base directory) are:
+The data querying component is an additional POST server. This component is far more in tune with a traditional microservices architecture as all instances are identical except for the endpoints at which they connect. For that reason a feasible redesign would be to just deploy the queriers in a standard kubernetes cluster. The actual functionality is that the controller spawns each querier instance and then provides the aggregator with addresses of the queriers. Then the aggregator connects with the querier and provides a set of users that it wants the querier to connect to and the querier will then performed that request by making a post request to the desired user clouds. Finally it send the result to the aggregator (and if necessary remains up to execute any concluding interaction with the usercloud).
 
-* `launch_machine.py` - Helper script to launch the controller.
-* `conf/net/machines.json.sample` - Example configuration used to specify the controller
-* `emission/net/api/controller.py` - Actual code used to provide the server.
+#### Files
+The actually files used to implement the querier (relative to the e-mission-server base directory) are:
+
+* `runQueryCorrect.py` - Helper script to launch a correctness query.
+* `emission/net/int_service/query_microservice.py` - Sample implementation of a querier server.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
 ### Multimachine Communication
 
+One fundamental challenge with this project was the struggle to align the project with existing schema in microservices architectures. To illustrate this more clearly let's give the example of how `kubernetes` or `docker swarm` might opt to handle a web server. The general paradigm is that someone creates an image of the web server. The user does this with some number of instances to reflect their expected workload. However all users connect to the same web address and `kubernetes` decides which web server should be routed traffic based on load management, similarly managing the movement of instances across a cluster of machines. Crucially all web traffic goes to the same place because all instances are identical! In our user cloud implementation we have a code base which should be identical for each user but once a user connects it is no longer stateless, so a user must connect again to the previous instance it connected to (the only piece of state we have added is a user secret key to encrypt data but this is a very important piece of state).
+
+The implication of this is that we cannot treat the user cloud as a service in the way a traditional microservices architecture would and instead need to create individual containers manually. Due to limitations in `docker swarm` we actually can't even directly deploy containers as services with a single container (it cannot provide privleged containers). This is not a limitation with `kubernetes`, which makes it promising as an alternative, especially given that kubernetes can then address issues like load management and reliability. However we have opted to push this to future work, mostly because there are not many theoretical challenges with using `kubernetes` but I was unexperienced and my research seemed to indicate setup can be complex. One definite improvement would be to port these modules to `kubernetes` and hopefully in the process remove many of the hacks needed to implement it.
+
+For the time being we using docker to spawn individual contains and associate machines together with many a per machine python server that can launch a docker container. We then decide how to allocate containers across machines using static information (though we could use information like current CPU consumed and available memory but we figured this was a temporary fix before using kubernetes).
+
 #### Files
 The actually files used to implement the controller (relative to the e-mission-server base directory) are:
 
-* `launch_machine.py` - Helper script to launch the controller.
-* `conf/net/machines.json.sample` - Example configuration used to specify the controller
-* `emission/net/api/controller.py` - Actual code used to provide the server.
+* `conf/net/machines.json.sample` - Example configuration used to specify machines that can be accessed. It does not provide support for fault tolerance for example.
+* `emission/net/int_service/swarm.py` - Server run locally to actually launch docker commands. This should be removed eventually.
+* `emission/net/int_service/swarm_controller.py` - Helper file to provide abstractions to the controller about how to launch an instance. This should be removed eventually.
 
 We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
 
