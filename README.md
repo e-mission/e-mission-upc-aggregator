@@ -161,6 +161,11 @@ To get familiar with our implementation and changes we suggest the following rea
 5. Data Aggregator and Data Querier - These together should provide an example of how an application may query and interact with our user cloud
 6. Scripts to run the whole process (`runNewArch.py` for example) - These should give you an example how use can construct experiments to test the architecture.
 
-## Setup and Teardown
+## Running an Example
 
-You can find information on how to actually run the code and build the necessary images inside the `README` in the docker directory.
+First you need to make sure the relevant docker images are built. This information can be found in `docker/README.md` and for our example this will require building all 3 of the images listed. If you are planning on using this as a starting point for future changes there a couple important takeaways.
+
+1. If you want your changes to be reflected and you are not working off the main branch you need to modify all 3 dockerfiles and change possibly the repository name and the branch. Failure to do so will cause the image to fail to download your changes from github.
+2. Any changes that you make must be pushed to github to test them. This is necessary because again the image downloads from your repository. It is however not necessary to rebuild the images each time you make a change because we have added commands into the startup script to download the latest commit (which you also be aware of in case you want to control which components have up to date changes and which do not). For this reason we recommend using multiple branches and if you are planning on making large changes possibly a different branch for each component so you can test them independently.
+
+Next you need to make sure and update what machines you will be using.
