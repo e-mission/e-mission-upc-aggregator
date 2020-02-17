@@ -191,7 +191,7 @@ Finally once your network is started (which may take a while on the first attemp
  $ ./e-mission-py.bash runNewArch.py
 ```
 
-from a terminal in the e-mission source environment. If you are seeking to make your own trials then consider investigating this script and the more importantly the scripts it calls in order to function. 
+from a terminal in the e-mission source environment. This example may take a while before you see any output. If you are seeking to make your own trials then consider investigating this script and the more importantly the scripts it calls in order to function. 
 
 ### Teardown
 
