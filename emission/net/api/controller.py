@@ -111,6 +111,7 @@ def spawn_usercloud ():
         output = emissc.createCloudInstance (user_uuid) 
         runningclouds[user_uuid] = output
         cloudticks[user_uuid] = ticks
+        print(output)
         return output
     
 @post('/profile/create')
