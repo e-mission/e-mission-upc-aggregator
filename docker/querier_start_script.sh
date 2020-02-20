@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 #Configure web server
 
+
+#Pull the latest changes from the repo
+cd /usr/src/app && git pull origin tls
+
 #set database URL using environment variable
 echo ${DB_HOST}
 if [ -z ${DB_HOST} ] ; then
@@ -19,11 +23,8 @@ if [ -z ${WEB_SERVER_HOST}} ] ; then
 else
     sed "s_localhost_${WEB_SERVER_HOST}_" conf/net/api/webserver.conf.sample > conf/net/api/webserver.conf
 fi
+
 cat conf/net/api/webserver.conf
-
-#Pull the latest changes from the repo
-cd /usr/src/app && git pull origin tls
-
 #TODO: start cron jobs
 # change python environment
 source activate emission
