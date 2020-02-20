@@ -8,7 +8,7 @@
     "swarm-port" : "54321",
     "machines" :
         {
-            "http://127.0.1.1" : "1"
+            "https://127.0.1.1" : "1"
         },
     "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second)",
     "register_user_endpoint" : "/profile/create",
