@@ -1,7 +1,7 @@
 {
-    "controller-ip" : "http://127.0.1.1",
+    "controller-ip" : "https://127.0.1.1",
     "_controller_comment": "The controller-ip is the IP address hosting the controller",
-    "controller-port" : "4041",
+    "controller-port" : "4430",
     "tick-period" : "60",
     "pause-ticks" : "30",
     "kill-ticks" : "15",
