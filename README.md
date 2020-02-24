@@ -20,7 +20,7 @@ To get everything to work properly with the current implementation, you need a l
 * Docker-Compose
 
 ### Anaconda Python3
-On each machine we need a host process to provision docker instances which means you need access to `Python 3.5` or greater. Depending on the data analysis you wish to run you may need access to additional libraries, most of which should be supported by the `conda env` produced for the base e-mission server. You find the installation instructions on the main branch of the e-mission docs. Unfortunately the link to manual installation appears to be broken right now so I will link it when it returns.
+On each machine we need a host process to provision docker instances which means you need access to `Python 3.5` or greater. Depending on the data analysis you wish to run you may need access to additional libraries, most of which should be supported by the `conda env` produced for the base e-mission server. You find the installation instructions [here](https://github.com/e-mission/e-mission-docs/blob/master/docs/install/manual_install.md).
 
 It shouldn't be necessary to have as large an environment as the existing `conda env` provisions, but this sticks with some of the core design decisions we made in working on these changes "don't remove/optimize features until we get a working product." It for this reason that you see huge chunks of the e-mission code copied over (and consequentially creating a need to merge with the main repository) when we could probably succeed with a only including a much smaller subset.
 
@@ -161,6 +161,50 @@ To get familiar with our implementation and changes we suggest the following rea
 5. Data Aggregator and Data Querier - These together should provide an example of how an application may query and interact with our user cloud
 6. Scripts to run the whole process (`runNewArch.py` for example) - These should give you an example how use can construct experiments to test the architecture.
 
-## Setup and Teardown
+## Running an Example
 
-You can find information on how to actually run the code and build the necessary images inside the `README` in the docker directory.
+First you need to make sure the relevant docker images are built. This information can be found in `docker/README.md` and for our example this will require building all 3 of the images listed. If you are planning on using this as a starting point for future changes there a couple important takeaways.
+
+1. If you want your changes to be reflected and you are not working off the main branch you need to modify all 3 dockerfiles and change possibly the repository name and the branch. Failure to do so will cause the image to fail to download your changes from github.
+2. Any changes that you make must be pushed to github to test them. This is necessary because again the image downloads from your repository. It is however not necessary to rebuild the images each time you make a change because we have added commands into the startup script to download the latest commit (which you also be aware of in case you want to control which components have up to date changes and which do not). For this reason we recommend using multiple branches and if you are planning on making large changes possibly a different branch for each component so you can test them independently.
+
+Once you actually begin making changes and have configured your repository and branches future builds can be completed from the `build_images.sh` script.
+
+Next you need to make sure and update what machines you will be using. Eventually this step should be replaced by configuring your kubernetes cluster. However since that functionality is not yet available and our configuration is not compatible with docker swarm due to its reliance on privileged containers, you will need to modify our configuration for our docker "controller." To do so you want to open the file `conf/net/machines.json.sample`. In this file you will find a few important json fields. Most of these you won't need to edit (and you should refer to the code if you are curious about their functionality) but you may need to change `controller-ip`, which refers to the ip address from which you will launch your controller, `controller-port` which is the public accessible tcp port upon which the controller will run, `swarm-port` which is the port from which a per machine server responsible for launching docker containers will run, and finally `machines` which is a dictionary mapping ip addresses of the machines participating to integer values. These integers don't necessarily have any inherent meaning but can be used if you want to give weighted priority to certain machines when launching UPC containers based upon their features (for example available RAM).
+
+Now that you have completed the necessary setup you need to launch the server that will spawn docker containers across your machines. This requires you to first launch the e-mission anaconda environment as the server must be run outside of docker so they can eventually launch docker containers. Assuming you have already setup the installation steps for the anaconda environment found [here](https://github.com/e-mission/e-mission-docs/blob/master/docs/install/manual_install.md) run:
+```
+ $ source setup/setup.sh
+```
+
+You must do this on every machine you will be using (and if you plan on using more than one terminal in each terminal you use). Now from inside the e-mission environment you can launch the server and controller. To do so run
+
+```
+ $ ./e-mission-py.bash launch_machine.py
+```
+
+ The script `launch_machine.py` will setup the controller if the ip address matches the controller and launch the server (note this will takeup one terminal). If you need greater inspect you can launch each component manually in a separate terminal (check the script for details). This means its also very important that you push your configuration file to your repository and ensure it is consistent across all machines participating. If this script is not launching the controller check that the ip address matches the form expected by the script and that ip address matches the ip address python receives when it calls `gethostbyname` on the current machine.
+
+Finally once your network is started (which may take a while on the first attempt) you can run any of your tests. In this example we will run `runNewArch.py`, which creates fake users, uploads their data to each UPC and finally particpates in some queries. To launch this you can run
+
+```
+ $ ./e-mission-py.bash runNewArch.py
+```
+
+from a terminal in the e-mission source environment. This example may take a while before you see any output. If you are seeking to make your own trials then consider investigating this script and the more importantly the scripts it calls in order to function. 
+
+### Teardown
+
+One issue you may encounter is that if you are running tests you can accidentally dedicate a lot of memory to stopped docker containers. To address this we offer two nearly identical scripts. `prune_docker.sh` will prune any docker images, volumes, or containers you have that are not being used but are consuming memory. `teardown_docker.sh` does the same thing but also first stops all currently running docker containers (which means you should be very careful if you have other docker containers running on your machine.
+
+
+### Summary
+
+In conclusion the steps to running an example in UPC are 
+
+1. Build the images, first by modifying the dockerfiles to refer to your repository and then using `build_images.sh`.
+2. Update the configuration file, `/conf/net/machines.json.sample` to refer to the machines you will be using.
+3. Load the e-mission environment.
+4. Launch the server on each machine and the controller on the dedicated machine with `launch_machine.py`.
+5. Run your desired test file, such as `runNewArch.py`
+6. Teardown as necessary or desired with either `prune_docker.sh` or `teardown_docker.sh`

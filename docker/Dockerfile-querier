@@ -5,11 +5,11 @@ MAINTAINER K. Shankari (shankari@eecs.berkeley.edu)
 # set working directory
 WORKDIR /usr/src/app
 
-# clone from repo
-RUN git clone https://github.com/njriasan/e-mission-server.git .
+# clone from repo. If you forked the existing repo change this to the repo you are using
+RUN git clone https://github.com/e-mission/e-mission-upc-aggregator.git .
 
-# update the branch
-RUN git checkout newArch
+# update the branch. If you are using a different branch than master change the branch name.
+RUN git checkout master
 
 # setup python environment.
 RUN conda env update --name emission --file setup/environment36.yml
@@ -32,7 +32,7 @@ RUN apt-get -y install nano vim
 RUN apt-get -y remove --purge build-essential
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-#declare environment variables
+#declare environment variables. These environment variables are used as a method to get around docker network issues.
 ENV DB_HOST=''
 ENV WEB_SERVER_HOST=''
 
