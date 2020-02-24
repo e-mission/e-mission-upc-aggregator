@@ -17,19 +17,19 @@ class UserCloud:
 
 
     def send_contents (self, addr):
-        print (requests.get (addr + cloud_status_endpoint).text)
-        print (requests.post (addr + cloud_key_endpoint, json=self.key).text)
-        print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile)).text)
+        print (requests.get (addr + cloud_status_endpoint, verify=False).text)
+        print (requests.post (addr + cloud_key_endpoint, json=self.key, verify=False).text)
+        print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile), verify=False).text)
 
 
     # Method used to get the address from speaking to the KAL
     def getaddress (self, username, addr):
-        self.address = requests.post (addr + spawn_usercloud_endpoint, json=username).text
+        self.address = requests.post (addr + spawn_usercloud_endpoint, json=username, verify=False).text
 
     # Registers the user to controller
     def register_with_controller (self, controller_addr):
         print (controller_addr)
-        print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}))
+        print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}, verify=False))
 
     def init_usercloud (self, username, controller_addr):
         self.username = username
@@ -38,4 +38,4 @@ class UserCloud:
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):
-        return requests.post (self.address + addr_extension, json=contents)
+        return requests.post (self.address + addr_extension, json=contents, verify=False)

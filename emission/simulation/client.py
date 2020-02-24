@@ -43,7 +43,7 @@ class EmissionFakeDataGenerator(Client):
         data = {'user': email}
         #url = self._config['emission_server_base_url'] + self._config['register_user_endpoint'] 
         self._usercloud.init_usercloud (data, self._config['emission_server_base_url'])
-        r = requests.post(self._usercloud.address + self._config['register_user_endpoint'], json=data)
+        r = requests.post(self._usercloud.address + self._config['register_user_endpoint'], json=data, verify=False)
         r.raise_for_status()
         uuid = r.json()['uuid']
         #TODO: This is a hack to make all the genereated entries JSON encodeable. 

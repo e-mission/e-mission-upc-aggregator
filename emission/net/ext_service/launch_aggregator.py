@@ -11,7 +11,7 @@ username = "test_analyst"
 # query_file = "query.json"
 
 def main (query_file, csv_file, upperbound):
-    r = requests.post (controller_addr + register_user_endpoint, json={'user':username})
+    r = requests.post (controller_addr + register_user_endpoint, json={'user':username}, verify=False)
     if r.ok:
         ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/aggregator.py", query_file, controller_addr, "1", upperbound, username, "test-querier", csv_file])
         ret.wait ()

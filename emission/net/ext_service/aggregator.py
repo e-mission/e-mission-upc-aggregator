@@ -164,7 +164,7 @@ class RC():
         return "ae"
 
 def get_user_addrs (controller_addr, num_users_lower_bound, num_users_upper_bound):
-    r = requests.post(controller_addr + get_users_endpoint, json={"count": num_users_upper_bound})
+    r = requests.post(controller_addr + get_users_endpoint, json={"count": num_users_upper_bound}, verify=False)
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)
@@ -175,7 +175,7 @@ def get_user_addrs (controller_addr, num_users_lower_bound, num_users_upper_boun
         return None
 
 def launch_query_microservices (query_type, service_count, username):
-    r = requests.post(controller_addr + get_queriers_endpoint + "/{}".format (query_type), json={"user": username, "count": service_count})
+    r = requests.post(controller_addr + get_queriers_endpoint + "/{}".format (query_type), json={"user": username, "count": service_count}, verify=False)
     json_addrs = r.json ()
     addr_list = list (json_addrs.values ())
     print (addr_list)
