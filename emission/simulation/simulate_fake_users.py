@@ -56,6 +56,7 @@ def main (usercount, tripcount):
     for i in range(int(usercount / 50) + 1):
         curr_num_users = (usercount - 50 * i) % 51
         fakeusers = create_fake_users (curr_num_users, base_user_config, client_config) 
+        print("REACHED!")
         create_and_sync_data (fakeusers, tripcount)
 
     
@@ -95,7 +96,7 @@ def create_and_sync_data (userlist, numTrips):
 
 def create_user_data (user, numTrips):
     for _ in range (numTrips):
-        temp = user.take_trip ()
+        temp = user.dummy_take_trip ()
 
 def sync_user_data (user):
     old_len = len (user._measurements_cache)

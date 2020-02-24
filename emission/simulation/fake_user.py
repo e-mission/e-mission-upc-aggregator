@@ -9,6 +9,9 @@ import socket
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 
+#fake imports to delete later
+import datetime
+
 class FakeUser:
     """
     Fake user class used to genreate synthetic data.
@@ -27,6 +30,14 @@ class FakeUser:
         self._label_to_coordinate_map = self._create_label_to_coordinate_map(config)
         self._trip_to_mode_map = self._create_trip_to_mode_map(config)
         self._measurements_cache = []
+
+    # Helper function which has no purpose except allowing scripts to advance while the OTP server
+    # is out of commission
+    def dummy_take_trip(self):
+        self._measurements_cache += [{'_id': None, 'data': None}]
+        return [{'_id': None, 'data': None}]
+         
+
 
     def take_trip(self):
         #TODO: If we have already completed a trip, we could potentially cache the location data 
@@ -75,7 +86,7 @@ class FakeUser:
 
         error = False
         try:
-            r = requests.post(self._config['upload_url'], json=data, timeout=300)
+            r = requests.post(self._config['upload_url'], json=data, timeout=300, verify=False)
         except (socket.timeout) as e:
             error = True
 
@@ -85,12 +96,12 @@ class FakeUser:
 
             #We may have failed because the usercloud was paused. Let's contact the controller and try one more time
             try:
-                r = request.post(self._config['check_url'], json={'user': self.email}, timeout=5)
+                r = requests.post(self._config['check_url'], json={'user': self._email}, timeout=5, verify=False)
                 if r.ok:
 
                     # If this succeeded then we have the address of our cloud again (with the timer reset)
                     self._config['upload_url'] = r.text
-                    r = requests.post(self._config['upload_url'], json=data, timeout=5)
+                    r = requests.post(self._config['upload_url'], json=data, timeout=5, verify=False)
                     if r.ok:
                         error = False 
             except (socket.timeout) as e:
