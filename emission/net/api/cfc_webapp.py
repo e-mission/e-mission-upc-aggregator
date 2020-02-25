@@ -631,7 +631,7 @@ if __name__ == '__main__':
         key_file = open('conf/net/keys.json')
       except:
         logging.debug("certificates not configured, falling back to sample, default certificates")
-        key_file = open('conf/net/api/webserver.conf.sample')
+        key_file = open('conf/net/keys.json.sample')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]
       chain_cert = key_data["chain_certificate"]

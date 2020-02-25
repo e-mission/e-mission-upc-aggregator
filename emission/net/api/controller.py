@@ -333,9 +333,8 @@ if __name__ == "__main__":
       chain_cert = key_data["chain_certificate"]
       private_key = key_data["private_key"]
 
-      print("Running server with TLS")
       run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server='cheroot', debug=True,
           certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
     else:
-      print("Running server without TLS")
+      print("Running with HTTPS turned OFF - use a reverse proxy on production")
       run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server="cheroot", debug=True)
