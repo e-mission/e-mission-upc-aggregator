@@ -1,5 +1,5 @@
 {
-  "host_certificate" : "xxxxx-cert.cer",
-  "chain_certificate" : "xxxxx-interm.cer",
-  "private_key" : "xxxxx_privkey.key"
+  "host_certificate" : "conf/net/certificates/upc-individual.crt",
+  "chain_certificate" : "conf/net/certificates/upc-individual.crt",
+  "private_key" : "conf/net/certificates/upc-individual.key"
 }

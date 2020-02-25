@@ -627,7 +627,11 @@ if __name__ == '__main__':
     # port number
     if server_port == "443":
       # We support SSL and want to use it
-      key_file = open('conf/net/keys.json')
+      try:
+        key_file = open('conf/net/keys.json')
+      except:
+        logging.debug("certificates not configured, falling back to sample, default certificates")
+        key_file = open('conf/net/api/webserver.conf.sample')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]
       chain_cert = key_data["chain_certificate"]
