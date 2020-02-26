@@ -5,6 +5,7 @@ config_data = json.load(config_file)
 controller_ip = config_data["controller-ip"]
 controller_port = int (config_data["controller-port"])
 upc_port = int (config_data["upc-port"])
+querier_port = int (config_data["upc-port"])
 tick_period = float (config_data["tick-period"])
 pause_ticks = int (config_data["pause-ticks"])
 kill_ticks = int (config_data["kill-ticks"])
