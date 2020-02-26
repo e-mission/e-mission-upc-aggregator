@@ -13,7 +13,7 @@ services:
         condition: on-failure
     ports:
       #ENV VAR FOR RUNTIME PORT MAPPING
-      - $PORTMAP
+        - $PORTMAP
     links:
       - db:db$ctr
     networks:

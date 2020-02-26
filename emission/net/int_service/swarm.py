@@ -97,4 +97,12 @@ def get_container_names (name):
 
 
 if __name__ == "__main__":
-    run(host=socket.gethostbyname(socket.gethostname()), port=swarm_port, server='cheroot')
+    # Run this with TLS
+      key_file = open('conf/net/keys.json')
+      key_data = json.load(key_file)
+      host_cert = key_data["host_certificate"]
+      chain_cert = key_data["chain_certificate"]
+      private_key = key_data["private_key"]
+
+      run(host=socket.gethostbyname(socket.gethostname()), port=swarm_port, server='cheroot', debug=True,
+          certfile=host_cert, chainfile=chain_cert, keyfile=private_key)

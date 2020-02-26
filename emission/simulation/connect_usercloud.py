@@ -17,6 +17,7 @@ class UserCloud:
 
 
     def send_contents (self, addr):
+        print(addr + cloud_status_endpoint)
         print (requests.get (addr + cloud_status_endpoint, verify=False).text)
         print (requests.post (addr + cloud_key_endpoint, json=self.key, verify=False).text)
         print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile), verify=False).text)

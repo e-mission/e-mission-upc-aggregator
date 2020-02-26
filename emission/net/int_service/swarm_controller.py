@@ -24,7 +24,7 @@ class Machine ():
         if self.weight == 0.0:
             return
         #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-        resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
+        resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=False)
         self.containers.append (uuid)
         Machine.total += 1
         return "{}:{}".format (self.baseaddr, resp.text)
@@ -35,7 +35,7 @@ class Machine ():
             return
         #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
         json_dict = {"name": name, "query": query_type}
-        resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict)
+        resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict, verify=False)
         self.containers.append (name)
         Machine.total += 1
         return "{}:{}".format (self.baseaddr, resp.text)
@@ -44,19 +44,19 @@ class Machine ():
 
     def pauseContainer (self, uuid):
         if uuid in self.containers:
-            resp = requests.post ("{}:{}/pause".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
+            resp = requests.post ("{}:{}/pause".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=False)
             return True 
         return False
 
     def unpauseContainer (self, uuid):
         if uuid in self.containers:
-            resp = requests.post ("{}:{}/unpause".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
+            resp = requests.post ("{}:{}/unpause".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=False)
             return True 
         return False
 
     def killContainer (self, uuid):
         if uuid in self.containers:
-            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':uuid})
+            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=False)
             print (resp)
             self.containers.remove (uuid)
             Machine.total -= 1
@@ -65,11 +65,11 @@ class Machine ():
 
     def clearContainers (self):
         Machine.total -= len (self.containers)
-        resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort))
+        resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort), verify=False)
         self.containers = []
 
     def setupNetwork (self):
-        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort))
+        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort), verify=False)
         
 
 # Takes in a list of machine tuples, where the first element is the IP_ADDR
