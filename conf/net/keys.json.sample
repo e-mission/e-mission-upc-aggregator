@@ -1,5 +1,5 @@
 {
-  "host_certificate" : "conf/net/certificates/upc-individual.crt",
-  "chain_certificate" : "conf/net/certificates/upc-individual.crt",
-  "private_key" : "conf/net/certificates/upc-individual.key"
+  "host_certificate" : "conf/net/certificates/upc.crt",
+  "chain_certificate" : "conf/net/certificates/upc.crt",
+  "private_key" : "conf/net/certificates/upc-private.key"
 }
