@@ -9,7 +9,7 @@ import abc
 import numpy as np
 import sys
 import requests
-from emission.net.int_service.machine_configs import cloud_aggregate_endpoint
+from emission.net.int_service.machine_configs import cloud_aggregate_endpoint, querier_port
 
 class Query(abc.ABC):
     """
@@ -127,4 +127,4 @@ def receive_user_data(resp, query_object):
 
 if __name__ == "__main__":
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
-    run(host=socket.gethostbyname(socket.gethostname()), port=6500, server='cheroot')
+    run(host=socket.gethostbyname(socket.gethostname()), port=querier_port, server='cheroot')

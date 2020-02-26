@@ -59,6 +59,9 @@ import emission.core.get_database as edb
 import emission.storage.timeseries.geoquery as estg
 import emission.simulation.profile_json as pj
 
+# Nick's additional import for managing servers
+from emission.net.int_service.machine_configs import upc_port
+
 try:
     config_file = open('conf/net/api/webserver.conf')
 except:
@@ -637,11 +640,11 @@ if __name__ == '__main__':
       chain_cert = key_data["chain_certificate"]
       private_key = key_data["private_key"]
 
-      run(host=server_host, port=server_port, server='cheroot', debug=True,
+      run(host=server_host, port=upc_port, server='cheroot', debug=True,
           certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
     else:
       # Non SSL option for testing on localhost
       print("Running with HTTPS turned OFF - use a reverse proxy on production")
-      run(host=server_host, port=server_port, server='cheroot', debug=True)
+      run(host=server_host, port=upc_port, server='cheroot', debug=True)
 
     # run(host="0.0.0.0", port=server_port, server='cherrypy', debug=True)
