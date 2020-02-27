@@ -6,10 +6,10 @@ MAINTAINER K. Shankari (shankari@eecs.berkeley.edu)
 WORKDIR /usr/src/app
 
 # clone from repo. If you forked the existing repo change this to the repo you are using
-RUN git clone https://github.com/e-mission/e-mission-upc-aggregator.git .
+RUN git clone https://github.com/njriasan/e-mission-upc-aggregator.git .
 
 # update the branch. If you are using a different branch than master change the branch name.
-RUN git checkout master
+RUN git checkout tls
 
 # setup python environment.
 RUN conda env update --name emission --file setup/environment36.yml

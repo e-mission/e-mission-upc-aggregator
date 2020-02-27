@@ -1,7 +1,7 @@
 import subprocess, sys, requests
 import json
 import argparse
-from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, certificate_bundle_path
 
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
@@ -11,7 +11,7 @@ username = "test_analyst"
 # query_file = "query.json"
 
 def main (query_file, csv_file, upperbound):
-    r = requests.post (controller_addr + register_user_endpoint, json={'user':username})
+    r = requests.post (controller_addr + register_user_endpoint, json={'user':username}, verify=certificate_bundle_path)
     if r.ok:
         ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/aggregator.py", query_file, controller_addr, "1", upperbound, username, "test-querier", csv_file])
         ret.wait ()

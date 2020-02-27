@@ -111,6 +111,7 @@ def spawn_usercloud ():
         output = emissc.createCloudInstance (user_uuid) 
         runningclouds[user_uuid] = output
         cloudticks[user_uuid] = ticks
+        print(output)
         return output
     
 @post('/profile/create')
@@ -319,7 +320,21 @@ def getUUID(request, inHeader=False):
 if __name__ == "__main__":
     signal.signal (signal.SIGALRM, tick_incr)
     launch_timer ()
-    if (len (sys.argv) == 1):
-        run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server="cheroot", debug=True)
+    if len(sys.argv) != 1:
+      sys.stderr.write ("Error too many arguments to launch known access location.\n")
+      sys.exit(1)
+    # Place holder for SSL that will be replaced with 443 when run in a container.
+    # Not controller port is set to be an integer by an earlier code segment
+    if  controller_port == 4430:
+      # We support SSL and want to use it
+      key_file = open('conf/net/keys.json')
+      key_data = json.load(key_file)
+      host_cert = key_data["host_certificate"]
+      chain_cert = key_data["chain_certificate"]
+      private_key = key_data["private_key"]
+
+      run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server='cheroot', debug=True,
+          certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
     else:
-        sys.stderr.write ("Error too many arguments to launch known access location.\n")
+      print("Running with HTTPS turned OFF - use a reverse proxy on production")
+      run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server="cheroot", debug=True)

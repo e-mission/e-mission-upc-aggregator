@@ -9,7 +9,7 @@ import abc
 import numpy as np
 import sys
 import requests
-from emission.net.int_service.machine_configs import cloud_aggregate_endpoint
+from emission.net.int_service.machine_configs import cloud_aggregate_endpoint, querier_port
 
 class Query(abc.ABC):
     """
@@ -127,4 +127,24 @@ def receive_user_data(resp, query_object):
 
 if __name__ == "__main__":
     query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
-    run(host=socket.gethostbyname(socket.gethostname()), port=6500, server='cheroot')
+    # The selection of SSL versus non-SSL should really be done through a config
+    # option and not through editing source code, so let's make this keyed off the
+    # port number
+    if querier_port == "443":
+      # We support SSL and want to use it
+      try:
+        key_file = open('conf/net/keys.json')
+      except:
+        logging.debug("certificates not configured, falling back to sample, default certificates")
+        key_file = open('conf/net/keys.json.sample')
+      key_data = json.load(key_file)
+      host_cert = key_data["host_certificate"]
+      chain_cert = key_data["chain_certificate"]
+      private_key = key_data["private_key"]
+
+      run(host=socket.gethostbyname(socket.gethostname()), port=querier_port, server='cheroot', debug=True,
+          certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
+    else:
+      # Non SSL option for testing on localhost
+      print("Running with HTTPS turned OFF - use a reverse proxy on production")
+      run(host=socket.gethostbyname(socket.gethostname()), port=querier_port, server='cheroot', debug=True)

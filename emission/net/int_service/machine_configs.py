@@ -4,6 +4,8 @@ config_file = open('conf/net/machines.json.sample')
 config_data = json.load(config_file)
 controller_ip = config_data["controller-ip"]
 controller_port = int (config_data["controller-port"])
+upc_port = int (config_data["upc-port"])
+querier_port = int (config_data["upc-port"])
 tick_period = float (config_data["tick-period"])
 pause_ticks = int (config_data["pause-ticks"])
 kill_ticks = int (config_data["kill-ticks"])
@@ -23,5 +25,6 @@ cloud_aggregate_endpoint = config_data["cloud_aggregate_endpoint"]
 query_endpoint = config_data["query_endpoint"]
 get_queriers_endpoint = config_data["get_queriers_endpoint"]
 get_users_endpoint = config_data["get_users_endpoint"]
+certificate_bundle_path = config_data["certificate_bundle"]
 
 config_file.close ()

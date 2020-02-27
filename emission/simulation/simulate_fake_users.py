@@ -56,6 +56,7 @@ def main (usercount, tripcount):
     for i in range(int(usercount / 50) + 1):
         curr_num_users = (usercount - 50 * i) % 51
         fakeusers = create_fake_users (curr_num_users, base_user_config, client_config) 
+        print("REACHED!")
         create_and_sync_data (fakeusers, tripcount)
 
     

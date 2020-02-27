@@ -18,6 +18,7 @@ import numpy as np
 from emission.net.int_service.machine_configs import swarm_port
 from multiprocessing import Lock
 from emission.simulation.rand_helpers import gen_random_key_string
+from emission.net.int_service.machine_configs import upc_port, querier_port
 
 cloudVarName = "PORTMAP"
 
@@ -30,7 +31,7 @@ def launch_querier():
     while (not_spawn):
         # select a random port and hope it works
         port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (port, "6500"), "ctr": gen_random_key_string ()}
+        envVars = {cloudVarName: "{}:{}".format (port, querier_port), "ctr": gen_random_key_string ()}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
@@ -44,7 +45,7 @@ def launch_cloud():
     while (not_spawn):
         # select a random port and hope it works
         cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (cloudPort, "8080"), "ctr": gen_random_key_string ()}
+        envVars = {cloudVarName: "{}:{}".format (cloudPort, upc_port), "ctr": gen_random_key_string ()}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
         if res.returncode == 0:
             not_spawn = False
@@ -97,4 +98,12 @@ def get_container_names (name):
 
 
 if __name__ == "__main__":
-    run(host=socket.gethostbyname(socket.gethostname()), port=swarm_port, server='cheroot')
+    # Run this with TLS
+      key_file = open('conf/net/keys.json')
+      key_data = json.load(key_file)
+      host_cert = key_data["host_certificate"]
+      chain_cert = key_data["chain_certificate"]
+      private_key = key_data["private_key"]
+
+      run(host=socket.gethostbyname(socket.gethostname()), port=swarm_port, server='cheroot', debug=True,
+          certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
