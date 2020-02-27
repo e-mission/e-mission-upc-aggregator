@@ -4,6 +4,7 @@ from emission.simulation.error import AddressNotFoundError
 from emission.simulation.rand_helpers import gen_random_key
 import emission.simulation.gen_profile as gp
 import emission.simulation.connect_usercloud as escu
+from emission.net.int_service.machine_configs import certificate_bundle_path
 import requests
 
 class Client(ABC):
@@ -43,7 +44,7 @@ class EmissionFakeDataGenerator(Client):
         data = {'user': email}
         #url = self._config['emission_server_base_url'] + self._config['register_user_endpoint'] 
         self._usercloud.init_usercloud (data, self._config['emission_server_base_url'])
-        r = requests.post(self._usercloud.address + self._config['register_user_endpoint'], json=data, verify=False)
+        r = requests.post(self._usercloud.address + self._config['register_user_endpoint'], json=data, verify=certificate_bundle_path)
         r.raise_for_status()
         uuid = r.json()['uuid']
         #TODO: This is a hack to make all the genereated entries JSON encodeable. 

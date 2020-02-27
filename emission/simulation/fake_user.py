@@ -8,9 +8,7 @@ import socket
 #emission imports
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
-
-#fake imports to delete later
-import datetime
+from emission.net.int_service.machine_configs import certificate_bundle_path
 
 class FakeUser:
     """
@@ -86,7 +84,7 @@ class FakeUser:
 
         error = False
         try:
-            r = requests.post(self._config['upload_url'], json=data, timeout=300, verify=False)
+            r = requests.post(self._config['upload_url'], json=data, timeout=300, verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
 
@@ -96,12 +94,12 @@ class FakeUser:
 
             #We may have failed because the usercloud was paused. Let's contact the controller and try one more time
             try:
-                r = requests.post(self._config['check_url'], json={'user': self._email}, timeout=5, verify=False)
+                r = requests.post(self._config['check_url'], json={'user': self._email}, timeout=5, verify=certificate_bundle_path)
                 if r.ok:
 
                     # If this succeeded then we have the address of our cloud again (with the timer reset)
                     self._config['upload_url'] = r.text
-                    r = requests.post(self._config['upload_url'], json=data, timeout=5, verify=False)
+                    r = requests.post(self._config['upload_url'], json=data, timeout=5, verify=certificate_bundle_path)
                     if r.ok:
                         error = False 
             except (socket.timeout) as e:

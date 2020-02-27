@@ -4,7 +4,7 @@
 
 # Inspired by https://stackoverflow.com/questions/34417279/sending-a-json-string-as-a-post-request/34418733
 import requests
-from emission.net.int_service.machine_configs import register_user_endpoint, spawn_usercloud_endpoint, cloud_status_endpoint, cloud_key_endpoint, cloud_profile_endpoint
+from emission.net.int_service.machine_configs import register_user_endpoint, spawn_usercloud_endpoint, cloud_status_endpoint, cloud_key_endpoint, cloud_profile_endpoint, certificate_bundle_path
 import emission.simulation.profile_json as profile_json
 
 class UserCloud:
@@ -17,20 +17,19 @@ class UserCloud:
 
 
     def send_contents (self, addr):
-        print(addr + cloud_status_endpoint)
-        print (requests.get (addr + cloud_status_endpoint, verify=False).text)
-        print (requests.post (addr + cloud_key_endpoint, json=self.key, verify=False).text)
-        print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile), verify=False).text)
+        print (requests.get (addr + cloud_status_endpoint, verify=certificate_bundle_path).text)
+        print (requests.post (addr + cloud_key_endpoint, json=self.key, verify=certificate_bundle_path).text)
+        print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile), verify=certificate_bundle_path).text)
 
 
     # Method used to get the address from speaking to the KAL
     def getaddress (self, username, addr):
-        self.address = requests.post (addr + spawn_usercloud_endpoint, json=username, verify=False).text
+        self.address = requests.post (addr + spawn_usercloud_endpoint, json=username, verify=certificate_bundle_path).text
 
     # Registers the user to controller
     def register_with_controller (self, controller_addr):
         print (controller_addr)
-        print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}, verify=False))
+        print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}, verify=certificate_bundle_path))
 
     def init_usercloud (self, username, controller_addr):
         self.username = username
@@ -39,4 +38,4 @@ class UserCloud:
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):
-        return requests.post (self.address + addr_extension, json=contents, verify=False)
+        return requests.post (self.address + addr_extension, json=contents, verify=certificate_bundle_path)

@@ -25,5 +25,6 @@ cloud_aggregate_endpoint = config_data["cloud_aggregate_endpoint"]
 query_endpoint = config_data["query_endpoint"]
 get_queriers_endpoint = config_data["get_queriers_endpoint"]
 get_users_endpoint = config_data["get_users_endpoint"]
+certificate_bundle_path = config_data["certificate_bundle"]
 
 config_file.close ()

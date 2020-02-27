@@ -22,5 +22,7 @@
     "cloud_aggregate_endpoint" : "/run/aggregate",
     "query_endpoint" : "/receive_query",
     "get_queriers_endpoint" : "/get_querier_addrs",
-    "get_users_endpoint" : "/get_user_addrs"
+    "get_users_endpoint" : "/get_user_addrs",
+    "_certificate_bundle_comment" : "path provided to were trusted certificates are located on a machine",
+    "certificate_bundle": "conf/net/certificates/public-certs.pem"
 }
