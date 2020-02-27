@@ -29,13 +29,6 @@ class FakeUser:
         self._trip_to_mode_map = self._create_trip_to_mode_map(config)
         self._measurements_cache = []
 
-    # Helper function which has no purpose except allowing scripts to advance while the OTP server
-    # is out of commission
-    def dummy_take_trip(self):
-        self._measurements_cache += [{'_id': None, 'data': None}]
-        return [{'_id': None, 'data': None}]
-         
-
 
     def take_trip(self):
         #TODO: If we have already completed a trip, we could potentially cache the location data 

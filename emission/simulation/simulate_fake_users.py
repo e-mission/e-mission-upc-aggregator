@@ -96,7 +96,7 @@ def create_and_sync_data (userlist, numTrips):
 
 def create_user_data (user, numTrips):
     for _ in range (numTrips):
-        temp = user.dummy_take_trip ()
+        temp = user.take_trip ()
 
 def sync_user_data (user):
     old_len = len (user._measurements_cache)

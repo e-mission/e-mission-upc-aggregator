@@ -193,7 +193,7 @@ def launch_query(q, username, user_addrs, query_micro_addrs):
 
     for i, query_addr in enumerate(query_micro_addrs):
         user_addr = user_addrs[i]
-        query_results.append(pool.apply_async(requests.post, [query_addr + query_endpoint], {"json": {'query': q, 'user_cloud_addr': user_addr, 'agg': username}, "verify" : certificate_bundle_path))
+        query_results.append(pool.apply_async(requests.post, [query_addr + query_endpoint], {"json": {'query': q, 'user_cloud_addr': user_addr, 'agg': username}, "verify" : certificate_bundle_path}))
     pool.close()
     results = []
     [result.wait () for result in query_results]
