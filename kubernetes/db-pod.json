@@ -1,0 +1,39 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "db",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "db"
+    }
+  },
+  "spec": {
+    "volumes": [
+      {
+        "name": "mongo-data-raw",
+        "persistentVolumeClaim": {
+          "claimName": "mongo-data-raw"
+        }
+      }
+    ],
+    "containers": [
+      {
+        "name": "db",
+        "image": "emission/mongo-custom:latest",
+        "resources": {},
+        "volumeMounts": [
+          {
+            "name": "mongo-data-raw",
+            "mountPath": "/raw"
+          }
+        ],
+        "securityContext": {
+          "privileged": true
+        }
+      }
+    ],
+    "restartPolicy": "OnFailure"
+  },
+  "status": {}
+}

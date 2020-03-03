@@ -1,0 +1,37 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "web-server",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "web-server"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "web-server",
+        "image": "emission/test-server:latest",
+        "ports": [
+          {
+            "containerPort": 443
+          }
+        ],
+        "env": [
+          {
+            "name": "DB_HOST",
+            "value": "db"
+          },
+          {
+            "name": "WEB_SERVER_HOST",
+            "value": "0.0.0.0"
+          }
+        ],
+        "resources": {}
+      }
+    ],
+    "restartPolicy": "OnFailure"
+  },
+  "status": {}
+}

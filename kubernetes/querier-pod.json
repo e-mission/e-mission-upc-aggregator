@@ -1,0 +1,33 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "querier",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "querier"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "querier",
+        "image": "emission/test-querier:latest",
+        "ports": [
+          {
+            "containerPort": 8000
+          }
+        ],
+        "env": [
+          {
+            "name": "WEB_SERVER_HOST",
+            "value": "0.0.0.0"
+          }
+        ],
+        "resources": {}
+      }
+    ],
+    "restartPolicy": "OnFailure"
+  },
+  "status": {}
+}
