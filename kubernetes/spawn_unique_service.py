@@ -16,16 +16,20 @@ query_pod_file = "query-pod.json"
 query_pod_config = None
 
 # Function that must be called once to allow for upcs to be spawned at any point in the future
-def initialize_upc():
+def initialize_upc(upc_listening_port):
     global upc_service_config, upc_pod_config
     upc_service_config = read_config_json(upc_service_file)
+    set_service_internal_port(upc_service_config, upc_listening_port)
     upc_pod_config = read_config_json(upc_pod_file)
+    set_pod_internal_port(upc_pod_config, upc_listening_port)
 
 # Function that be called once to allow for queries to be spawned at any point in the future
-def initialize_queries():
+def initialize_queries(query_listening_port):
     global query_service_config, query_pod_config
     query_service_config = read_config_json(query_service_file)
+    set_service_internal_port(query_service_config, query_listening_port)
     query_pod_config = read_config_json(query_pod_file)
+    set_pod_internal_port(query_pod_config, query_listening_port)
 
 
 # Helper function that reads in the givenm json filename and returns 
