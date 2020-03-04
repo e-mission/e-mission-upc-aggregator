@@ -43,7 +43,7 @@ query_pod_config = None
 # Global variables for controlling if each component uses kubernetes or docker
 # This is mostly for testing parts independently and eventually kubernetes should
 # be adopted
-upc_kubernetes = True
+upc_kubernetes = False
 query_kubernetes = False
 
 @post('/launch_querier')
@@ -78,7 +78,7 @@ def launch_cloud():
             if res.returncode == 0:
                 not_spawn = False
         time.sleep (10)
-        return str (cloudPort)
+        return uuid, str (cloudPort)
 
 
 

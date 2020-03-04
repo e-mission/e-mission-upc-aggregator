@@ -8,7 +8,11 @@ import requests
 import numpy as np
 from emission.net.int_service.machine_configs import swarm_port, machines_list, certificate_bundle_path
 
-# Current port the server should be listening on
+# Global variables for controlling if each component uses kubernetes or docker
+# This is mostly for testing parts independently and eventually kubernetes should
+# be adopted
+upc_kubernetes = False
+query_kubernetes = False
 
 randlist = []
 
@@ -26,9 +30,9 @@ class Machine ():
         #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
         resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=certificate_bundle_path)
         self.containers.append (uuid)
+        print(resp.text)
         Machine.total += 1
         return "{}:{}".format (self.baseaddr, resp.text)
-        #return ""
 
     def addQuery (self, name, query_type):
         if self.weight == 0.0:
@@ -39,7 +43,6 @@ class Machine ():
         self.containers.append (name)
         Machine.total += 1
         return "{}:{}".format (self.baseaddr, resp.text)
-       # return ""
         
 
     def pauseContainer (self, uuid):
