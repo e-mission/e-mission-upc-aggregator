@@ -48,76 +48,89 @@ query_kubernetes = False
 
 @post('/launch_querier')
 def launch_querier():
-    if 
-    name = request.json['name'].replace ("-", "")
-    query_type = request.json['query']
-    not_spawn = True
-    while (not_spawn):
-        # select a random port and hope it works
-        port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (port, querier_port), "ctr": gen_random_key_string ()}
-        res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
-        if res.returncode == 0:
-            not_spawn = False
-    return str (port)
+    if query_kubernetes:
+        pass
+    else:
+        name = request.json['name'].replace ("-", "")
+        query_type = request.json['query']
+        not_spawn = True
+        while (not_spawn):
+            # select a random port and hope it works
+            port = np.random.randint (low=2000, high = (pow (2, 16) - 1))
+            envVars = {cloudVarName: "{}:{}".format (port, querier_port), "ctr": gen_random_key_string ()}
+            res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 'docker/docker-compose-{}.yml'.format (query_type), 'up', '-d'], env=envVars)
+            if res.returncode == 0:
+                not_spawn = False
+        return str (port)
 
 @post('/launch_cloud')
 def launch_cloud():
-    uuid = request.json['uuid'].replace ("-", "")
-    not_spawn = True
-    while (not_spawn):
-        # select a random port and hope it works
-        cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (cloudPort, upc_port), "ctr": gen_random_key_string ()}
-        res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
-        if res.returncode == 0:
-            not_spawn = False
-    time.sleep (10)
-    return str (cloudPort)
+    if upc_kubernetes:
+        pass
+    else:
+        uuid = request.json['uuid'].replace ("-", "")
+        not_spawn = True
+        while (not_spawn):
+            # select a random port and hope it works
+            cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
+            envVars = {cloudVarName: "{}:{}".format (cloudPort, upc_port), "ctr": gen_random_key_string ()}
+            res = subprocess.run (['docker-compose', '-p', '{}'.format (uuid), '-f', 'docker/docker-compose.yml', 'up', '-d'], env=envVars)
+            if res.returncode == 0:
+                not_spawn = False
+        time.sleep (10)
+        return str (cloudPort)
 
 
 
 @post('/pause')
 def pause():
-    uuid = request.json['uuid'].replace ("-", "")
-    containers = get_container_names (uuid)
-    for name in containers:
-        if name:
-            res = subprocess.run (['docker', 'container', 'pause', name])
+    if not upc_kubernetes:
+        uuid = request.json['uuid'].replace ("-", "")
+        containers = get_container_names (uuid)
+        for name in containers:
+            if name:
+                res = subprocess.run (['docker', 'container', 'pause', name])
 
 
 @post('/unpause')
 def unpause():
-    uuid = request.json['uuid'].replace ("-", "")
-    containers = get_container_names (uuid)
-    for name in containers:
-        if name:
-            res = subprocess.run (['docker', 'container', 'unpause', name])
+    if not upc_kubernetes:
+        uuid = request.json['uuid'].replace ("-", "")
+        containers = get_container_names (uuid)
+        for name in containers:
+            if name:
+                res = subprocess.run (['docker', 'container', 'unpause', name])
 
 
 @post('/kill')
 def kill():
-    uuid = request.json['uuid'].replace ("-", "")
-    containers = get_container_names (uuid)
-    for name in containers:
-        if name:
-            res = subprocess.run (['docker', 'container', 'stop', name])
-            res = subprocess.run (['docker', 'container', 'rm', name])
+    if upc_kubernetes:
+        pass
+    else:
+        uuid = request.json['uuid'].replace ("-", "")
+        containers = get_container_names (uuid)
+        for name in containers:
+            if name:
+                res = subprocess.run (['docker', 'container', 'stop', name])
+                res = subprocess.run (['docker', 'container', 'rm', name])
 
 @post('/clear_all')
 def clear_all():
-    res = subprocess.run (['./teardown_docker.sh'])
+    if upc_kubernetes or query_kubernetes:
+        res = subprocess.run (['./teardown_docker.sh'])
 
 @post('/create_network')
 def create_network():
-    ret = subprocess.run (["docker", "network", "create", "emission"], cwd="./")
+    if upc_kubernetes or query_kubernetes:
+        ret = subprocess.run (["docker", "network", "create", "emission"], cwd="./")
 
 # Container Helper functions
 def get_container_names (name):
-    process = subprocess.Popen (['./bin/deploy/container_id.sh', name], stdout=subprocess.PIPE)
-    process.wait ()
-    (result, error) = process.communicate ()
-    return result.decode ('utf-8').split ('\n')
+    if upc_kubernetes or query_kubernetes:
+        process = subprocess.Popen (['./bin/deploy/container_id.sh', name], stdout=subprocess.PIPE)
+        process.wait ()
+        (result, error) = process.communicate ()
+        return result.decode ('utf-8').split ('\n')
 
 ### Helper functions used in the kubernetes implementation. ###
 
@@ -157,6 +170,7 @@ def set_pod_internal_port(config_json, internal_port):
 def modify_config_port(config_json):
     new_port = np.random.randint (low=30000, high = 32768)
     config_json['spec']['ports'][0]['port'] = new_port
+    return new_port
 
 # Takes in a json for a kubernetes configuration and modifies the name to become the
 # name passed in.
@@ -178,13 +192,10 @@ def convert_temp_name(old_name):
 # Takes in a configuration that represents the standard file for the system. It modifies
 # the listening port to ensure it is correct, adds a random configuration port, changes the
 # name and finally launches it as a service using a temporary file. It returns the temporary
-# name.
-def launch_unique_service(config_json, server_port):
-    name = None
-    set_internal_port(config_json, server_port)
-    # Return when success is reached
+# name and the port.
+def launch_unique_service(config_json):
     while True:
-        modify_config_port(config_json)
+        new_port = modify_config_port(config_json)
         with NamedTemporaryFile("w+", dir='.') as new_json_file:
             path_name, service_name = convert_temp_name(new_json_file.name)
             modify_name(config_json, service_name)
@@ -192,7 +203,7 @@ def launch_unique_service(config_json, server_port):
             new_json_file.flush()
             try:
                 subprocess.run (['kubectl', 'apply', '-f', '{}'.format (path_name)])
-                return service_name
+                return service_name, new_port
             except:
                 pass
 
