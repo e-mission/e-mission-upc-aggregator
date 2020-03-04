@@ -3,16 +3,30 @@ import numpy as np
 import subprocess
 from tempfile import NamedTemporaryFile
 
-# Name of the service file that will need to be duplicated
+# Name upc files that will need to be duplicated
 upc_service_file = "web-server-service.json"
 upc_service_config = None
 upc_pod_file = "web-server-pod.json"
 upc_pod_config = None
 
-def initialize_jsons():
+# Name of the query files that will need to be duplicated
+query_service_file = "query-service.json"
+query_service_config = None
+query_pod_file = "query-pod.json"
+query_pod_config = None
+
+# Function that must be called once to allow for upcs to be spawned at any point in the future
+def initialize_upc():
     global upc_service_config, upc_pod_config
     upc_service_config = read_config_json(upc_service_file)
     upc_pod_config = read_config_json(upc_pod_file)
+
+# Function that be called once to allow for queries to be spawned at any point in the future
+def initialize_queries():
+    global query_service_config, query_pod_config
+    query_service_config = read_config_json(query_service_file)
+    query_pod_config = read_config_json(query_pod_file)
+
 
 # Helper function that reads in the givenm json filename and returns 
 # a dictionary of the contents
