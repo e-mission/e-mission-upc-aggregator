@@ -66,7 +66,7 @@ def launch_querier():
 @post('/launch_cloud')
 def launch_cloud():
     if upc_kubernetes:
-        container_name, container_port = launch_unique_service(upc_service_config)
+        container_name, container_port = launch_unique_service(upc_service_config, upc_pod_config)
         return container_name +"\n" + str(container_port)
     else:
         uuid = request.json['uuid'].replace ("-", "")
@@ -179,6 +179,10 @@ def modify_config_port(config_json):
 def modify_name(config_json, new_name):
     config_json['metadata']['name'] = new_name
 
+# Takes in a json for a kubernetes configuration and modifies the label to become the
+# name passed in.
+def modify_label(config_json, new_label):
+    config_json['metadata']['labels']['io.kompose.service'] = new_name
 
 # Helper function to convert the name produced by temporary files to one accepted by
 # kubectl. Also returns the path name for the file
@@ -195,22 +199,39 @@ def convert_temp_name(old_name):
 # the listening port to ensure it is correct, adds a random configuration port, changes the
 # name and finally launches it as a service using a temporary file. It returns the temporary
 # name and the port.
-def launch_unique_service(config_json):
-    while True:
-        new_port = modify_config_port(config_json)
-        with NamedTemporaryFile("w+", dir='.') as new_json_file:
-            path_name, service_name = convert_temp_name(new_json_file.name)
-            modify_name(config_json, service_name)
-            json.dump(config_json, new_json_file)
-            new_json_file.flush()
-            try:
-                print(config_json)
-                # Fix to actually catch errors
-                subprocess.run (['kubectl', 'apply', '-f', '{}'.format (path_name)])
-                time.sleep(60)
-                return service_name, new_port
-            except:
-                pass
+def launch_unique_service(service_config_json, pod_config_json):
+        with NamedTemporaryFile("w+", dir='.') as new_service_json_file:
+            with NamedTemporaryFile("w+", dir='.') as new_pod_json_file:
+                service_path_name, service_name = convert_temp_name(new_service_json_file.name)
+                pod_path_name, pod_name = convert_temp_name(new_pod_json_file.name)
+                # Change the service name
+                modify_name(service_config_json, service_name)
+                # Change the pod name
+                modify_name(pod_config_json, pod_name)
+                # Modify the service label
+                modify_label(service_config_json, service_name)
+                # Modify the pod label
+                modify_label(pod_config_json, service_name)
+                # Dump pod file
+                json.dump(pod_config_json, new_pod_json_file)
+                new_pod_json_file.flush()
+            while True:
+                # Port updates need to occur for each failure because they are the
+                # most likely cause
+                new_port = modify_config_port(service_config_json)
+                # Dump service file
+                json.dump(service_config_json, new_service_json_file)
+                new_service_json_file.flush()
+                try:
+                    print(pod_config_json)
+                    print(service_config_json)
+                    # Fix to actually catch errors
+                    subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
+                    subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])
+                    time.sleep(60)
+                    return service_name, new_port
+                except:
+                    pass
 
 ### End of kubernetes helper functions ### 
 
