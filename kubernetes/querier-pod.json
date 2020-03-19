@@ -12,7 +12,7 @@
     "containers": [
       {
         "name": "querier",
-        "image": "emission/test-querier:latest",
+        "image": "emission/test-querier:1.0",
         "ports": [
           {
             "containerPort": 8000

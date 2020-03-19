@@ -26,16 +26,16 @@ cloudVarName = "PORTMAP"
 ### GLOBAL VARIABLES FOR KUBERNETES IMPLEMENTATION ###
 
 # Name upc files that will need to be duplicated
-upc_service_file = "web-server-service.json"
+upc_service_file = "kubernetes/web-server-service.json"
 upc_service_config = None
-upc_pod_file = "web-server-pod.json"
+upc_pod_file = "kubernetes/web-server-pod.json"
 upc_pod_config = None
 
 
 # Name of the query files that will need to be duplicated
-query_service_file = "query-service.json"
+query_service_file = "kubernetes/querier-service.json"
 query_service_config = None
-query_pod_file = "query-pod.json"
+query_pod_file = "kubernetes/querier-pod.json"
 query_pod_config = None
 
 ### END OF KUBERNETES IMPLEMENTATION VARIABLES ###
@@ -43,7 +43,7 @@ query_pod_config = None
 # Global variables for controlling if each component uses kubernetes or docker
 # This is mostly for testing parts independently and eventually kubernetes should
 # be adopted
-upc_kubernetes = False
+upc_kubernetes = True
 query_kubernetes = False
 
 @post('/launch_querier')
@@ -66,7 +66,8 @@ def launch_querier():
 @post('/launch_cloud')
 def launch_cloud():
     if upc_kubernetes:
-        pass
+        container_name, container_port = launch_unique_service(upc_service_config)
+        return container_name +"\n" + str(container_port)
     else:
         uuid = request.json['uuid'].replace ("-", "")
         not_spawn = True
@@ -78,7 +79,7 @@ def launch_cloud():
             if res.returncode == 0:
                 not_spawn = False
         time.sleep (10)
-        return uuid, str (cloudPort)
+        return uuid + "\n" + str (cloudPort)
 
 
 
@@ -143,7 +144,7 @@ def initialize_upc(upc_listening_port):
     set_pod_internal_port(upc_pod_config, upc_listening_port)
 
 # Function that be called once to allow for queries to be spawned at any point in the future
-def initialize_queries(query_listening_port):
+def initialize_querier(query_listening_port):
     global query_service_config, query_pod_config
     query_service_config = read_config_json(query_service_file)
     set_service_internal_port(query_service_config, query_listening_port)
@@ -163,12 +164,13 @@ def set_service_internal_port(config_json, internal_port):
     config_json['spec']['ports'][0]['targetPort'] = internal_port
 
 def set_pod_internal_port(config_json, internal_port):
-    config_json['spec']['ports'][0]['targetPort'] = internal_port
+    config_json['spec']['containers'][0]['ports'][0]['containerPort'] = internal_port
 
 # Takes in a json for a kubernetes configuration and modifies the broadcasted port
 # to become a randomly assigned dynamic port
 def modify_config_port(config_json):
     new_port = np.random.randint (low=30000, high = 32768)
+    config_json['spec']['ports'][0]['nodePort'] = new_port
     config_json['spec']['ports'][0]['port'] = new_port
     return new_port
 
@@ -202,7 +204,10 @@ def launch_unique_service(config_json):
             json.dump(config_json, new_json_file)
             new_json_file.flush()
             try:
+                print(config_json)
+                # Fix to actually catch errors
                 subprocess.run (['kubectl', 'apply', '-f', '{}'.format (path_name)])
+                time.sleep(60)
                 return service_name, new_port
             except:
                 pass
@@ -211,10 +216,12 @@ def launch_unique_service(config_json):
 
 if __name__ == "__main__":
     # Initialize the upc_config
-    initialize_upc(upc_port)
+    if upc_kubernetes:
+        initialize_upc(upc_port)
 
     # Initialize the querier config
-    initialize_querier(querier_port)
+    if query_kubernetes:
+        initialize_querier(querier_port)
 
     # Run this with TLS
     key_file = open('conf/net/keys.json')

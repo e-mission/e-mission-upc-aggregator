@@ -29,10 +29,13 @@ class Machine ():
             return
         #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
         resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=certificate_bundle_path)
-        self.containers.append (uuid)
-        print(resp.text)
+        components = resp.text.split()
+        container_name = components[0]
+        container_port = components[1]
+        self.containers.append (container_name)
+        print(components)
         Machine.total += 1
-        return "{}:{}".format (self.baseaddr, resp.text)
+        return "{}:{}".format (self.baseaddr, container_port)
 
     def addQuery (self, name, query_type):
         if self.weight == 0.0:

@@ -15,6 +15,7 @@ functools32==3.2.3.post2
 future==0.16.0
 geojson==2.3.0
 google-auth==1.2.1
+icalendar==4.0.4
 idna==2.6
 ipaddress==1.0.18
 jaraco.classes==1.4.3

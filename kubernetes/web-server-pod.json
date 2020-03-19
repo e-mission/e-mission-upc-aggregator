@@ -12,7 +12,7 @@
     "containers": [
       {
         "name": "web-server",
-        "image": "emission/test-server:latest",
+        "image": "emission/test-server:1.0",
         "ports": [
           {
             "containerPort": 443
@@ -21,14 +21,29 @@
         "env": [
           {
             "name": "DB_HOST",
-            "value": "db"
+            "value": "localhost"
           },
           {
             "name": "WEB_SERVER_HOST",
-            "value": "0.0.0.0"
+            "value": "localhost"
           }
         ],
         "resources": {}
+      },
+      {
+        "name": "web-server",
+        "image": "emission/mongo-custom:1.0",
+        "env": [
+          {
+            "name": "DB_HOST",
+            "value": "localhost"
+          },
+          {
+            "name": "WEB_SERVER_HOST",
+            "value": "localhost"
+          }
+        ],
+        "resources": {} 
       }
     ],
     "restartPolicy": "OnFailure"

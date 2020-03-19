@@ -12,7 +12,7 @@
     "containers": [
       {
         "name": "controller",
-        "image": "emission/test-controller:latest",
+        "image": "emission/test-controller:1.0",
         "ports": [
           {
             "containerPort": 8000

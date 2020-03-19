@@ -20,7 +20,7 @@
     "containers": [
       {
         "name": "db",
-        "image": "emission/mongo-custom:latest",
+        "image": "emission/mongo-custom:1.0",
         "resources": {},
         "volumeMounts": [
           {
