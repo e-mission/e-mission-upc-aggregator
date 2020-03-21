@@ -2,7 +2,7 @@
 #Configure web server
 
 #Pull the latest changes from the repo
-cd /usr/src/app && git pull origin tls
+cd /usr/src/app && git pull origin kubernetes
 
 #set database URL using environment variable
 echo ${DB_HOST}

@@ -182,7 +182,7 @@ def modify_name(config_json, new_name):
 # Takes in a json for a kubernetes configuration and modifies the label to become the
 # name passed in.
 def modify_label(config_json, new_label):
-    config_json['metadata']['labels']['io.kompose.service'] = new_name
+    config_json['metadata']['labels']['io.kompose.service'] = new_label
 
 # Helper function to convert the name produced by temporary files to one accepted by
 # kubectl. Also returns the path name for the file
@@ -215,23 +215,24 @@ def launch_unique_service(service_config_json, pod_config_json):
                 # Dump pod file
                 json.dump(pod_config_json, new_pod_json_file)
                 new_pod_json_file.flush()
-            while True:
-                # Port updates need to occur for each failure because they are the
-                # most likely cause
-                new_port = modify_config_port(service_config_json)
-                # Dump service file
-                json.dump(service_config_json, new_service_json_file)
-                new_service_json_file.flush()
-                try:
-                    print(pod_config_json)
-                    print(service_config_json)
-                    # Fix to actually catch errors
-                    subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
-                    subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])
-                    time.sleep(60)
-                    return service_name, new_port
-                except:
-                    pass
+                while True:
+                    # Port updates need to occur for each failure because they are the
+                    # most likely cause
+                    new_port = modify_config_port(service_config_json)
+                    # Dump service file
+                    json.dump(service_config_json, new_service_json_file)
+                    new_service_json_file.flush()
+                    try:
+                        print(pod_config_json)
+                        print(service_config_json)
+                        print(pod_path_name)
+                        # Fix to actually catch errors
+                        subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
+                        subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])
+                        time.sleep(60)
+                        return service_name, new_port
+                    except:
+                        pass
 
 ### End of kubernetes helper functions ### 
 

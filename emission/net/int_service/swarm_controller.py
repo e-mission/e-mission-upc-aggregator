@@ -35,6 +35,7 @@ class Machine ():
         self.containers.append (container_name)
         print(components)
         Machine.total += 1
+        return "https://10.111.176.195:30000"
         return "{}:{}".format (self.baseaddr, container_port)
 
     def addQuery (self, name, query_type):

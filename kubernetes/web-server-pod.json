@@ -31,7 +31,7 @@
         "resources": {}
       },
       {
-        "name": "web-server",
+        "name": "database",
         "image": "emission/mongo-custom:1.0",
         "env": [
           {
