@@ -35,7 +35,7 @@ class Machine ():
         self.containers.append (container_name)
         print(components)
         Machine.total += 1
-        addr = "http://10.103.87.220:30000"
+        addr = "http://127.0.0.1:30000"
         print(addr)
         return addr
         return "{}:{}".format (self.baseaddr, container_port)

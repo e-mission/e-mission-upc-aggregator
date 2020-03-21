@@ -2,7 +2,7 @@
     "controller-ip" : "https://127.0.1.1",
     "_controller_comment": "The controller-ip is the IP address hosting the controller",
     "controller-port" : "4430",
-    "upc-port" : "443",
+    "upc-port" : "80",
     "querier-port" : "443",
     "tick-period" : "60",
     "pause-ticks" : "30",
