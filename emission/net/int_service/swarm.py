@@ -229,7 +229,8 @@ def launch_unique_service(service_config_json, pod_config_json):
                         # Fix to actually catch errors
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])
-                        time.sleep(60)
+                        time.sleep(15)
+                        print("escaped")
                         return service_name, new_port
                     except:
                         pass

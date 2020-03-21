@@ -482,6 +482,7 @@ def process_profile():
     
 @get ("/cloud/status")
 def check_status ():
+    print("reached")
     ret_string = ""
     if key is None:
         ret_string += "Key needs to be sent\n"

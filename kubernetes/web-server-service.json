@@ -19,7 +19,7 @@
         "name": "default-port",
         "nodePort": 30000,
         "port": 30000,
-        "targetPort": 443
+        "targetPort": 80
       }
     ],
     "selector": {

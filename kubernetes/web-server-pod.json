@@ -15,7 +15,7 @@
         "image": "emission/test-server:1.0",
         "ports": [
           {
-            "containerPort": 443
+            "containerPort": 80
           }
         ],
         "env": [
