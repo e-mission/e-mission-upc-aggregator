@@ -23,8 +23,9 @@ class Machine ():
             return
         json_dict = {'uuid':uuid, 'use_kubernetes': use_kubernetes,
                 'service_file' : service_file, 'pod_file': pod_file}
-        resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), 
+        resp = requests.post ("{}:{}/spawn_service".format (self.baseaddr, self.serverPort), 
                 json=json_dict, verify=certificate_bundle_path)
+        print(resp.text)
         components = resp.text.split()
         container_name = components[0]
         container_port = components[1]

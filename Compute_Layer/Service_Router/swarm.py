@@ -29,9 +29,9 @@ def spawn_service():
     # Add section to load data
     use_kubernetes = bool(request.json['use_kubernetes'])
     if use_kubernetes:
-        upc_service_file = request.json["service-file"]
+        upc_service_file = request.json["service_file"]
         upc_service_config = read_config_json(upc_service_file)
-        upc_pod_file = request.json["pod-file"]
+        upc_pod_file = request.json["pod_file"]
         upc_pod_config = read_config_json(upc_pod_file)
         container_name, container_port = launch_unique_service(upc_service_config, 
                 upc_pod_config)
@@ -39,7 +39,7 @@ def spawn_service():
         time.sleep (10)
         return container_name +"\n" + str(container_port)
     else:
-        docker_file = request.json["service-file"]
+        docker_file = request.json["service_file"]
         # Add an error check to confirm the docker_file exists
         uuid = request.json['uuid'].replace ("-", "")
         not_spawn = True
@@ -47,13 +47,14 @@ def spawn_service():
             # select a random port and hope it works
             exposedPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
             service_name = uuid + str(exposedPort)
+            print(service_name)
             envVars = {cloudVarName: "{}:{}".format (exposedPort, upc_port), "ctr": gen_random_key_string ()}
             res = subprocess.run (['docker-compose', '-p', '{}'.format (service_name), '-f', '{}'.format(docker_file), 'up', '-d'], env=envVars)
             if res.returncode == 0:
                 not_spawn = False
         # Need a better way to wait
         time.sleep (10)
-        return service_name + "\n" + str (cloudPort)
+        return service_name + "\n" + str (exposedPort)
 
 
 

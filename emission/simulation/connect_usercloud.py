@@ -4,7 +4,7 @@
 
 # Inspired by https://stackoverflow.com/questions/34417279/sending-a-json-string-as-a-post-request/34418733
 import requests
-from emission.net.int_service.machine_configs import register_user_endpoint, spawn_usercloud_endpoint, cloud_status_endpoint, cloud_key_endpoint, cloud_profile_endpoint, certificate_bundle_path
+from emission.net.int_service.machine_configs import register_user_endpoint, service_endpoint, cloud_status_endpoint, cloud_key_endpoint, cloud_profile_endpoint, certificate_bundle_path
 import emission.simulation.profile_json as profile_json
 
 class UserCloud:

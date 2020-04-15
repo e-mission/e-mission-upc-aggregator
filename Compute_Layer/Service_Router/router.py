@@ -78,6 +78,7 @@ def launch_service ():
        uuid = getUUID(request)
     else:
         raise HTTPError(403, "Unable to create a uuid")
+    user_uuid = str (uuid)
     service_name = request.json["service"]
     if service_name in services:
         services_dict = services[service_name]
@@ -91,7 +92,7 @@ def launch_service ():
     # TODO Add a user's permission manager 
     container_name, address = clsrl.spawnServiceInstance (user_uuid, False, service_file, pod_file)
     # This value should be used to match a container contents against a user's expectations
-    request.json["hash"]
+    #request.json["hash"]
     if user_uuid not in users:
         users[user_uuid] = {}
     users[user_uuid][container_name] = ticks
@@ -121,7 +122,7 @@ def return_container_addrs ():
 @post('/clear_containers')
 def clear_containers ():
     global users
-    clrsl.clearContainers ()
+    clsrl.clearContainers ()
     users = dict()
 
 @post('/setup_networks')
@@ -154,7 +155,7 @@ def check_timer (users_dict, tick_limit):
                 kill_query (name, user_dict)
 
 def kill_query (name, user_dict):
-    clrsl.killQueryInstance (name)
+    clsrl.killQueryInstance (name)
     del runningdict[name]
     del tickdict[name]
 
