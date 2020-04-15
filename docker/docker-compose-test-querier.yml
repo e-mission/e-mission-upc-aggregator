@@ -1,7 +1,7 @@
 version: "3"
 services:
   querier:
-    image: emission/test-querier:latest
+    image: emission/test-querier:1.0
     environment:
       - WEB_SERVER_HOST=0.0.0.0
     deploy:
@@ -14,7 +14,7 @@ services:
     networks:
       - emission
   db:
-    image: emission/mongo-custom:latest
+    image: emission/mongo-custom:1.0
     deploy:
       replicas: 1
       restart_policy:

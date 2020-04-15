@@ -152,12 +152,11 @@ def check_timer (users_dict, tick_limit):
     for user in list(users_dict.values()):
         for name, starttime in user.items():
             if ticks - starttime >= tick_limit:
-                kill_query (name, user_dict)
+                kill_query (name, user)
 
 def kill_query (name, user_dict):
     clsrl.killQueryInstance (name)
-    del runningdict[name]
-    del tickdict[name]
+    del user_dict[name]
 
 def launch_timer ():
     signal.setitimer (signal.ITIMER_REAL, tick_period)
