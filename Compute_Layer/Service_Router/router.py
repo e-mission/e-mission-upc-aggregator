@@ -150,7 +150,7 @@ def tick_incr (unused1, unused2):
 # General functions to handle timer check for running services
 def check_timer (users_dict, tick_limit):
     for user in list(users_dict.values()):
-        for name, starttime in user.items():
+        for name, starttime in user.copy().items():
             if ticks - starttime >= tick_limit:
                 kill_instance (name, user)
 
