@@ -13,7 +13,6 @@ RUN git checkout kubernetes
 
 # setup python environment.
 RUN setup/setup.sh
-RUN /bin/bash -c "source activate emission; pip install six --upgrade"
 
 # install nodejs, npm and bower
 RUN apt-get update
