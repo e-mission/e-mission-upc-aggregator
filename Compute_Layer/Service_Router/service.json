@@ -1,0 +1,1 @@
+{"user-cloud": {"service-file": "docker/docker-compose.yml"}, "basic-querier": {"service-file": "docker/docker-compose-test-querier.yml"}}

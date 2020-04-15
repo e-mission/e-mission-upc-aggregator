@@ -24,44 +24,19 @@ class Machine ():
         self.weight = weight
         self.containers = []
 
-    def addCloud (self, uuid):
+    def spawnService (self, uuid, use_kubernetes, service_file, pod_file=None):
         if self.weight == 0.0:
             return
-        #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-        resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=certificate_bundle_path)
+        json_dict = {'uuid':uuid, 'use_kubernetes': use_kubernetes,
+                'service_file' : service_file, 'pod_file': pod_file}
+        resp = requests.post ("{}:{}/launch_cloud".format (self.baseaddr, self.serverPort), 
+                json=json_dict, verify=certificate_bundle_path)
         components = resp.text.split()
         container_name = components[0]
         container_port = components[1]
         self.containers.append (container_name)
-        print(components)
         Machine.total += 1
-        addr = "http://10.102.51.0:30000"
-        print(addr)
-        return addr
         return "{}:{}".format (self.baseaddr, container_port)
-
-    def addQuery (self, name, query_type):
-        if self.weight == 0.0:
-            return
-        #if Machine.total == 0 or len (self.containers) / Machine.total <= self.weight:
-        json_dict = {"name": name, "query": query_type}
-        resp = requests.post ("{}:{}/launch_querier".format (self.baseaddr, self.serverPort), json=json_dict, verify=certificate_bundle_path)
-        self.containers.append (name)
-        Machine.total += 1
-        return "{}:{}".format (self.baseaddr, resp.text)
-        
-
-    def pauseContainer (self, uuid):
-        if uuid in self.containers:
-            resp = requests.post ("{}:{}/pause".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=certificate_bundle_path)
-            return True 
-        return False
-
-    def unpauseContainer (self, uuid):
-        if uuid in self.containers:
-            resp = requests.post ("{}:{}/unpause".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=certificate_bundle_path)
-            return True 
-        return False
 
     def killContainer (self, uuid):
         if uuid in self.containers:
@@ -107,34 +82,15 @@ machines = setupMachines (machines_list)
 # This file should be imported by the controller when not using kubernetes
 
 # Helper function to allocate the Cloud instance
-def createCloudInstance (uuid):
+def spawnServiceInstance (uuid, use_kubernetes, service_file, pod_file=None):
     val = np.random.random ()
     i = 0
     while val > randlist[i]:
         i += 1
-    return machines[i].addCloud (uuid)
-
-# Helper function to pause the Cloud instance
-def pauseCloudInstance (uuid):
-    for m in machines:
-        if m.pauseContainer (uuid):
-            return
+    return machines[i].spawnService (uuid, use_kubernetes, service_file, pod_file)
 
 
-# Helper function to unpause the Cloud instance
-def unpauseCloudInstance (uuid):
-    for m in machines:
-        if m.unpauseContainer (uuid):
-            return
-
-def createQueryInstance (name, query_type):
-    val = np.random.random ()
-    i = 0
-    while val > randlist[i]:
-        i += 1
-    return machines[i].addQuery (name, query_type)
-
-def killQueryInstance (uuid):
+def killInstance (uuid):
     for m in machines:
         if m.killContainer (uuid):
             return
