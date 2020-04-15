@@ -75,72 +75,44 @@ def launch_service ():
         raise HTTPError(403, "Request made for an unknown service")
 
     # TODO Add a user's permission manager 
-    output = clsrl.spawnServiceInstance (user_uuid, False, service_file, pod_file)
+    container_name, address = clsrl.spawnServiceInstance (user_uuid, False, service_file, pod_file)
     # This value should be used to match a container contents against a user's expectations
     request.json["hash"]
     if user_uuid not in users:
         users[user_uuid] = {}
-    users[user_uuid][output] = ticks
-    return output
+    users[user_uuid][container_name] = ticks
+    return address
 
 @post('/get_user_addrs')
 def return_container_addrs ():
+    # This functionality will later be replaced with user applications and the PM.
     user_max = int (request.json['count'])
-    name_list = np.array ([name for name in list (runningclouds.keys ())])
+    name_list = np.array ([user for user in list (users.keys ())])
     np.random.shuffle (name_list)
     name_list = list (name_list)
     limit = min (len (name_list), user_max)
     addr_list = []
     for i in range (limit):
         name = name_list[i]
-        if name in runningclouds:
-            addr_list.append (runningclouds[name])
-            cloudticks[name] = ticks
+        user_instances = users[name]
+        # Hardcode 1 instance per user for the experiment
+        addr = list(user_instances.keys())[0]
+        addr_list.append(addr)
+        user_instances[addr] = ticks
     ret_dict = dict ()
     for i, addr in enumerate(addr_list):
         ret_dict[i] = addr
     return json.dumps (ret_dict)
 
-@post('/get_querier_addrs/<query_type>')
-def launch_queriers (query_type):
-    if 'user' in request.json:
-       uuid = getUUID(request)
-    else:
-       uuid = None #Maybe this should error
-    user_uuid = str (uuid)
-    querier_count = int (request.json['count'])
-
-    gen_count = querier_count
-    
-    if gen_count:
-        pool = Pool(gen_count + 1)
-        addr_list = []
-        for i in range (gen_count):
-            addr_list.append (pool.apply_async(launch_query, [query_type, i, user_uuid]))
-        pool.close()
-        [result.wait () for result in addr_list]
-        pool.join()
-        # No way to check the updates are ready. Remove later with something more accurate 
-        time.sleep (10)
-    else:
-        addr_list = []
-    ret_dict = dict ()
-    for i, addr in enumerate(addr_list):
-        ret_dict[i] = addr.get ()
-    return json.dumps (ret_dict)
-
 @post('/clear_containers')
 def clear_containers ():
-    global runningclouds, cloudticks, queryinstances, queryticks
-    emissc.clearContainers ()
-    runningclouds = dict ()
-    cloudticks = dict ()
-    queryinstances = dict ()
-    queryticks = dict ()
+    global users
+    clrsl.clearContainers ()
+    users = dict()
 
 @post('/setup_networks')
 def setup_networks ():
-    emissc.setupNetworks ()
+    clsrl.setupNetworks ()
 
 # Container Helper functions
 def get_container_names (contents):
@@ -156,38 +128,19 @@ def tick_incr (unused1, unused2):
     global ticks
     print ("Ticking the timer")
     ticks += 1
-    check_timer (keylist=list (cloudticks.keys ()) [:], tickdict=cloudticks, runningdict=runningclouds, tick_limit=kill_ticks)
-    check_timer (keylist=list (queryticks.keys ()) [:], tickdict=queryticks, runningdict=queryinstances, tick_limit=kill_ticks)
+    check_timer (users_dict, tick_limit=kill_ticks)
     launch_timer ()
 
 
-# General functions to handle timer check for running service. The arguments are:
-#
-# A keylist. This is the a copy of the keys in the tickdict
-#
-# A tickdict. This is a mapping of name ---> ticktime, which is the time the service
-# was last accessed. This will be checked against running ticks to check if a service
-# should be shutdown.
-#
-# A runningdict. This is a dictionary for all currently running services of a particular
-# type. Its mapping name -----> addr, where the name is the same as tickdict and the addr
-# is the location at which the service is deployed.
-#
-#
-# For example the userclouds arguments would be
-# keylist = list (cloudticks.keys ()) [:]
-# tickdict = cloudticks
-# runningdict = runningclouds
-#
+# General functions to handle timer check for running services
+def check_timer (users_dict, tick_limit):
+    for user in list(users_dict.values()):
+        for name, starttime in user.items():
+            if ticks - starttime >= tick_limit:
+                kill_query (name, user_dict)
 
-def check_timer (keylist, tickdict, runningdict, tick_limit):
-    for name in keylist:
-        starttime = tickdict[name]
-        if ticks - starttime >= tick_limit:
-            kill_query (name, tickdict, runningdict)
-
-def kill_query (name, tickdict, runningdict):
-    emissc.killQueryInstance (name)
+def kill_query (name, user_dict):
+    clrsl.killQueryInstance (name)
     del runningdict[name]
     del tickdict[name]
 

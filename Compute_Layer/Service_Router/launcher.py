@@ -36,7 +36,7 @@ class Machine ():
         container_port = components[1]
         self.containers.append (container_name)
         Machine.total += 1
-        return "{}:{}".format (self.baseaddr, container_port)
+        return (container_name, "{}:{}".format (self.baseaddr, container_port))
 
     def killContainer (self, uuid):
         if uuid in self.containers:
