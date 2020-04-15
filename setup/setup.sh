@@ -21,7 +21,7 @@ curl -o /tmp/pyasn1-modules-0.2.7-py_0.tar.bz2 -L https://anaconda.org/conda-for
 ls /tmp/
 
 echo "Installing manually downloaded packages"
-conda install /tmp/*.bz2 -v
+conda install /tmp/*.bz2 -v -n emission
 
 echo "Updating using conda now"
 conda env update --name emission --file setup/environment36.yml
