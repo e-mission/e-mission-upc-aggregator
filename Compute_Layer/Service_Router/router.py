@@ -152,10 +152,10 @@ def check_timer (users_dict, tick_limit):
     for user in list(users_dict.values()):
         for name, starttime in user.items():
             if ticks - starttime >= tick_limit:
-                kill_query (name, user)
+                kill_instance (name, user)
 
-def kill_query (name, user_dict):
-    clsrl.killQueryInstance (name)
+def kill_instance (name, user_dict):
+    clsrl.killInstance (name)
     del user_dict[name]
 
 def launch_timer ():
