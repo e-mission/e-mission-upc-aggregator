@@ -1,4 +1,4 @@
-{"user-cloud": 
+{"PM": 
     {"service_file": "docker/docker-compose.yml"}, 
 "basic-querier": 
     {"service_file": "docker/docker-compose-test-querier.yml"}}

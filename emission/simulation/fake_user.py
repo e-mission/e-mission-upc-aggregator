@@ -77,6 +77,7 @@ class FakeUser:
 
         error = False
         try:
+            # data['phone_to_server'] = "test-string" # Used to test endpoints
             r = requests.post(self._config['upload_url'], json=data, timeout=300, verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True

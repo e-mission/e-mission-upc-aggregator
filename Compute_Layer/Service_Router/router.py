@@ -56,6 +56,8 @@ services = None
 
 users = dict()
 
+pm_name = 'PM'
+
 ticks = 0
 
 @post('/profile/create')
@@ -80,23 +82,44 @@ def launch_service ():
         raise HTTPError(403, "Unable to create a uuid")
     user_uuid = str (uuid)
     service_name = request.json["service"]
+
     if service_name in services:
         services_dict = services[service_name]
         service_file = services_dict['service_file']
         pod_file = None
-        if 'pod_file' in service_file:
+        if 'pod_file' in services_dict:
             pod_file = services_dict['pod_file'] 
     else:
         raise HTTPError(403, "Request made for an unknown service")
 
-    # TODO Add a user's permission manager 
-    container_name, address = clsrl.spawnServiceInstance (user_uuid, False, service_file, pod_file)
+    pm_container_name = None
+    pm_address = None
+    
+    # Treat the PM as a special service and always launch it
+    if service_name != pm_name:
+        services_dict = services[pm_name]
+        pm_service_file = services_dict['service_file']
+        pm_pod_file = None
+        if 'pod_file' in services_dict:
+            pm_pod_file = services_dict['pod_file'] 
+        pm_container_name, pm_address = clsrl.spawnServiceInstance (user_uuid, False,
+                pm_name, pm_service_file, pm_pod_file)
+
+
+    # Launch the actual container
+    container_name, address = clsrl.spawnServiceInstance (user_uuid, False, 
+            service_name, service_file, pod_file)
     # This value should be used to match a container contents against a user's expectations
     #request.json["hash"]
     if user_uuid not in users:
         users[user_uuid] = {}
+    if [pm_container_name]:
+        users[user_uuid][pm_container_name] = ticks
     users[user_uuid][container_name] = ticks
-    return address
+    if pm_address:
+       return pm_address + '\n' + address
+    else:
+        return address
 
 @post('/get_user_addrs')
 def return_container_addrs ():

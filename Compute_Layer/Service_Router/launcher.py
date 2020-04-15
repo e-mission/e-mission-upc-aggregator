@@ -18,10 +18,10 @@ class Machine ():
         self.weight = weight
         self.containers = []
 
-    def spawnService (self, uuid, use_kubernetes, service_file, pod_file=None):
+    def spawnService (self, uuid, use_kubernetes, service_name, service_file, pod_file=None):
         if self.weight == 0.0:
             return
-        json_dict = {'uuid':uuid, 'use_kubernetes': use_kubernetes,
+        json_dict = {'uuid':uuid, 'use_kubernetes': use_kubernetes, 'service_name': service_name,
                 'service_file' : service_file, 'pod_file': pod_file}
         resp = requests.post ("{}:{}/spawn_service".format (self.baseaddr, self.serverPort), 
                 json=json_dict, verify=certificate_bundle_path)
@@ -77,12 +77,12 @@ machines = setupMachines (machines_list)
 # This file should be imported by the controller when not using kubernetes
 
 # Helper function to allocate the Cloud instance
-def spawnServiceInstance (uuid, use_kubernetes, service_file, pod_file=None):
+def spawnServiceInstance (uuid, use_kubernetes, service_name, service_file, pod_file=None):
     val = np.random.random ()
     i = 0
     while val > randlist[i]:
         i += 1
-    return machines[i].spawnService (uuid, use_kubernetes, service_file, pod_file)
+    return machines[i].spawnService (uuid, use_kubernetes, service_name, service_file, pod_file)
 
 
 def killInstance (name):

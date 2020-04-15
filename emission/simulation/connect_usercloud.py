@@ -33,7 +33,7 @@ class UserCloud:
     def init_usercloud (self, username, controller_addr):
         self.username = username
         self.register_with_controller (controller_addr)
-        self.getaddress ({'user': self.username, 'service':'user-cloud'}, controller_addr)
+        self.getaddress ({'user': self.username, 'service':'PM'}, controller_addr)
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):

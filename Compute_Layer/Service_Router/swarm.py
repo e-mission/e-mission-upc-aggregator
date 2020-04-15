@@ -28,6 +28,7 @@ cloudVarName = "PORTMAP"
 def spawn_service():
     # Add section to load data
     use_kubernetes = bool(request.json['use_kubernetes'])
+    service_name = request.json['service_name']
     if use_kubernetes:
         upc_service_file = request.json["service_file"]
         upc_service_config = read_config_json(upc_service_file)
@@ -46,7 +47,7 @@ def spawn_service():
         while (not_spawn):
             # select a random port and hope it works
             exposedPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-            service_name = uuid + str(exposedPort)
+            service_name = uuid + service_name 
             print(service_name)
             envVars = {cloudVarName: "{}:{}".format (exposedPort, upc_port), "ctr": gen_random_key_string ()}
             res = subprocess.run (['docker-compose', '-p', '{}'.format (service_name), '-f', '{}'.format(docker_file), 'up', '-d'], env=envVars)
