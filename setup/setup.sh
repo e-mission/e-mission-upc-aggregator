@@ -11,7 +11,7 @@ conda create --name emission python=3.6
 . activate emission
 
 echo "Downloading packages"
-curl -o /tmp/cachetools-2.1.0-py_0.tar.bz2 -L https://anaconda.org/conda-forge/cachetools/2.1.0/download/noarch/cachetools-2.1.0-py_0.tar.bz2
+curl -o /tmp/cachetools-2.0.1-py_0.tar.bz2 -L https://anaconda.org/conda-forge/cachetools/2.0.1/download/noarch/cachetools-2.0.1-py_0.tar.bz2
 curl -o /tmp/geojson-2.3.0-py_0.tar.bz2 -L https://anaconda.org/conda-forge/geojson/2.3.0/download/noarch/geojson-2.3.0-py_0.tar.bz2
 curl -o /tmp/jsonpickle-0.9.6-py_1.tar.bz2 -L https://anaconda.org/conda-forge/jsonpickle/0.9.6/download/noarch/jsonpickle-0.9.6-py_1.tar.bz2
 curl -o /tmp/more-itertools-8.2.0-py_0.tar.bz2 -L https://anaconda.org/conda-forge/more-itertools/8.2.0/download/noarch/more-itertools-8.2.0-py_0.tar.bz2
