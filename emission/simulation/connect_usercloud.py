@@ -18,10 +18,7 @@ class UserCloud:
 
     def send_contents (self, addr):
         print(addr)
-        print (requests.get (addr + cloud_status_endpoint, verify=False).text)
-        #print (requests.get (addr + cloud_status_endpoint, verify=certificate_bundle_path).text)
         print (requests.post (addr + cloud_key_endpoint, json=self.key, verify=certificate_bundle_path).text)
-        print (requests.post (addr + cloud_profile_endpoint, json=profile_json.to_json(self.profile), verify=certificate_bundle_path).text)
 
 
     # Method used to get the address from speaking to the KAL
