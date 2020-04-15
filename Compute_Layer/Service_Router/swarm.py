@@ -59,8 +59,8 @@ def spawn_service():
 
 @post('/kill')
 def kill():
-    uuid = request.json['uuid'].replace ("-", "")
-    containers = get_container_names (uuid)
+    name = request.json['name'].replace ("-", "")
+    containers = get_container_names (name)
     for name in containers:
         if name:
             res = subprocess.run (['docker', 'container', 'stop', name])

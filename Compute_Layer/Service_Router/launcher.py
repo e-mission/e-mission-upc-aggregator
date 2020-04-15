@@ -8,12 +8,6 @@ import requests
 import numpy as np
 from emission.net.int_service.machine_configs import swarm_port, machines_list, certificate_bundle_path
 
-# Global variables for controlling if each component uses kubernetes or docker
-# This is mostly for testing parts independently and eventually kubernetes should
-# be adopted
-upc_kubernetes = False
-query_kubernetes = False
-
 randlist = []
 
 class Machine ():
@@ -38,11 +32,11 @@ class Machine ():
         Machine.total += 1
         return (container_name, "{}:{}".format (self.baseaddr, container_port))
 
-    def killContainer (self, uuid):
-        if uuid in self.containers:
-            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':uuid}, verify=certificate_bundle_path)
+    def killContainer (self, name):
+        if name in self.containers:
+            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':name}, verify=certificate_bundle_path)
             print (resp)
-            self.containers.remove (uuid)
+            self.containers.remove (name)
             Machine.total -= 1
             return True 
         return False
@@ -90,9 +84,9 @@ def spawnServiceInstance (uuid, use_kubernetes, service_file, pod_file=None):
     return machines[i].spawnService (uuid, use_kubernetes, service_file, pod_file)
 
 
-def killInstance (uuid):
+def killInstance (name):
     for m in machines:
-        if m.killContainer (uuid):
+        if m.killContainer (name):
             return
 
 def clearContainers ():
