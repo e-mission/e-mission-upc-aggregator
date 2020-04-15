@@ -18,8 +18,6 @@ def main ():
             ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(curr_num_users), str(curr_num_trips)], cwd="./")
             ret.wait ()
             for _ in range(num_queries):
-                requests.post (controller_addr + "/pause_all_queriers", verify=certificate_bundle_path)
-                requests.post (controller_addr + "/pause_all_clouds", verify=certificate_bundle_path)
                 csv_file_name = "csvs/time_" + str(curr_num_users) + "_" + str(curr_num_trips) + ".csv"
                 ret = subprocess.Popen (["./e-mission-py.bash", "emission/net/ext_service/launch_aggregator.py", query_file, csv_file_name, str (curr_num_users)], cwd="./")
                 ret.wait ()

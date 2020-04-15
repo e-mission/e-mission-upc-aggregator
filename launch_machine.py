@@ -12,7 +12,7 @@ def main():
         envVars = {cloudVarName: "{}:{}".format (controller_port, controller_port), "ctr": "00"}
         #ret = subprocess.Popen (["docker-compose", "-f", "docker/docker-compose-controller.yml", "up", "-d"], cwd="./", env=envVars)
         #ret.wait ()
-    process = subprocess.Popen (["./e-mission-py.bash", "emission/net/int_service/swarm.py"], cwd="./")
+    process = subprocess.Popen (["./e-mission-py.bash", "Compute_Layer/Service_Router/swarm.py"], cwd="./")
     process.wait ()
 
 

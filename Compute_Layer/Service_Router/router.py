@@ -27,7 +27,7 @@ import bson.json_util
 
 import emission.net.auth.auth as enaa
 from emission.core.wrapper.user import User
-import Compute_Layer.service_router.launcher as clsrl
+import Compute_Layer.Service_Router.launcher as clsrl
 from emission.net.int_service.machine_configs import controller_port, tick_period, kill_ticks
 
 try:
@@ -57,6 +57,20 @@ services = None
 users = dict()
 
 ticks = 0
+
+@post('/profile/create')
+def createUserProfile():
+  try:
+      logging.debug("Called createUserProfile")
+      userEmail = enaa._getEmail(request, auth_method)
+      logging.debug("userEmail = %s" % userEmail)
+      user = User.register(userEmail)
+      logging.debug("Looked up user = %s" % user)
+      logging.debug("Returning result %s" % {'uuid': str(user.uuid)})
+      return {'uuid': str(user.uuid)}
+  except ValueError as e:
+      traceback.print_exc()
+      abort(403, e.message)
 
 @post ("/service_request")
 def launch_service ():
@@ -128,7 +142,7 @@ def tick_incr (unused1, unused2):
     global ticks
     print ("Ticking the timer")
     ticks += 1
-    check_timer (users_dict, tick_limit=kill_ticks)
+    check_timer (users, tick_limit=kill_ticks)
     launch_timer ()
 
 
@@ -171,7 +185,7 @@ if __name__ == "__main__":
       sys.stderr.write ("Error too many arguments to launch known access location.\n")
       sys.exit(1)
     # Read the services
-    with open("service.json", "r") as f:
+    with open("Compute_Layer/Service_Router/service.json", "r") as f:
         services = json.load(f)
 
 

@@ -12,7 +12,7 @@ import autograd.numpy as np
 from autograd import grad
 import csv
 import time
-from emission.net.int_service.machine_configs import query_endpoint, get_queriers_endpoint, get_users_endpoint, certificate_bundle_path
+from emission.net.int_service.machine_configs import service_endpoint, get_users_endpoint, certificate_bundle_path
 
 # query_file = "query.json"
 
@@ -175,9 +175,11 @@ def get_user_addrs (controller_addr, num_users_lower_bound, num_users_upper_boun
         return None
 
 def launch_query_microservices (query_type, service_count, username):
-    r = requests.post(controller_addr + get_queriers_endpoint + "/{}".format (query_type), json={"user": username, "count": service_count}, verify=certificate_bundle_path)
-    json_addrs = r.json ()
-    addr_list = list (json_addrs.values ())
+    addr_list = []
+    for i in range(service_count):
+        r = requests.post(controller_addr + service_endpoint + "/{}".format (query_type), json={"user": username, "service": 'basic-querier'}, verify=certificate_bundle_path)
+        addr = r.json ()
+        addr_list.append(addr)
     print (addr_list)
     if len(addr_list) == service_count:
         return addr_list
