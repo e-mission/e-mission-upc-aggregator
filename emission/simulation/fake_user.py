@@ -123,7 +123,7 @@ class FakeUser:
             keys_dict['metadata.write_ts'] = [["DESCENDING"], "False"]
             keys_dict['data_ts'] = [["DESCENDING"], "True"]
             json_entries['keys'] = keys_dict
-            json_entries['search_fields'] = {"metadata.type": "document"}
+            json_entries['search_fields'] = [{"metadata.type": "document"}, {"_id": "False"}]
             json_entries['should_sort'] = "True"
             json_entries['sort'] = {'metadata.write_ts': "True"}
             r = requests.post(self._config['download_url'], json=json_entries, timeout=300, verify=certificate_bundle_path)

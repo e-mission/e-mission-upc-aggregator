@@ -70,10 +70,15 @@ def loadData():
   # When entry "itemA.itemB...itemZ" + "\n" + "..." should store data[itemA][itemB]...[itemZ]
   keys = request.json['keys']
   # Holds a dict mapping field name to value for a search
-  search_fields = request.json['search_fields']
+  elements = request.json['search_fields']
+  search_fields = elements[0]
+  filtered = elements[1]
+  for key, value in filtered.copy().items():
+      filtered[key] = value == "True":
+
   # Get the database
   table = get_database_table(data_type, keys)
-  retrievedData = table.find(search_fields)
+  retrievedData = table.find(search_fields, filtered)
   should_sort = request.json['should_sort'] == "True"
   if should_sort:
     # Holds if there is a value to sort on and if so what direction
