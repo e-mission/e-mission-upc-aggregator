@@ -74,7 +74,7 @@ def loadData():
   search_fields = elements[0]
   filtered = elements[1]
   for key, value in filtered.copy().items():
-      filtered[key] = value == "True":
+      filtered[key] = value == "True"
 
   # Get the database
   table = get_database_table(data_type, keys)
