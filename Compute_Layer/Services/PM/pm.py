@@ -56,7 +56,7 @@ def get_database_table(table, keys):
         assert(len(key_parts) == len(data_types))
         index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0])) for i in range(len(key_parts))]
         is_sparse = bool(elements[1])
-        Table.create_index([key, data_type], sparse=is_sparse)
+        Table.create_index(index_pairs, sparse=is_sparse)
     return Table
 
 @post('/data/load')
