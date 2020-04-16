@@ -35,7 +35,7 @@ BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 print("Finished configuring logging for %s" % logging.getLogger())
 app = app()
 
-key = None
+enc_key = None
 mongoHostPort = 27017
 _current_db = None
 
@@ -57,7 +57,7 @@ def get_database_table(table, keys):
 
 @post('/data/load')
 def loadData():
-  if key is None:
+  if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
   logging.debug("Called data.load")
   data_type = request.json['data_type']
@@ -86,7 +86,7 @@ def loadData():
 
 @post('/data/store')
 def storeData():
-  if key is None:
+  if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
   logging.debug("Called data.store")
   data_type = request.json['data_type']
@@ -117,14 +117,14 @@ def storeData():
 
 @post ("/cloud/key")
 def process_key():
-    global key
-    if key:
+    global enc_key
+    if enc_key:
         abort (403, "Key already given\n")
     else:
-        key = request.json
+        enc_key = request.json
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((url, 27018))
-            s.sendall (key.to_bytes (32, byteorder='big'))
+            s.sendall (enc_key.to_bytes (32, byteorder='big'))
             s.recv(1024)
 
 # TODO:
