@@ -13,6 +13,7 @@ import requests
 from emission.net.int_service.machine_configs import upc_port
 from pymongo import MongoClient
 import pymongo
+import sys
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -50,7 +51,10 @@ def get_database_table(table, keys):
     Table = _get_current_db()[table]
     for key, elements in keys.items():
         # Should add checks for typing
-        data_type = getattr(pymongo, elements[0])
+        key_parts = key.split("\n")
+        data_types = elements[0]
+        assert(len(key_parts) == len(data_types))
+        index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0]) for i in len(key_parts)]
         is_sparse = bool(elements[1])
         Table.create_index([key, data_type], sparse=is_sparse)
     return Table
@@ -63,7 +67,7 @@ def loadData():
   data_type = request.json['data_type']
   # Keys is a json dict mapping keys to [data_type, is_sparse]
   # Each key is of the form itemA.itemB.....itemZ,
-  # When entry itemA.itemB...itemZ should store data[itemA][itemB]...[itemZ]
+  # When entry "itemA.itemB...itemZ" + "\n" + "..." should store data[itemA][itemB]...[itemZ]
   keys = request.json['keys']
   # Holds a dict mapping field name to value for a search
   search_fields = request.json['search_fields']
@@ -103,17 +107,19 @@ def storeData():
     document = {'$set': data}
     query = {}
     for key in list(keys.keys()):
-      parts = key.split('.')
-      data_elem = data
-      for part in parts:
-        data_elem = data_elem[part]
-      query[key] = data_elem
-    result = table.update(query, document, upsert=True)
-    if 'err' in result and result['err'] is not None:
-      logging.error("In storeData, err = %s" % result['err'])
-      raise Exception()
-    else:
-      logging.debug("Succesfully stored user data")
+      key_parts = key.split("\n")
+      for elem in key_parts:
+        parts = elem.split('.')
+        data_elem = data
+        for part in parts:
+          data_elem = data_elem[part]
+        query[key] = data_elem
+      result = table.update(query, document, upsert=True)
+      if 'err' in result and result['err'] is not None:
+        logging.error("In storeData, err = %s" % result['err'])
+        raise Exception()
+      else:
+        logging.debug("Succesfully stored user data")
 
 @post ("/cloud/key")
 def process_key():
