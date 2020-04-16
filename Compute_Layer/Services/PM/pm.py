@@ -111,7 +111,7 @@ def storeData():
       for elem in key_parts:
         parts = elem.split('.')
         data_elem = data
-        print(parts)
+        logging.debug("Parts are {}, data_elem is {}".format (parts, data_elem))
         for part in parts:
           data_elem = data_elem[part]
         query[key] = data_elem
