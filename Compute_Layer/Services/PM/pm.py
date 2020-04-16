@@ -54,7 +54,7 @@ def get_database_table(table, keys):
         key_parts = key.split("\n")
         data_types = elements[0]
         assert(len(key_parts) == len(data_types))
-        index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0]) for i in len(key_parts)]
+        index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0])) for i in len(key_parts)]
         is_sparse = bool(elements[1])
         Table.create_index([key, data_type], sparse=is_sparse)
     return Table
