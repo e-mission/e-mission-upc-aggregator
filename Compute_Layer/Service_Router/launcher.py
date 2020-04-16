@@ -35,7 +35,7 @@ class Machine ():
 
     def killContainer (self, name):
         if name in self.containers:
-            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'uuid':name}, verify=certificate_bundle_path)
+            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'name':name}, verify=certificate_bundle_path)
             print (resp)
             self.containers.remove (name)
             Machine.total -= 1

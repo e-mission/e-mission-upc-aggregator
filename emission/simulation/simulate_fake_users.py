@@ -79,6 +79,8 @@ def connect_user (client_config, user_config):
     return client.create_fake_user (user_config)
 
 def create_and_sync_data (userlist, numTrips):
+    # Open use once OTP server works
+    """
     pool = Pool ()
     results = []
     for i in range (len (userlist)):
@@ -86,6 +88,7 @@ def create_and_sync_data (userlist, numTrips):
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
+    """
 
     pool = Pool (len (userlist) + 1)
     results = []
