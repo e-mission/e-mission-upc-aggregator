@@ -86,6 +86,7 @@ def loadData():
       else:
         sort_direction = pymongo.DESCENDING
     retrievedData = retrievedData.sort(sort_field, sort_direction)
+  print(retrievedData)
   return {'data': list(retrievedData)}
 
 @post('/data/store')
