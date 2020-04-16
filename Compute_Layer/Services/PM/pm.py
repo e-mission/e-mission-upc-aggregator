@@ -111,15 +111,16 @@ def storeData():
       for elem in key_parts:
         parts = elem.split('.')
         data_elem = data
+        print(parts)
         for part in parts:
           data_elem = data_elem[part]
         query[key] = data_elem
-      result = table.update(query, document, upsert=True)
-      if 'err' in result and result['err'] is not None:
-        logging.error("In storeData, err = %s" % result['err'])
-        raise Exception()
-      else:
-        logging.debug("Succesfully stored user data")
+    result = table.update(query, document, upsert=True)
+    if 'err' in result and result['err'] is not None:
+      logging.error("In storeData, err = %s" % result['err'])
+      raise Exception()
+    else:
+      logging.debug("Succesfully stored user data")
 
 @post ("/cloud/key")
 def process_key():
