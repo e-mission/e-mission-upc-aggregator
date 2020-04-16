@@ -77,7 +77,7 @@ class FakeUser:
             test = dict()
             test["metadata"] = dict()
             test["metadata"]["write_ts"] = "1587026989"
-            test["metadata"]["type"] = "int"
+            test["metadata"]["type"] = "document"
             test["metadata"]["key"] = "test"
             test["data.ts"] = "1000491904"
             json_entries['data'] = test
@@ -92,8 +92,9 @@ class FakeUser:
             keys_dict[key_one] =[["ASCENDING", "ASCENDING", "ASCENDING"], "False"]
             keys_dict['metadata.write_ts'] = [["DESCENDING"], "False"]
             keys_dict['data_ts'] = [["DESCENDING"], "True"]
+            json_entries['keys'] = keys_dict
             # data['phone_to_server'] = "test-string" # Used to test endpoints
-            r = requests.post(self._config['upload_url'], json=data, timeout=300, verify=certificate_bundle_path)
+            r = requests.post(self._config['upload_url'], json=json_entries, timeout=300, verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
 
@@ -106,6 +107,36 @@ class FakeUser:
         else:
             self._flush_cache()
             print("%d entries were sucessfully synced to the server" % len(measurements_no_id))
+
+    def load_data_from_server(self):
+        error = False
+        try:
+            json_entries = dict()
+            json_entries['data_type'] = "Stage_usercache"
+            keys_dict = dict()
+            index1 = ["metadata.write_ts",
+                    "metadata.key"]
+            key_one = "metadata.type"
+            for elem in index1:
+                key_one += "\n" + elem
+            keys_dict[key_one] =[["ASCENDING", "ASCENDING", "ASCENDING"], "False"]
+            keys_dict['metadata.write_ts'] = [["DESCENDING"], "False"]
+            keys_dict['data_ts'] = [["DESCENDING"], "True"]
+            json_entries['keys'] = keys_dict
+            json_entries['search_fields'] = {"metadata.type": "document"}
+            r = requests.post(self._config['upload_url'], json=json_entries, timeout=300, verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+        if error:
+            print('Something went wrong when trying to sync your data. Try again or use save_cache_to_file to save your data.')
+            print(r.content)
+        else:
+            return r.text
+
 
     def run_pipeline (self):
         # Make a call 
