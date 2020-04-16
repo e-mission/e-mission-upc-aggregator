@@ -118,7 +118,7 @@ def sync_user_data (user):
     return (old_len, new_len)
 
 def load_user_data (user):
-    data = user.load_data_from_server()['data']
+    data = user.load_data_from_server()
     return data
 
 if __name__ == "__main__":
