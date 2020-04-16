@@ -9,9 +9,8 @@ import emission.simulation.profile_json as profile_json
 
 class UserCloud:
 
-    def __init__ (self, key, profile):
+    def __init__ (self, key):
         self.key = key
-        self.profile = profile
         self.address = None
         self.username = None
 

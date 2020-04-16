@@ -23,6 +23,7 @@ def main (usercount, tripcount):
 
     base_user_config = {
         "email" : "", #Fill this in later for each user
+        "uuid" : "",  #Dummy entry to allow reuse
     
         "locations" :
         [
