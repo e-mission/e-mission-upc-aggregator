@@ -1,5 +1,6 @@
 import json
 from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
+from emission.core.get_database import url
 # To support dynamic loading of client-specific libraries
 import socket
 import logging

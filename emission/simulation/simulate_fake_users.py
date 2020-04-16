@@ -5,7 +5,7 @@ import argparse
 import requests
 from time import sleep
 import numpy as np
-from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, user_cache_endpoint, service_endpoint
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, store_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
@@ -17,7 +17,7 @@ def main (usercount, tripcount):
     client_config = {
         'emission_server_base_url': controller_addr,
         'register_user_endpoint': register_user_endpoint,
-        'user_cache_endpoint': user_cache_endpoint,
+        'store_endpoint': store_endpoint,
         'service_endpoint': service_endpoint
     }
 

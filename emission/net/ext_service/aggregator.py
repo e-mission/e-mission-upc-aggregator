@@ -12,7 +12,7 @@ import autograd.numpy as np
 from autograd import grad
 import csv
 import time
-from emission.net.int_service.machine_configs import service_endpoint, get_users_endpoint, certificate_bundle_path, query_endpoint
+from emission.net.int_service.machine_configs import service_endpoint, certificate_bundle_path, query_endpoint
 
 # query_file = "query.json"
 
