@@ -17,6 +17,7 @@ for key, value in machines_dict.items ():
 
 register_user_endpoint = config_data["register_user_endpoint"]
 store_endpoint = config_data["store_endpoint"]
+load_endpoint = config_data["load_endpoint"]
 service_endpoint = config_data["service_endpoint"]
 cloud_key_endpoint = config_data["cloud_key_endpoint"]
 cloud_aggregate_endpoint = config_data["cloud_aggregate_endpoint"]

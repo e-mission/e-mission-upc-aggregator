@@ -5,7 +5,7 @@ import argparse
 import requests
 from time import sleep
 import numpy as np
-from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, store_endpoint, service_endpoint
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, store_endpoint, load_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
@@ -18,6 +18,7 @@ def main (usercount, tripcount):
         'emission_server_base_url': controller_addr,
         'register_user_endpoint': register_user_endpoint,
         'store_endpoint': store_endpoint,
+        'load_endpoint': load_endpoint,
         'service_endpoint': service_endpoint
     }
 
@@ -95,6 +96,7 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
+    pool = Pool (len (userlist) + 1)
     for i in range (len (userlist)):
         results.append (pool.apply_async (load_user_data, [userlist[i]]))
     pool.close ()

@@ -80,7 +80,7 @@ class FakeUser:
             test["metadata"]["type"] = "document"
             test["metadata"]["key"] = "test"
             test["data_ts"] = "1000491904"
-            json_entries['data'] = test
+            json_entries['data'] = [test]
 
             ### END OF TEST
             keys_dict = dict()
@@ -124,7 +124,8 @@ class FakeUser:
             keys_dict['data_ts'] = [["DESCENDING"], "True"]
             json_entries['keys'] = keys_dict
             json_entries['search_fields'] = {"metadata.type": "document"}
-            r = requests.post(self._config['upload_url'], json=json_entries, timeout=300, verify=certificate_bundle_path)
+            json_entries['should_sort'] = "False"
+            r = requests.post(self._config['download_url'], json=json_entries, timeout=300, verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
 

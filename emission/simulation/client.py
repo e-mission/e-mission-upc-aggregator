@@ -32,6 +32,7 @@ class EmissionFakeDataGenerator(Client):
         self._register_fake_user(config['email'])
         config['check_url'] = self._config['emission_server_base_url'] + self._config['service_endpoint']
         config['upload_url'] = self._usercloud.address + self._config['store_endpoint']
+        config['download_url'] = self._usercloud.address + self._config['load_endpoint']
         #config['pipeline_url'] = self._usercloud.address + self._config['algorithm_endpoint']
         return self._user_factory(config)
 

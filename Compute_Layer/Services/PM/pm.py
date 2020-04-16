@@ -55,7 +55,7 @@ def get_database_table(table, keys):
         data_types = elements[0]
         assert(len(key_parts) == len(data_types))
         index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0])) for i in range(len(key_parts))]
-        is_sparse = bool(elements[1])
+        is_sparse = elements[1] == "True"
         Table.create_index(index_pairs, sparse=is_sparse)
     return Table
 
@@ -74,7 +74,7 @@ def loadData():
   # Get the database
   table = get_database_table(data_type, keys)
   retrievedData = table.find(search_fields)
-  should_sort = bool(request.json['should_sort'])
+  should_sort = request.json['should_sort'] == "True"
   if should_sort:
     # Holds if there is a value to sort on and if so what direction
     sort_info = request.json['sort']
