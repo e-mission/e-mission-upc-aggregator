@@ -59,6 +59,11 @@ def get_prediction_db():
     Predictions=_get_current_db().Stage_Predictions
     return Predictions
 
+# Nick adding calendar
+def get_calendar_db():
+    Calendars = _get_current_db().Stage_Calendars
+    return Calendars
+
 """
 def get_routeDistanceMatrix_db():
     current_db=MongoClient().Stage_database

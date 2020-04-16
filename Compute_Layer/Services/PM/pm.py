@@ -61,6 +61,8 @@ import emission.simulation.profile_json as pj
 
 # Nick's additional import for managing servers
 from emission.net.int_service.machine_configs import upc_port
+from pymongo import MongoClient
+import pymongo
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -83,23 +85,88 @@ BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 print("Finished configuring logging for %s" % logging.getLogger())
 app = app()
 
-@post('/usercache/get')
-def getFromCache():
-  logging.debug("Called userCache.get")
-  user_uuid=getUUID(request)
-  logging.debug("user_uuid %s" % user_uuid)
-  to_phone = usercache.sync_server_to_phone(user_uuid)
-  return {'server_to_phone': to_phone}
+mongoHostPort = 27017
+_current_db = None
+def _get_current_db():
+    global _current_db
+    if _current_db is None:
+        print("Connecting to database URL "+url)
+        _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
+    return _current_db
 
-@post('/usercache/put')
-def putIntoCache():
+def get_database_table(table, keys):
+    Table = _get_current_db()[table]
+    for key, elements in keys.items():
+        # Should add checks for typing
+        data_type = getattr(pymongo, elements[0])
+        is_sparse = bool(elements[1])
+        Table.create_index([key, data_type], sparse=is_sparse)
+    return Table
+
+@post('/data/load')
+def loadData():
+  if key is None:
+      abort (403, "Cannot load data without a key.\n") 
+  logging.debug("Called data.load")
+  user_uuid=getUUID(request)
+  data_type = request.json['data_type']
+  # Keys is a json dict mapping keys to [data_type, is_sparse]
+  # Each key is of the form itemA.itemB.....itemZ,
+  # When entry itemA.itemB...itemZ should store data[itemA][itemB]...[itemZ]
+  keys = request.json['keys']
+  # Holds a dict mapping field name to value for a search
+  search_fields = request.json['search_fields']
+  # Get the database
+  table = get_database_table(data_type, keys)
+  assert(len(sort_info) == 1)
+  sort_field = list(sort_info.keys()
+  retrievedData = table.find(search_fields)
+  should_sort = bool(request.json['should_sort']
+  if should_sort:
+    # Holds if there is a value to sort on and if so what direction
+    sort_info = request.json['sort']
+    assert(len(sort_info) == 1)
+    for key, value in sort_info.items():
+      sort_field = key
+      if bool(value):
+        sort_direction = pymongo.ASCENDING
+      else:
+        sort_direction = pymongo.DESCENDING
+    retrievedData = retrievedData.sort(sort_field, sort_direction)
+  return list(retrievedData)
+
+@post('/data/store')
+def storeData():
   if key is None:
       abort (403, "Cannot store data without a key.\n") 
-  logging.debug("Called userCache.put")
+  logging.debug("Called data.store")
   user_uuid=getUUID(request)
-  logging.debug("user_uuid %s" % user_uuid)
-  from_phone = request.json['phone_to_server']
-  return usercache.sync_phone_to_server(user_uuid, from_phone)
+  data_type = request.json['data_type']
+  # Data is the data transferred
+  data_list = request.json['data']
+  # Keys is a json dict mapping keys to [data_type, is_sparse]
+  # Each key is of the form itemA.itemB.....itemZ,
+  # When entry itemA.itemB...itemZ should store data[itemA][itemB]...[itemZ]
+  keys = request.json['keys']
+  # Get the database
+  table = get_database_table(data_type, keys)
+  # Ignore any preprocessing
+  for data in data_list:
+    document = {'$set': data}
+    query = {}
+    for key in list(keys.keys()):
+      parts = key.split('.')
+      data_elem = data
+      for part in parts:
+        data_elem = data_elem[part]
+      query[key] = data_elem
+    result = table.update(query, document, upsert=True)
+    if 'err' in result and result['err'] is not None:
+      logging.error("In storeData, err = %s" % result['err'])
+      raise Exception()
+    else:
+      logging.debug("Succesfully stored user data")
+
 
 @post('/profile/create')
 def createUserProfile():
