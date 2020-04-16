@@ -84,7 +84,7 @@ def loadData():
       if bool(value):
         sort_direction = pymongo.ASCENDING
       else:
-        sort_dir/ection = pymongo.DESCENDING
+        sort_direction = pymongo.DESCENDING
     retrievedData = retrievedData.sort(sort_field, sort_direction)
   return {'data': list(retrievedData)}
 
