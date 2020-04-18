@@ -125,7 +125,7 @@ def storeData():
         for part in parts:
           data_elem = data_elem[part]
           type_elem = type_elem[part]
-        type_parts = string.rsplit(".", 1)
+        type_parts = type_elem.rsplit(".", 1)
         assert(len(type_parts) == 2)
         module_name = type_parts[0]
         func_name = parts[1]

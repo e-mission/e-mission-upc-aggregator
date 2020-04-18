@@ -1,7 +1,7 @@
 import requests
 import socket
 
-def get_usercache_keys_and_func():
+def get_usercache_keys():
     keys_dict = dict()
     index1 = ["metadata.write_ts",
             "metadata.key"]
@@ -26,10 +26,11 @@ def get_usercache_types():
 
     # Add data
     types['data_ts'] = "builtins.str"
+    return types
 
 def store_usercache_data(target_address, certificate_path, data):
     return store_data(target_address, certificate_path,"Stage_usercache", 
-            get_usercache_keys(), data)
+            get_usercache_keys(), data, get_usercache_types())
 
 
 def load_usercache_data(target_address, certificate_path, search_fields, 
@@ -63,6 +64,7 @@ def get_calendar_types():
     data_types["ts"] = "datetime.datetime"
     data_types["geo"] = "builtins.list"
     types['data'] = data_types
+    return types
 
 def store_calendar_data(target_address, certificate_path, data):
     return store_data(target_address, certificate_path, "Stage_calendar",
