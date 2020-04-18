@@ -199,7 +199,7 @@ def storeData():
       logging.debug("Succesfully stored user data")
 
 @post ("/cloud/key")
-def process_key():
+def add_encrypt_key():
     global enc_key
     if enc_key:
         abort (403, "Key already given\n")
