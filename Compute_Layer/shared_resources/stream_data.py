@@ -11,7 +11,8 @@ def get_usercache_keys():
     return keys_dict
 
 def store_usercache_data(target_address, certificate_path, data):
-    store_data(target_address, "Stage_usercache", get_usercache_keys(), data, certificate_path)
+    return store_data(target_address, "Stage_usercache", get_usercache_keys(),
+            data, certificate_path)
 
 
 def load_usercache_data(target_address, certificate_path, search_fields, 
@@ -29,7 +30,8 @@ def get_calendar_keys():
     return keys_dict
 
 def store_calendar_data(target_address, certificate_path, data):
-    store_data(target_address, "Stage_calendar", get_calendar_keys(), data, certificate_path)
+    return store_data(target_address, "Stage_calendar", get_calendar_keys(), 
+            data, certificate_path)
 
 def load_calendar_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
@@ -43,7 +45,8 @@ def store_data(target_address, certificate_path, data_type, keys, data):
         json_entries['data_type'] = data_type
         json_entries['keys'] = keys
         json_entries['data'] = data
-        r = requests.post(target_address, json=json_entries, timeout=300, verify=certificate_path)
+        r = requests.post(target_address, json=json_entries, timeout=300,
+                verify=certificate_path)
     except (socket.timeout) as e:
         error = True
 
@@ -55,10 +58,12 @@ def store_data(target_address, certificate_path, data_type, keys, data):
         print(r.content)
     else:
         print("{} data sucessfully synced to the server".format(data_type))
+    return error
 
 
 
-def load_data(target_address, certificate_path, data_type, keys, search_fields, should_sort=False, sort=None):
+def load_data(target_address, certificate_path, data_type, keys, search_fields,
+        should_sort=False, sort=None):
     error = False
     try:
         json_entries = dict()
@@ -70,12 +75,14 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields, 
             json_entries['sort'] = sort
         else:
             json_entries['should_sort'] = "False"
-        r = requests.post(target_address, json=json_entries, timeout=300, verify=certificate_path)
+        r = requests.post(target_address, json=json_entries, timeout=300,
+                verify=certificate_path)
     #Check if sucessful
     if not r.ok or error:
         error = True
     if error:
         print('Something went wrong when trying to load your {} data.'.format(data_type))
         print(r.content)
+        return (None, error)
     else:
-        return r.text
+        return (r.text, error)
