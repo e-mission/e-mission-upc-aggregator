@@ -91,6 +91,22 @@ def returnSpecifiedFunction(name_components):
         func = getattr(func, name)
     return func
 
+def process_key(key, data=None, types=None):
+  key_parts = key.split("\n")
+  for elem in key_parts:
+    parts = elem.split('.')
+    prev_data_dict = data
+    data_elem = data
+    type_elem = types
+    for part in parts:
+      if data:
+        prev_data_dict = data_elem
+        data_elem = data_elem[part]
+      if types:
+        type_elem = type_elem[part]
+    return prev_data_dict, date_elem, type_elem
+
+
 @post('/data/load')
 def loadData():
   if enc_key is None:
@@ -111,10 +127,7 @@ def loadData():
   elements = request.json['search_fields']
   search_fields = elements[0]
   for elem_location, value in search_fields.copy().items():
-    parts = elem_location.split('.')
-    type_elem = decode_types
-    for part in parts:
-      type_elem = type_elem[part]
+    _, _, type_elem = process_key(elem_location, None, decode_types)
     func = returnSpecifiedFunction(type_elem)
     if apply_func_if_not_leaf(value, func):
       search_fields[elem_location] = func(value)
@@ -143,20 +156,10 @@ def loadData():
   logging.debug("Retreived data is {}".format(retrievedData))
   for item in retrievedData:
     for key in list(keys.keys()):
-      key_parts = key.split("\n")
-      for elem in key_parts:
-        parts = elem.split('.')
-        prev_data_dict = item
-        data_elem = item
-        type_elem = encode_types
-        for part in parts:
-          prev_data_dict = data_elem
-          data_elem = data_elem[part]
-          type_elem = type_elem[part]
-        func = returnSpecifiedFunction(type_elem)
-        processed_data_elem = func(data_elem)
-        prev_data_dict[parts[-1]] = processed_data_elem
-
+      prev_data_dict, data_elem, type_elem = process_key(key, item, encode_types)
+      func = returnSpecifiedFunction(type_elem)
+      processed_data_elem = func(data_elem)
+      prev_data_dict[parts[-1]] = processed_data_elem
   return {'data' : retrievedData}
 
 @post('/data/store')
@@ -180,20 +183,11 @@ def storeData():
   for data in data_list:
     query = {}
     for key in list(keys.keys()):
-      key_parts = key.split("\n")
-      for elem in key_parts:
-        parts = elem.split('.')
-        prev_data_dict = data
-        data_elem = data
-        type_elem = decode_types
-        for part in parts:
-          prev_data_dict = data_elem
-          data_elem = data_elem[part]
-          type_elem = type_elem[part]
-        func = returnSpecifiedFunction(type_elem)
-        processed_data_elem = func(data_elem)
-        query[elem] = processed_data_elem
-        prev_data_dict[parts[-1]] = processed_data_elem
+      prev_data_dict, data_elem, type_elem = process_key(key, data, decode_types)
+      func = returnSpecifiedFunction(type_elem)
+      processed_data_elem = func(data_elem)
+      query[elem] = processed_data_elem
+      prev_data_dict[parts[-1]] = processed_data_elem
     logging.debug("Query is {}".format (query))
     logging.debug("Data is {}".format (data))
     document = {'$set': data}
