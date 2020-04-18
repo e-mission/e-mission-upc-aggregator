@@ -147,15 +147,16 @@ def storeData():
   table = get_database_table(data_type, keys)
   # Ignore any preprocessing
   for data in data_list:
-    document = {'$set': data}
     query = {}
     for key in list(keys.keys()):
       key_parts = key.split("\n")
       for elem in key_parts:
         parts = elem.split('.')
+        prev_data_dict = data
         data_elem = data
         type_elem = types
         for part in parts:
+          prev_data_dict = data_elem
           data_elem = data_elem[part]
           type_elem = type_elem[part]
         type_parts = type_elem.rsplit(".", 1)
@@ -165,8 +166,12 @@ def storeData():
         if module_name not in sys.modules:
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
-        query[elem] = func(data_elem)
+        processed_data_elem = func(data_elem)
+        query[elem] = processed_data_elem
+        prev_data_dict[parts[-1]] = processed_data_elem
     logging.debug("Query is {}".format (query))
+    logging.debug("Data is {}".format (data))
+    document = {'$set': data}
     result = table.update(query, document, upsert=True)
     if 'err' in result and result['err'] is not None:
       logging.error("In storeData, err = %s" % result['err'])
