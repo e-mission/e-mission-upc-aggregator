@@ -1,3 +1,6 @@
+import requests
+import socket
+
 def get_usercache_keys():
     keys_dict = dict()
     index1 = ["metadata.write_ts",
@@ -11,8 +14,8 @@ def get_usercache_keys():
     return keys_dict
 
 def store_usercache_data(target_address, certificate_path, data):
-    return store_data(target_address, "Stage_usercache", get_usercache_keys(),
-            data, certificate_path)
+    return store_data(target_address, certificate_path,"Stage_usercache", 
+            get_usercache_keys(), data)
 
 
 def load_usercache_data(target_address, certificate_path, search_fields, 
@@ -26,12 +29,13 @@ def get_calendar_keys():
     key_one = "metadata.type"
     for elem in index1:
         key_one += "\n" + elem
-    keys_dict[key_one] =[["ASCENDING", "ASCENDING", "ASCENDING", "ASCENDING", "ASCENDING", "GEOSPHERE"], "False"]
+    keys_dict[key_one] =[["ASCENDING", "ASCENDING", "ASCENDING", "ASCENDING", 
+        "ASCENDING", "GEOSPHERE"], "False"]
     return keys_dict
 
 def store_calendar_data(target_address, certificate_path, data):
-    return store_data(target_address, "Stage_calendar", get_calendar_keys(), 
-            data, certificate_path)
+    return store_data(target_address, certificate_path, "Stage_calendar",
+            get_calendar_keys(), data)
 
 def load_calendar_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
@@ -77,6 +81,8 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
             json_entries['should_sort'] = "False"
         r = requests.post(target_address, json=json_entries, timeout=300,
                 verify=certificate_path)
+    except (socket.timeout) as e:
+        error = True
     #Check if sucessful
     if not r.ok or error:
         error = True

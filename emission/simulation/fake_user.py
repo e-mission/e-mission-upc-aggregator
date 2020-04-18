@@ -9,7 +9,7 @@ import socket
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 from emission.net.int_service.machine_configs import certificate_bundle_path
-import Compute_Layer/shared_resources/stream_data.py as clsrsd
+import Compute_Layer.shared_resources.stream_data as clsrsd
 
 class FakeUser:
     """
@@ -89,7 +89,7 @@ class FakeUser:
         search_fields = [{"metadata.type": "document"}, {"_id": "False"}]
         should_sort = True
         sort = {'metadata.write_ts': "True"}
-        data, error = clsrsd.load_usercache_data(self._config['upload_url'], 
+        data, error = clsrsd.load_usercache_data(self._config['download_url'], 
                 certificate_bundle_path, search_fields, should_sort, sort)
         return data
 
