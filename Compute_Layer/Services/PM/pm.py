@@ -102,7 +102,7 @@ def process_key(key, data=None, types=None):
         data_elem = data_elem[part]
       if types:
         type_elem = type_elem[part]
-    return prev_data_dict, data_elem, type_elem
+    return prev_data_dict, data_elem, type_elem, parts[-1]
 
 
 @post('/data/load')
@@ -127,7 +127,7 @@ def loadData():
   for elem_location, value in search_fields.copy().items():
     key_parts = elem_location.split("\n")
     for elem in key_parts:
-      _, _, type_elem = process_key(elem, None, decode_types)
+      _, _, type_elem, _ = process_key(elem, None, decode_types)
       func = returnSpecifiedFunction(type_elem)
       if apply_func_if_not_leaf(value, func):
         search_fields[elem_location] = func(value)
@@ -158,10 +158,10 @@ def loadData():
     for key in list(keys.keys()):
       key_parts = key.split("\n")
       for elem in key_parts:
-        prev_data_dict, data_elem, type_elem = process_key(elem, item, encode_types)
+        prev_data_dict, data_elem, type_elem, end = process_key(elem, item, encode_types)
         func = returnSpecifiedFunction(type_elem)
         processed_data_elem = func(data_elem)
-        prev_data_dict[parts[-1]] = processed_data_elem
+        prev_data_dict[end] = processed_data_elem
   return {'data' : retrievedData}
 
 @post('/data/store')
@@ -187,11 +187,11 @@ def storeData():
     for key in list(keys.keys()):
       key_parts = key.split("\n")
       for elem in key_parts:
-        prev_data_dict, data_elem, type_elem = process_key(elem, data, decode_types)
+        prev_data_dict, data_elem, type_elem, end = process_key(elem, data, decode_types)
         func = returnSpecifiedFunction(type_elem)
         processed_data_elem = func(data_elem)
         query[elem] = processed_data_elem
-        prev_data_dict[parts[-1]] = processed_data_elem
+        prev_data_dict[end] = processed_data_elem
     logging.debug("Query is {}".format (query))
     logging.debug("Data is {}".format (data))
     document = {'$set': data}
