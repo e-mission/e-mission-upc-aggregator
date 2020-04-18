@@ -19,13 +19,13 @@ def get_usercache_decode_types():
 
     # Add metadata
     metadata_types = dict()
-    metadata_types["type"] = "builtins.str"
-    metadata_types["write_ts"] = "builtins.str"
-    metadata_types["key"] = "builtins.str"
+    metadata_types["type"] = ["builtins", "str"]
+    metadata_types["write_ts"] = ["builtins", "str"]
+    metadata_types["key"] = ["builtins", "str"]
     types['metadata'] = metadata_types
 
     # Add data
-    types['data_ts'] = "builtins.str"
+    types['data_ts'] = ["builtins", "str"]
     return types
 
 def get_usercache_encode_types():
@@ -33,13 +33,13 @@ def get_usercache_encode_types():
 
     # Add metadata
     metadata_types = dict()
-    metadata_types["type"] = "builtins.str"
-    metadata_types["write_ts"] = "builtins.str"
-    metadata_types["key"] = "builtins.str"
+    metadata_types["type"] = ["builtins", "str"]
+    metadata_types["write_ts"] = ["builtins", "str"]
+    metadata_types["key"] = ["builtins", "str"]
     types['metadata'] = metadata_types
 
     # Add data
-    types['data_ts'] = "builtins.str"
+    types['data_ts'] = ["builtins", "str"]
     return types
 
 def store_usercache_data(target_address, certificate_path, data):
@@ -68,16 +68,16 @@ def get_calendar_decode_types():
 
     # Add metadata
     metadata_types = dict()
-    metadata_types["type"] = "builtins.str"
+    metadata_types["type"] = ["builtins", "str"]
     types['metadata'] = metadata_types
 
     # Add data
     data_types = dict()
-    data_types["attendees"] = "builtins.list"
-    data_types["start_time"] = "dateutil.parser.parse"
-    data_types["end_time"] = "dateutil.parser.parse"
-    data_types["ts"] = "dateutil.parser.parse"
-    data_types["geo"] = "geojson.Point"
+    data_types["attendees"] = ["builtins", "list"]
+    data_types["start_time"] = ["dateutil.parser", "parse"]
+    data_types["end_time"] = ["dateutil.parser", "parse"]
+    data_types["ts"] = ["dateutil.parser", "parse"]
+    data_types["geo"] = ["geojson", "Point"]
     types['data'] = data_types
     return types
 
@@ -86,16 +86,16 @@ def get_calendar_encode_types():
 
     # Add metadata
     metadata_types = dict()
-    metadata_types["type"] = "builtins.str"
+    metadata_types["type"] = ["builtins", "str"]
     types['metadata'] = metadata_types
 
     # Add data
     data_types = dict()
-    data_types["attendees"] = "builtins.list"
-    data_types["start_time"] = "time.isoformat"
-    data_types["end_time"] = "time.isoformat"
-    data_types["ts"] = "time.isoformat"
-    data_types["geo"] = "geojson.dumps"
+    data_types["attendees"] = ["builtins", "list"]
+    data_types["start_time"] = ["datetime", "time.isoformat"]
+    data_types["end_time"] = ["datetime", "time.isoformat"]
+    data_types["ts"] = ["datetime", "time.isoformat"]
+    data_types["geo"] = ["geojson", "dumps"]
     types['data'] = data_types
     return types
 

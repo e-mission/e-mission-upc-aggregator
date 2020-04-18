@@ -98,10 +98,9 @@ def loadData():
     type_elem = decode_types
     for part in parts:
       type_elem = type_elem[part]
-    type_parts = type_elem.rsplit(".", 1)
-    assert(len(type_parts) == 2)
-    module_name = type_parts[0]
-    func_name = type_parts[1]
+    assert(len(type_elem) == 2)
+    module_name = type_elem[0]
+    func_name = type_elem[1]
     if module_name not in sys.modules:
       import_module(module_name)
     func = getattr(sys.modules[module_name], func_name)
@@ -142,10 +141,9 @@ def loadData():
           prev_data_dict = data_elem
           data_elem = data_elem[part]
           type_elem = type_elem[part]
-        type_parts = type_elem.rsplit(".", 1)
-        assert(len(type_parts) == 2)
-        module_name = type_parts[0]
-        func_name = type_parts[1]
+        assert(len(type_elem) == 2)
+        module_name = type_elem[0]
+        func_name = type_elem[1]
         if module_name not in sys.modules:
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
@@ -185,10 +183,9 @@ def storeData():
           prev_data_dict = data_elem
           data_elem = data_elem[part]
           type_elem = type_elem[part]
-        type_parts = type_elem.rsplit(".", 1)
-        assert(len(type_parts) == 2)
-        module_name = type_parts[0]
-        func_name = type_parts[1]
+        assert(len(type_elem) == 2)
+        module_name = type_elem[0]
+        func_name = type_elem[1]
         if module_name not in sys.modules:
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
