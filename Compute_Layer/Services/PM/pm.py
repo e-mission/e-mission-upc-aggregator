@@ -79,6 +79,7 @@ def apply_func_if_not_leaf(value, func):
     class.method. For generality we will assume a recursive situation.
 """
 def returnSpecifiedFunction(name_components):
+    # Should add a check to whitelist only data processing functions
     assert(len(name_components) == 2)
     module_name = name_components[0]
     func_name = name_components[1]
@@ -133,7 +134,7 @@ def loadData():
     assert(len(sort_info) == 1)
     for key, value in sort_info.items():
       sort_field = key
-      if value == True:
+      if value == 'True':
         sort_direction = pymongo.ASCENDING
       else:
         sort_direction = pymongo.DESCENDING
