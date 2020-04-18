@@ -67,7 +67,7 @@ def get_database_table(table, keys):
 def apply_func_if_not_leaf(value, func):
   if isinstance(value, dict):
     for key, data in value.copy().items():
-      if (apply_func_if_not_leaf(data)):
+      if (apply_func_if_not_leaf(data, func)):
         value[key] = func[data]
     return False
   else:
