@@ -101,7 +101,7 @@ class FakeUser:
 
 
     def load_calendar_from_server(self):
-        search_fields = [{"metadata.type": "calendar"}, {"_id": "False"}]
+        search_fields = [{"metadata.start_time": {"$gt": "2020-03-15 09:00:00"}}, {"_id": "False"}]
         should_sort = True
         sort = {'metadata.end_time': "False"}
         data, error = clsrsd.load_calendar_data(self._config['download_url'], 

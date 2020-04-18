@@ -1,7 +1,7 @@
 import requests
 import socket
 
-def get_usercache_keys():
+def get_usercache_keys_and_func():
     keys_dict = dict()
     index1 = ["metadata.write_ts",
             "metadata.key"]
@@ -12,6 +12,20 @@ def get_usercache_keys():
     keys_dict['metadata.write_ts'] = [["DESCENDING"], "False"]
     keys_dict['data_ts'] = [["DESCENDING"], "True"]
     return keys_dict
+
+
+def get_usercache_types():
+    types = dict()
+
+    # Add metadata
+    metadata_types = dict()
+    metadata_types["type"] = "builtins.str"
+    metadata_types["write_ts"] = "builtins.str"
+    metadata_types["key"] = "builtins.str"
+    types['metadata'] = metadata_types
+
+    # Add data
+    types['data_ts'] = "builtins.str"
 
 def store_usercache_data(target_address, certificate_path, data):
     return store_data(target_address, certificate_path,"Stage_usercache", 
@@ -33,22 +47,40 @@ def get_calendar_keys():
         "ASCENDING", "GEOSPHERE"], "False"]
     return keys_dict
 
+def get_calendar_types():
+    types = dict()
+
+    # Add metadata
+    metadata_types = dict()
+    metadata_types["type"] = "builtins.str"
+    types['metadata'] = metadata_types
+
+    # Add data
+    data_types = dict()
+    data_types["attendees"] = "datetime.datetime"
+    data_types["start_time"] = "datetime.datetime"
+    data_types["end_time"] = "datetime.datetime"
+    data_types["ts"] = "datetime.datetime"
+    data_types["geo"] = "builtins.list"
+    types['data'] = data_types
+
 def store_calendar_data(target_address, certificate_path, data):
     return store_data(target_address, certificate_path, "Stage_calendar",
-            get_calendar_keys(), data)
+            get_calendar_keys(), data, get_calendar_types())
 
 def load_calendar_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
     return load_data(target_address, certificate_path, "Stage_calendar", 
             get_calendar_keys(), search_fields, should_sort, sort)
 
-def store_data(target_address, certificate_path, data_type, keys, data):
+def store_data(target_address, certificate_path, data_type, keys, data, types):
     error = False
     try:
         json_entries = dict()
         json_entries['data_type'] = data_type
         json_entries['keys'] = keys
         json_entries['data'] = data
+        json_entries['types'] = types
         r = requests.post(target_address, json=json_entries, timeout=300,
                 verify=certificate_path)
     except (socket.timeout) as e:

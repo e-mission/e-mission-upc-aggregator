@@ -106,6 +106,9 @@ def storeData():
   # Each key is of the form itemA.itemB.....itemZ,
   # When entry itemA.itemB...itemZ should store data[itemA][itemB]...[itemZ]
   keys = request.json['keys']
+  # Types is a list with the same entries as the data list that is the list
+  # of function names used to process the data
+  types = request.json['types']
   # Get the database
   table = get_database_table(data_type, keys)
   # Ignore any preprocessing
@@ -117,10 +120,19 @@ def storeData():
       for elem in key_parts:
         parts = elem.split('.')
         data_elem = data
+        type_elem = types
         logging.debug("Parts are {}, data_elem is {}".format (parts, data_elem))
         for part in parts:
           data_elem = data_elem[part]
-        query[key] = data_elem
+          type_elem = type_elem[part]
+        type_parts = string.rsplit(".", 1)
+        assert(len(type_parts) == 2)
+ 11     module_name = type_parts[0]
+ 12     func_name = parts[1]
+ 13     if module_name not in sys.modules:
+ 15         import_module(module_name)
+ 16     func = getattr(sys.modules[module_name], func_name)
+        query[key] = func(data_elem)
     result = table.update(query, document, upsert=True)
     if 'err' in result and result['err'] is not None:
       logging.error("In storeData, err = %s" % result['err'])
