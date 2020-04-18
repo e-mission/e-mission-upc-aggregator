@@ -139,7 +139,6 @@ class FakeUser:
         else:
             return r.text
 
-
     def run_pipeline (self):
         # Make a call 
         pass 
