@@ -156,7 +156,7 @@ def loadData():
         processed_data_elem = func(data_elem)
         prev_data_dict[parts[-1]] = processed_data_elem
 
-  return {'data': retrievedData}
+  return retrievedData
 
 @post('/data/store')
 def storeData():
