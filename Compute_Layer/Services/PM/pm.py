@@ -127,11 +127,11 @@ def storeData():
           type_elem = type_elem[part]
         type_parts = string.rsplit(".", 1)
         assert(len(type_parts) == 2)
- 11     module_name = type_parts[0]
- 12     func_name = parts[1]
- 13     if module_name not in sys.modules:
- 15         import_module(module_name)
- 16     func = getattr(sys.modules[module_name], func_name)
+        module_name = type_parts[0]
+        func_name = parts[1]
+        if module_name not in sys.modules:
+            import_module(module_name)
+        func = getattr(sys.modules[module_name], func_name)
         query[key] = func(data_elem)
     result = table.update(query, document, upsert=True)
     if 'err' in result and result['err'] is not None:
