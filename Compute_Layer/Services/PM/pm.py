@@ -73,6 +73,22 @@ def apply_func_if_not_leaf(value, func):
   else:
     return True
 
+"""
+    Returns the function specified by the module and function names.
+    The function name may also be a method, in which case it will be
+    class.method. For generality we will assume a recursive situation.
+"""
+def returnSpecifiedFunction(name_components):
+    assert(len(name_components) == 2)
+    module_name = name_components[0]
+    func_name = name_components[1]
+    if module_name not in sys.modules:
+      import_module(module_name)
+    func = sys.modules[module_name]
+    func_components = func_name.split(".")
+    for name in func_components:
+        func = getattr(module, name)
+    return func
 
 @post('/data/load')
 def loadData():
@@ -98,12 +114,7 @@ def loadData():
     type_elem = decode_types
     for part in parts:
       type_elem = type_elem[part]
-    assert(len(type_elem) == 2)
-    module_name = type_elem[0]
-    func_name = type_elem[1]
-    if module_name not in sys.modules:
-      import_module(module_name)
-    func = getattr(sys.modules[module_name], func_name)
+    func = returnSpecifiedFunction(type_elem)
     if apply_func_if_not_leaf(value, func):
       search_fields[elem_location] = func(value)
 
@@ -141,12 +152,7 @@ def loadData():
           prev_data_dict = data_elem
           data_elem = data_elem[part]
           type_elem = type_elem[part]
-        assert(len(type_elem) == 2)
-        module_name = type_elem[0]
-        func_name = type_elem[1]
-        if module_name not in sys.modules:
-            import_module(module_name)
-        func = getattr(sys.modules[module_name], func_name)
+        func = returnSpecifiedFunction(type_elem)
         processed_data_elem = func(data_elem)
         prev_data_dict[parts[-1]] = processed_data_elem
 
@@ -183,12 +189,7 @@ def storeData():
           prev_data_dict = data_elem
           data_elem = data_elem[part]
           type_elem = type_elem[part]
-        assert(len(type_elem) == 2)
-        module_name = type_elem[0]
-        func_name = type_elem[1]
-        if module_name not in sys.modules:
-            import_module(module_name)
-        func = getattr(sys.modules[module_name], func_name)
+        func = returnSpecifiedFunction(type_elem)
         processed_data_elem = func(data_elem)
         query[elem] = processed_data_elem
         prev_data_dict[parts[-1]] = processed_data_elem
