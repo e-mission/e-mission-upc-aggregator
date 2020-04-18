@@ -92,9 +92,9 @@ def get_calendar_encode_types():
     # Add data
     data_types = dict()
     data_types["attendees"] = ["builtins", "list"]
-    data_types["start_time"] = ["datetime", "time.isoformat"]
-    data_types["end_time"] = ["datetime", "time.isoformat"]
-    data_types["ts"] = ["datetime", "time.isoformat"]
+    data_types["start_time"] = ["datetime", "datetime.isoformat"]
+    data_types["end_time"] = ["datetime", "datetime.isoformat"]
+    data_types["ts"] = ["datetime", "datetime.isoformat"]
     data_types["geo"] = ["geojson", "dumps"]
     types['data'] = data_types
     return types
