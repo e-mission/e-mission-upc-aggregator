@@ -84,15 +84,18 @@ def loadData():
   # Each key is of the form itemA.itemB.....itemZ,
   # When entry "itemA.itemB...itemZ" + "\n" + "..." should store data[itemA][itemB]...[itemZ]
   keys = request.json['keys']
-  # Types is a list with the same entries as the data list that is the list
-  # of function names used to process the data
-  types = request.json['types']
+  # Decode types is a list with the same entries as the query list that is the list
+  # of function names used to decode the json data
+  decode_types = request.json['decode-types']
+  # Decode types is a list with the same entries as the data list that is the list
+  # of function names used to decode the json data
+  encode_types = request.json['encode-types']
   # Holds a dict mapping field name to value for a search
   elements = request.json['search_fields']
   search_fields = elements[0]
   for elem_location, value in search_fields.copy().items():
     parts = elem_location.split('.')
-    type_elem = types
+    type_elem = decode_types
     for part in parts:
       type_elem = type_elem[part]
     type_parts = type_elem.rsplit(".", 1)
@@ -127,6 +130,28 @@ def loadData():
     retrievedData = retrievedData.sort(sort_field, sort_direction)
   retrievedData = list(retrievedData)
   logging.debug("Retreived data is {}".format(retrievedData))
+  for item in retrievedData:
+    for key in list(keys.keys()):
+      key_parts = key.split("\n")
+      for elem in key_parts:
+        parts = elem.split('.')
+        prev_data_dict = item
+        data_elem = item
+        type_elem = encode_types
+        for part in parts:
+          prev_data_dict = data_elem
+          data_elem = data_elem[part]
+          type_elem = type_elem[part]
+        type_parts = type_elem.rsplit(".", 1)
+        assert(len(type_parts) == 2)
+        module_name = type_parts[0]
+        func_name = type_parts[1]
+        if module_name not in sys.modules:
+            import_module(module_name)
+        func = getattr(sys.modules[module_name], func_name)
+        processed_data_elem = func(data_elem)
+        prev_data_dict[parts[-1]] = processed_data_elem
+
   return {'data': retrievedData}
 
 @post('/data/store')
@@ -141,9 +166,9 @@ def storeData():
   # Each key is of the form itemA.itemB.....itemZ,
   # When entry itemA.itemB...itemZ should store data[itemA][itemB]...[itemZ]
   keys = request.json['keys']
-  # Types is a list with the same entries as the data list that is the list
-  # of function names used to process the data
-  types = request.json['types']
+  # Decode types is a list with the same entries as the data list that is the list
+  # of function names used to decode the json data
+  decode_types = request.json['decode-types']
   # Get the database
   table = get_database_table(data_type, keys)
   # Ignore any preprocessing
@@ -155,7 +180,7 @@ def storeData():
         parts = elem.split('.')
         prev_data_dict = data
         data_elem = data
-        type_elem = types
+        type_elem = decode_types
         for part in parts:
           prev_data_dict = data_elem
           data_elem = data_elem[part]
