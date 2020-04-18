@@ -170,8 +170,14 @@ def get_last_event_from_server(user, upload_address, date):
     sort = {'data.end_time': "False"}
     data, error = clsrsd.load_calendar_data(upload_address, 
             certificate_bundle_path, search_fields, should_sort, sort)
-    print(data)
-        #return data
+    if error:
+        return None
+    else:
+        data_values = data['data']
+        if not data_values:
+            return None
+        else:
+            return data_values[0]
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
