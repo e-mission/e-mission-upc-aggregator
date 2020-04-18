@@ -86,10 +86,10 @@ def loadData():
   keys = request.json['keys']
   # Decode types is a list with the same entries as the query list that is the list
   # of function names used to decode the json data
-  decode_types = request.json['decode-types']
+  decode_types = request.json['decode_types']
   # Decode types is a list with the same entries as the data list that is the list
   # of function names used to decode the json data
-  encode_types = request.json['encode-types']
+  encode_types = request.json['encode_types']
   # Holds a dict mapping field name to value for a search
   elements = request.json['search_fields']
   search_fields = elements[0]
@@ -168,7 +168,7 @@ def storeData():
   keys = request.json['keys']
   # Decode types is a list with the same entries as the data list that is the list
   # of function names used to decode the json data
-  decode_types = request.json['decode-types']
+  decode_types = request.json['decode_types']
   # Get the database
   table = get_database_table(data_type, keys)
   # Ignore any preprocessing

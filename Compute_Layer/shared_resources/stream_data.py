@@ -14,7 +14,21 @@ def get_usercache_keys():
     return keys_dict
 
 
-def get_usercache_types():
+def get_usercache_decode_types():
+    types = dict()
+
+    # Add metadata
+    metadata_types = dict()
+    metadata_types["type"] = "builtins.str"
+    metadata_types["write_ts"] = "builtins.str"
+    metadata_types["key"] = "builtins.str"
+    types['metadata'] = metadata_types
+
+    # Add data
+    types['data_ts'] = "builtins.str"
+    return types
+
+def get_usercache_encode_types():
     types = dict()
 
     # Add metadata
@@ -30,14 +44,14 @@ def get_usercache_types():
 
 def store_usercache_data(target_address, certificate_path, data):
     return store_data(target_address, certificate_path,"Stage_usercache", 
-            get_usercache_keys(), data, get_usercache_types())
+            get_usercache_keys(), data, get_usercache_decode_types())
 
 
 def load_usercache_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
     return load_data(target_address, certificate_path, "Stage_usercache", 
-            get_usercache_keys(), search_fields, get_usercache_types(), 
-            should_sort, sort)
+            get_usercache_keys(), search_fields, get_usercache_decode_types(), 
+            get_usercache_encode_types(), should_sort, sort)
 
 def get_calendar_keys():
     keys_dict = dict()
@@ -49,7 +63,7 @@ def get_calendar_keys():
         "ASCENDING", "GEOSPHERE"], "False"]
     return keys_dict
 
-def get_calendar_types():
+def get_calendar_decode_types():
     types = dict()
 
     # Add metadata
@@ -67,24 +81,42 @@ def get_calendar_types():
     types['data'] = data_types
     return types
 
+def get_calendar_encode_types():
+    types = dict()
+
+    # Add metadata
+    metadata_types = dict()
+    metadata_types["type"] = "builtins.str"
+    types['metadata'] = metadata_types
+
+    # Add data
+    data_types = dict()
+    data_types["attendees"] = "builtins.list"
+    data_types["start_time"] = "time.isoformat"
+    data_types["end_time"] = "time.isoformat"
+    data_types["ts"] = "time.isoformat"
+    data_types["geo"] = "geojson.dumps"
+    types['data'] = data_types
+    return types
+
 def store_calendar_data(target_address, certificate_path, data):
     return store_data(target_address, certificate_path, "Stage_calendar",
-            get_calendar_keys(), data, get_calendar_types())
+            get_calendar_keys(), data, get_calendar_decode_types())
 
 def load_calendar_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
     return load_data(target_address, certificate_path, "Stage_calendar", 
-            get_calendar_keys(), search_fields, get_calendar_types(),
-            should_sort, sort)
+            get_calendar_keys(), search_fields, get_calendar_decode_types(),
+            get_calendar_encode_types(), should_sort, sort)
 
-def store_data(target_address, certificate_path, data_type, keys, data, types):
+def store_data(target_address, certificate_path, data_type, keys, data, decode_types):
     error = False
     try:
         json_entries = dict()
         json_entries['data_type'] = data_type
         json_entries['keys'] = keys
         json_entries['data'] = data
-        json_entries['types'] = types
+        json_entries['decode_types'] = decode_types
         r = requests.post(target_address, json=json_entries, timeout=300,
                 verify=certificate_path)
     except (socket.timeout) as e:
@@ -103,14 +135,15 @@ def store_data(target_address, certificate_path, data_type, keys, data, types):
 
 
 def load_data(target_address, certificate_path, data_type, keys, search_fields,
-        types, should_sort=False, sort=None):
+        decode_types, encode_types, should_sort=False, sort=None):
     error = False
     try:
         json_entries = dict()
         json_entries['data_type'] = data_type
         json_entries['keys'] = keys
         json_entries['search_fields'] = search_fields
-        json_entries['types'] = types
+        json_entries['decode_types'] = decode_types
+        json_entries['encode_types'] = encode_types
         if should_sort:
             json_entries['should_sort'] = "True"
             json_entries['sort'] = sort
