@@ -165,7 +165,7 @@ def storeData():
         if module_name not in sys.modules:
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
-        query[key_parts] = func(data_elem)
+        query[elem] = func(data_elem)
     logging.debug("Query is {}".format (query))
     result = table.update(query, document, upsert=True)
     if 'err' in result and result['err'] is not None:
