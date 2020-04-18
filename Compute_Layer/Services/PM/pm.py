@@ -104,7 +104,7 @@ def process_key(key, data=None, types=None):
         data_elem = data_elem[part]
       if types:
         type_elem = type_elem[part]
-    return prev_data_dict, date_elem, type_elem
+    return prev_data_dict, data_elem, type_elem
 
 
 @post('/data/load')
