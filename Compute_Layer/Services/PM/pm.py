@@ -127,7 +127,7 @@ def loadData():
   for elem_location, value in search_fields.copy().items():
     key_parts = elem_location.split("\n")
     for elem in key_parts:
-      _, _, type_elem = process_key(elem_location, None, decode_types)
+      _, _, type_elem = process_key(elem, None, decode_types)
       func = returnSpecifiedFunction(type_elem)
       if apply_func_if_not_leaf(value, func):
         search_fields[elem_location] = func(value)
@@ -158,7 +158,7 @@ def loadData():
     for key in list(keys.keys()):
       key_parts = key.split("\n")
       for elem in key_parts:
-        prev_data_dict, data_elem, type_elem = process_key(key, item, encode_types)
+        prev_data_dict, data_elem, type_elem = process_key(elem, item, encode_types)
         func = returnSpecifiedFunction(type_elem)
         processed_data_elem = func(data_elem)
         prev_data_dict[parts[-1]] = processed_data_elem
@@ -187,7 +187,7 @@ def storeData():
     for key in list(keys.keys()):
       key_parts = key.split("\n")
       for elem in key_parts:
-        prev_data_dict, data_elem, type_elem = process_key(key, data, decode_types)
+        prev_data_dict, data_elem, type_elem = process_key(elem, data, decode_types)
         func = returnSpecifiedFunction(type_elem)
         processed_data_elem = func(data_elem)
         query[elem] = processed_data_elem
