@@ -5,8 +5,12 @@ import argparse
 import requests
 from time import sleep
 import numpy as np
+import datetime
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, store_endpoint, load_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
+import Compute_Layer.shared_resources.stream_data as clsrsd
+from Compute_Layer.shared_resources.ical import calendarTimeZone 
+from emission.net.int_service.machine_configs import certificate_bundle_path
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
@@ -119,9 +123,20 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
+    """
     pool = Pool (len (userlist) + 1)
     for i in range (len (userlist)):
         results.append (pool.apply_async (load_calendar_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+    """
+
+    pool = Pool (len (userlist) + 1)
+    target_date = datetime.datetime(2020, 3, 15, tzinfo=calendarTimeZone)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (get_last_event_from_server, [userlist[i], userlist[i]._config['download_url'], target_date]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -146,6 +161,17 @@ def sync_calendar_data(user, calendar_file):
 
 def load_calendar_data(user):
     return user.load_calendar_from_server()
+
+def get_last_event_from_server(user, upload_address, date):
+    day_start = date.isoformat()
+    day_end = (date + datetime.timedelta(days=1)).isoformat()
+    search_fields = [{"data.end_time": {"$lt": day_end, "$gt": day_start}}, {"_id": "False"}]
+    should_sort = True
+    sort = {'data.end_time': "False"}
+    data, error = clsrsd.load_calendar_data(upload_address, 
+            certificate_bundle_path, search_fields, should_sort, sort)
+    print(data)
+        #return data
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")

@@ -133,7 +133,7 @@ def loadData():
     assert(len(sort_info) == 1)
     for key, value in sort_info.items():
       sort_field = key
-      if bool(value):
+      if value == True:
         sort_direction = pymongo.ASCENDING
       else:
         sort_direction = pymongo.DESCENDING
