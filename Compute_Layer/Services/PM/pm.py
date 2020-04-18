@@ -60,6 +60,20 @@ def get_database_table(table, keys):
         Table.create_index(index_pairs, sparse=is_sparse)
     return Table
 
+# Helper function the returns if the value is a leaf node.
+# If it is it just returns True, otherwise it calls the function
+# recursively and any dictionaries holding a leaf will apply the
+# func.
+def apply_func_if_not_leaf(value, func):
+  if isinstance(value, dict):
+    for key, data in value.copy.items():
+      if (apply_func_to_leaves(data)):
+        value[key] = func[data]
+    return False
+  else:
+    return True
+
+
 @post('/data/load')
 def loadData():
   if enc_key is None:
@@ -88,7 +102,8 @@ def loadData():
     if module_name not in sys.modules:
       import_module(module_name)
     func = getattr(sys.modules[module_name], func_name)
-    search_fields[elem_location] = func(value)
+    if apply_func_if_not_leaf(value, func):
+      search_fields[elem_location] = func(value)
 
   filtered = elements[1]
   for key, value in filtered.copy().items():
