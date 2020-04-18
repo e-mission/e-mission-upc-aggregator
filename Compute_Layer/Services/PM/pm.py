@@ -77,7 +77,7 @@ def loadData():
   elements = request.json['search_fields']
   search_fields = elements[0]
   for elem_location, value in search_fields.copy().items():
-    elem_location = elem.split('.')
+    parts = elem_location.split('.')
     type_elem = types
     for part in parts:
       type_elem = type_elem[part]
