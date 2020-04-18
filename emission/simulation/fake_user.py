@@ -10,6 +10,7 @@ import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 from emission.net.int_service.machine_configs import certificate_bundle_path
 import Compute_Layer.shared_resources.stream_data as clsrsd
+import Compute_Layer.shared_resources.ical as clsri
 
 class FakeUser:
     """
@@ -90,6 +91,20 @@ class FakeUser:
         should_sort = True
         sort = {'metadata.write_ts': "True"}
         data, error = clsrsd.load_usercache_data(self._config['download_url'], 
+                certificate_bundle_path, search_fields, should_sort, sort)
+        return data
+
+    def sync_calendar_to_server(self, calendar_file):
+        clsri.readCalendarAsEventList(calendar_file)
+        error = clsrsd.store_calendar_data(self._config['upload_url'], 
+                certificate_bundle_path, data)
+
+
+    def load_calendar_from_server(self):
+        search_fields = [{"metadata.type": "calendar"}, {"_id": "False"}]
+        should_sort = True
+        sort = {'metadata.end_time': "False"}
+        data, error = clsrsd.load_calendar_data(self._config['download_url'], 
                 certificate_bundle_path, search_fields, should_sort, sort)
         return data
 

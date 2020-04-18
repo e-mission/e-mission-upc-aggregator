@@ -107,6 +107,26 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
+    # Example test calendar
+    test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (sync_user_data, [userlist[i], test_calendar]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (load_calendar_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
 def create_user_data (user, numTrips):
     for _ in range (numTrips):
         temp = user.take_trip ()
@@ -120,6 +140,12 @@ def sync_user_data (user):
 def load_user_data (user):
     data = user.load_data_from_server()
     return data
+
+def sync_calendar_data(user, calendar_file):
+    user.sync_calendar_to_server(calendar_file)
+
+def load_calendar_data(user, calendar_file):
+    return user.load_calendar_from_server()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
