@@ -76,7 +76,7 @@ def readCalendarAsEventList(filename):
         data_dict['end_time'] = findEndTime(event).isoformat()
         data_dict['ts'] = findTimeStamp(event).isoformat()
         data_dict['attendees'] = findAttendees(event)
-        data_dict['geo'] = {"type": "Point", "coordinates": findGeo(event)}
+        data_dict['geo'] = findGeo(event)
         event_dict['data'] = data_dict
 
 

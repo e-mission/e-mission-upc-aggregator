@@ -63,7 +63,7 @@ def get_calendar_types():
     data_types["start_time"] = "dateutil.parser.parse"
     data_types["end_time"] = "dateutil.parser.parse"
     data_types["ts"] = "dateutil.parser.parse"
-    data_types["geo"] = "builtins.list"
+    data_types["geo"] = "geojson.Point"
     types['data'] = data_types
     return types
 
