@@ -14,6 +14,7 @@ from emission.net.int_service.machine_configs import upc_port
 from pymongo import MongoClient
 import pymongo
 import sys
+from importlib import import_module
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -128,7 +129,7 @@ def storeData():
         type_parts = type_elem.rsplit(".", 1)
         assert(len(type_parts) == 2)
         module_name = type_parts[0]
-        func_name = parts[1]
+        func_name = type_parts[1]
         if module_name not in sys.modules:
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
