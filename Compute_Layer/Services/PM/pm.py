@@ -166,7 +166,7 @@ def storeData():
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
         query[key] = func(data_elem)
-        logging.debug("Processed result is %s".format (query[key]))
+    logging.debug("Query is {}".format (query))
     result = table.update(query, document, upsert=True)
     if 'err' in result and result['err'] is not None:
       logging.error("In storeData, err = %s" % result['err'])
