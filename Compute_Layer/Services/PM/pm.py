@@ -70,9 +70,26 @@ def loadData():
   # Each key is of the form itemA.itemB.....itemZ,
   # When entry "itemA.itemB...itemZ" + "\n" + "..." should store data[itemA][itemB]...[itemZ]
   keys = request.json['keys']
+  # Types is a list with the same entries as the data list that is the list
+  # of function names used to process the data
+  types = request.json['types']
   # Holds a dict mapping field name to value for a search
   elements = request.json['search_fields']
   search_fields = elements[0]
+  for elem_location, value in search_fields.copy().items():
+    elem_location = elem.split('.')
+    type_elem = types
+    for part in parts:
+      type_elem = type_elem[part]
+    type_parts = type_elem.rsplit(".", 1)
+    assert(len(type_parts) == 2)
+    module_name = type_parts[0]
+    func_name = type_parts[1]
+    if module_name not in sys.modules:
+      import_module(module_name)
+    func = getattr(sys.modules[module_name], func_name)
+    search_fields[elem_location] = func(value)
+
   filtered = elements[1]
   for key, value in filtered.copy().items():
       filtered[key] = value == "True"
@@ -134,6 +151,7 @@ def storeData():
             import_module(module_name)
         func = getattr(sys.modules[module_name], func_name)
         query[key] = func(data_elem)
+        logging.debug("Processed result is %s".format (query[key]))
     result = table.update(query, document, upsert=True)
     if 'err' in result and result['err'] is not None:
       logging.error("In storeData, err = %s" % result['err'])

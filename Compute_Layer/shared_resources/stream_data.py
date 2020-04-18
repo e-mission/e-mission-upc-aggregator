@@ -36,7 +36,8 @@ def store_usercache_data(target_address, certificate_path, data):
 def load_usercache_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
     return load_data(target_address, certificate_path, "Stage_usercache", 
-            get_usercache_keys(), search_fields, should_sort, sort)
+            get_usercache_keys(), search_fields, get_usercache_types(), 
+            should_sort, sort)
 
 def get_calendar_keys():
     keys_dict = dict()
@@ -58,10 +59,10 @@ def get_calendar_types():
 
     # Add data
     data_types = dict()
-    data_types["attendees"] = "datetime.datetime"
-    data_types["start_time"] = "datetime.datetime"
-    data_types["end_time"] = "datetime.datetime"
-    data_types["ts"] = "datetime.datetime"
+    data_types["attendees"] = "builtins.list"
+    data_types["start_time"] = "dateutil.parser.parse"
+    data_types["end_time"] = "dateutil.parser.parse"
+    data_types["ts"] = "dateutil.parser.parse"
     data_types["geo"] = "builtins.list"
     types['data'] = data_types
     return types
@@ -73,7 +74,8 @@ def store_calendar_data(target_address, certificate_path, data):
 def load_calendar_data(target_address, certificate_path, search_fields, 
         should_sort=False, sort=None):
     return load_data(target_address, certificate_path, "Stage_calendar", 
-            get_calendar_keys(), search_fields, should_sort, sort)
+            get_calendar_keys(), search_fields, get_calendar_types(),
+            should_sort, sort)
 
 def store_data(target_address, certificate_path, data_type, keys, data, types):
     error = False
@@ -101,13 +103,14 @@ def store_data(target_address, certificate_path, data_type, keys, data, types):
 
 
 def load_data(target_address, certificate_path, data_type, keys, search_fields,
-        should_sort=False, sort=None):
+        types, should_sort=False, sort=None):
     error = False
     try:
         json_entries = dict()
         json_entries['data_type'] = data_type
         json_entries['keys'] = keys
         json_entries['search_fields'] = search_fields
+        json_entries['types'] = types
         if should_sort:
             json_entries['should_sort'] = "True"
             json_entries['sort'] = sort
