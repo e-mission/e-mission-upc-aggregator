@@ -60,12 +60,46 @@ def readCalendar(filename):
 def readCalendarAsEventList(filename):
     calendar = readCalendar(filename)
     events = calendar.walk('vevent')
-    events = []
+    events_list = []
     for event in events:
-        print(event)
+        # dict for holding the event
+        event_dict = dict()
+
+        # Add metadata
+        metadata_dict = dict()
+        metadata_dict['type'] = 'calendar'
+        event_dict['metadata'] = metadata_dict
+
+        # Add data
+        data_dict = dict()
+        data_dict['start_time'] = str(findStartTime(event))
+        data_dict['end_time'] = str(findEndTime(event))
+        data_dict['ts'] = str(findTimeStamp(event))
+        data_dict['attendees'] = findAttendees(event)
+        data_dict['geo'] = {"type": "Point", "coordinates": findGeo(event)}
+        event_dict['data'] = data_dict
+
+
+        # Append to list
+        events_list.append(event_dict)
+    return events_list
+
+def findStartTime(event):
+    return icalendar.vDatetime.from_ical(event['dtstart'].to_ical())
 
 def findEndTime(event):
     return icalendar.vDatetime.from_ical(event['dtend'].to_ical())
+
+def findTimeStamp(event):
+    return icalendar.vDatetime.from_ical(event['dtstamp'].to_ical())
+
+def findAttendees(event):
+    attendees = event['attendee']
+    attendees_strs = [str(icalendar.vCalAddress.from_ical(attendee.to_ical())) for attendee in attendees]
+    return attendees_strs
+
+def findGeo(event):
+    return icalendar.vGeo.from_ical(event['geo'].to_ical())
 
 
 def sortEventsByEndTime(calendar):

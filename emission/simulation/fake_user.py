@@ -95,7 +95,7 @@ class FakeUser:
         return data
 
     def sync_calendar_to_server(self, calendar_file):
-        clsri.readCalendarAsEventList(calendar_file)
+        data = clsri.readCalendarAsEventList(calendar_file)
         error = clsrsd.store_calendar_data(self._config['upload_url'], 
                 certificate_bundle_path, data)
 

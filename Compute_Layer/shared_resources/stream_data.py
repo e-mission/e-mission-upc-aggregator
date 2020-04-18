@@ -91,4 +91,5 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
         print(r.content)
         return (None, error)
     else:
+        print("{} data sucessfully loaded from the server".format(data_type))
         return (r.text, error)

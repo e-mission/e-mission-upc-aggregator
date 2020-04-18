@@ -113,7 +113,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (sync_user_data, [userlist[i], test_calendar]))
+        results.append (pool.apply_async (sync_calendar_data, [userlist[i], test_calendar]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -144,7 +144,7 @@ def load_user_data (user):
 def sync_calendar_data(user, calendar_file):
     user.sync_calendar_to_server(calendar_file)
 
-def load_calendar_data(user, calendar_file):
+def load_calendar_data(user):
     return user.load_calendar_from_server()
 
 if __name__ == "__main__":
