@@ -92,7 +92,7 @@ def returnSpecifiedFunction(name_components):
     return func
 
 def process_key(key, data=None, types=None):
-    parts = elem.split('.')
+    parts = key.split('.')
     prev_data_dict = data
     data_elem = data
     type_elem = types
