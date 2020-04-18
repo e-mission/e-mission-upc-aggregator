@@ -87,7 +87,7 @@ def returnSpecifiedFunction(name_components):
     func = sys.modules[module_name]
     func_components = func_name.split(".")
     for name in func_components:
-        func = getattr(module, name)
+        func = getattr(func, name)
     return func
 
 @post('/data/load')
