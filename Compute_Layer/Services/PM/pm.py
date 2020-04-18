@@ -110,6 +110,7 @@ def loadData():
       filtered[key] = value == "True"
 
   # Get the database
+  logging.debug("Search fields are {}".format (search_fields))
   table = get_database_table(data_type, keys)
   retrievedData = table.find(search_fields, filtered)
   should_sort = request.json['should_sort'] == "True"
@@ -154,7 +155,6 @@ def storeData():
         parts = elem.split('.')
         data_elem = data
         type_elem = types
-        logging.debug("Parts are {}, data_elem is {}".format (parts, data_elem))
         for part in parts:
           data_elem = data_elem[part]
           type_elem = type_elem[part]
