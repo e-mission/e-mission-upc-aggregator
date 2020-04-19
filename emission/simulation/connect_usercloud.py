@@ -22,7 +22,7 @@ class UserCloud:
 
 
     # Method used to get the address from speaking to the KAL
-    def getaddress (self, json, addr):
+    def getaddress (self):
         self.address = request_service(self.username, 'PM')[0]
 
     # Registers the user to controller

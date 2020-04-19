@@ -138,7 +138,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     target_date = datetime.datetime(2020, 3, 15, tzinfo=calendarTimeZone)
     for i in range (len (userlist)):
-        results.append (pool.apply_async (get_arrival_time, ["https://127.0.1.1:8000/get_last_event", userlist[i]._config['pm_url'], target_date]))
+        results.append (pool.apply_async (get_arrival_time, [userlist[i], target_date]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -169,7 +169,7 @@ def get_arrival_time(user, date):
     json_dict = dict()
     json_dict['pm_address'] = addresses[0]
     json_dict['date'] = date.isoformat()
-    r = requests.post (addresses[1], json=json_dict, verify=certificate_bundle_path)
+    r = requests.post (addresses[1] + "/get_last_event", json=json_dict, verify=certificate_bundle_path)
     return r.json()
 
 if __name__ == "__main__":

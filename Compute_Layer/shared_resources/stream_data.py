@@ -1,7 +1,7 @@
 import requests
 import socket
 
-from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint
+from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path
 
 def get_usercache_keys():
     keys_dict = dict()
