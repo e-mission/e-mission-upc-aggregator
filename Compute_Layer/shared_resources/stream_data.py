@@ -1,6 +1,8 @@
 import requests
 import socket
 
+from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint
+
 def get_usercache_keys():
     keys_dict = dict()
     index1 = ["metadata.write_ts",
@@ -163,3 +165,12 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
     else:
         print("{} data sucessfully loaded from the server".format(data_type))
         return (r.json(), error)
+
+def request_service(username, service_name):
+    controller_addr = controller_ip + str(controller_port) + service_endpoint
+    json_values = dict()
+    json_values['user'] = username
+    json_values['service'] = service_name
+    r = requests.post (controller_addr, json=json_values, verify=certificate_bundle_path)
+    json_values = r.json()
+    return json_values['addresses']

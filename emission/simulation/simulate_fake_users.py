@@ -164,11 +164,12 @@ def sync_calendar_data(user, calendar_file):
 def load_calendar_data(user):
     return user.load_calendar_from_server()
 
-def get_arrival_time(service_address, pm_address, date):
+def get_arrival_time(user, date):
+    addresses = clsrsd.request_service(user.username, 'last_cal')
     json_dict = dict()
-    json_dict['pm_address'] = pm_address
+    json_dict['pm_address'] = addresses[0]
     json_dict['date'] = date.isoformat()
-    r = requests.post(service_address, json=json_dict, verify=certificate_bundle_path)
+    r = requests.post (addresses[1], json=json_dict, verify=certificate_bundle_path)
     return r.json()
 
 if __name__ == "__main__":

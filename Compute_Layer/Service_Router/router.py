@@ -116,10 +116,11 @@ def launch_service ():
     if [pm_container_name]:
         users[user_uuid][pm_container_name] = ticks
     users[user_uuid][container_name] = ticks
+    address_list = []
     if pm_address:
-       return pm_address + '\n' + address
-    else:
-        return address
+       address_list.append(pm_address)
+    address_list.append(address)
+    return {'addresses': address_list}
 
 @post('/get_user_addrs')
 def return_container_addrs ():

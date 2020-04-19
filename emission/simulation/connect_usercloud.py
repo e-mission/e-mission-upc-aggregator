@@ -6,6 +6,7 @@
 import requests
 from emission.net.int_service.machine_configs import register_user_endpoint, service_endpoint, cloud_key_endpoint, certificate_bundle_path
 import emission.simulation.profile_json as profile_json
+from Compute_Layer.shared_resources.stream_data import request_service 
 
 class UserCloud:
 
@@ -22,7 +23,7 @@ class UserCloud:
 
     # Method used to get the address from speaking to the KAL
     def getaddress (self, json, addr):
-        self.address = requests.post (addr + service_endpoint, json=json, verify=certificate_bundle_path).text
+        self.address = request_service(self.username, 'PM')[0]
 
     # Registers the user to controller
     def register_with_controller (self, controller_addr):
@@ -32,7 +33,7 @@ class UserCloud:
     def init_usercloud (self, username, controller_addr):
         self.username = username
         self.register_with_controller (controller_addr)
-        self.getaddress ({'user': self.username, 'service':'PM'}, controller_addr)
+        self.getaddress ()
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):
