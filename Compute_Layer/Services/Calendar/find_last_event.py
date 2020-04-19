@@ -80,7 +80,7 @@ if __name__ == '__main__':
     # The selection of SSL versus non-SSL should really be done through a config
     # option and not through editing source code, so let's make this keyed off the
     # port number
-    if upc_port == 443:
+    if upc_port == 8000:
       # We support SSL and want to use it
       try:
         key_file = open('conf/net/keys.json')

@@ -53,8 +53,6 @@ def spawn_service():
             res = subprocess.run (['docker-compose', '-p', '{}'.format (service_name), '-f', '{}'.format(docker_file), 'up', '-d'], env=envVars)
             if res.returncode == 0:
                 not_spawn = False
-        # Need a better way to wait
-        time.sleep (10)
         return service_name + "\n" + str (exposedPort)
 
 

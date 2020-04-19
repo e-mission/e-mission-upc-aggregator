@@ -121,6 +121,8 @@ def launch_service ():
     if pm_address:
        address_list.append(pm_address)
     address_list.append(address)
+    # Need a better way to wait
+    time.sleep (9)
     return {'addresses': address_list}
 
 @post('/get_user_addrs')
