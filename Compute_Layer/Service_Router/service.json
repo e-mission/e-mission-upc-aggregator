@@ -2,5 +2,5 @@
     {"service_file": "docker/docker-compose.yml"}, 
 "basic-querier": 
     {"service_file": "docker/docker-compose-test-querier.yml"},
-"last_cal":
-    {"service_file": "docker/docker-compose-test-last-cal.yml"}}
+"calendar":
+    {"service_file": "docker/docker-compose-calendar.yml"}}

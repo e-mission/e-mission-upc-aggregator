@@ -165,7 +165,7 @@ def load_calendar_data(user):
     return user.load_calendar_from_server()
 
 def get_arrival_time(user, date):
-    addresses = clsrsd.request_service(user.username, 'last_cal')
+    addresses = clsrsd.request_service({'user': user._config['email']}, 'calendar')
     json_dict = dict()
     json_dict['pm_address'] = addresses[0]
     json_dict['date'] = date.isoformat()

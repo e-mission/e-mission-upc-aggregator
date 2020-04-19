@@ -79,6 +79,7 @@ def launch_service ():
     if 'user' in request.json:
        uuid = getUUID(request)
     else:
+        print("ERROR\n\n\n\n\n\n\n")
         raise HTTPError(403, "Unable to create a uuid")
     user_uuid = str (uuid)
     service_name = request.json["service"]

@@ -167,7 +167,9 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
         return (r.json(), error)
 
 def request_service(username, service_name):
-    controller_addr = controller_ip + str(controller_port) + service_endpoint
+    controller_addr = controller_ip + ":" + str(controller_port) + service_endpoint
+    print (username)
+    print (controller_addr)
     json_values = dict()
     json_values['user'] = username
     json_values['service'] = service_name
