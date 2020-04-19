@@ -11,6 +11,8 @@ from multiprocessing.dummy import Pool
 import Compute_Layer.shared_resources.stream_data as clsrsd
 from Compute_Layer.shared_resources.ical import calendarTimeZone 
 from emission.net.int_service.machine_configs import certificate_bundle_path
+from dateutil.parser import parse
+import geojson
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
@@ -136,7 +138,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     target_date = datetime.datetime(2020, 3, 15, tzinfo=calendarTimeZone)
     for i in range (len (userlist)):
-        results.append (pool.apply_async (get_last_event_from_server, [userlist[i], userlist[i]._config['download_url'], target_date]))
+        results.append (pool.apply_async (get_arrival_time, ["https://127.0.1.1:8000/get_last_event", userlist[i]._config['pm_url'], target_date]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -162,22 +164,12 @@ def sync_calendar_data(user, calendar_file):
 def load_calendar_data(user):
     return user.load_calendar_from_server()
 
-def get_last_event_from_server(user, upload_address, date):
-    day_start = date.isoformat()
-    day_end = (date + datetime.timedelta(days=1)).isoformat()
-    search_fields = [{"data.end_time": {"$lt": day_end, "$gt": day_start}}, {"_id": "False"}]
-    should_sort = True
-    sort = {'data.end_time': "False"}
-    data, error = clsrsd.load_calendar_data(upload_address, 
-            certificate_bundle_path, search_fields, should_sort, sort)
-    if error:
-        return None
-    else:
-        data_values = data['data']
-        if not data_values:
-            return None
-        else:
-            return data_values[0]
+def get_arrival_time(service_address, pm_address, date):
+    json_dict = dict()
+    json_dict['pm_address'] = pm_address
+    json_dict['date'] = date.isoformat()
+    r = requests.post(service_address, json=json_dict, verify=certificate_bundle_path)
+    return r.json()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")

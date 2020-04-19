@@ -6,7 +6,6 @@ import socket
 import logging
 import logging.config
 
-# For decoding JWTs using the google decode URL
 import requests
 
 # Nick's additional import for managing servers
