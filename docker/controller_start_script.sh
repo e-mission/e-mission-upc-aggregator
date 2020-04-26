@@ -3,7 +3,7 @@
 
 
 #Pull the latest changes from the repo
-cd /usr/src/app && git pull origin kubernetes
+cd /usr/src/app && git pull origin tls
 
 #set database URL using environment variable
 echo ${DB_HOST}
