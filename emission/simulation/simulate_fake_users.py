@@ -5,8 +5,14 @@ import argparse
 import requests
 from time import sleep
 import numpy as np
-from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, user_cache_endpoint, spawn_usercloud_endpoint
+import datetime
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, store_endpoint, load_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
+import Compute_Layer.shared_resources.stream_data as clsrsd
+from Compute_Layer.shared_resources.ical import calendarTimeZone 
+from emission.net.int_service.machine_configs import certificate_bundle_path
+from dateutil.parser import parse
+import geojson
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
@@ -17,12 +23,14 @@ def main (usercount, tripcount):
     client_config = {
         'emission_server_base_url': controller_addr,
         'register_user_endpoint': register_user_endpoint,
-        'user_cache_endpoint': user_cache_endpoint,
-        'spawn_usercloud_endpoint': spawn_usercloud_endpoint
+        'store_endpoint': store_endpoint,
+        'load_endpoint': load_endpoint,
+        'service_endpoint': service_endpoint
     }
 
     base_user_config = {
         "email" : "", #Fill this in later for each user
+        "uuid" : "",  #Dummy entry to allow reuse
     
         "locations" :
         [
@@ -77,6 +85,8 @@ def connect_user (client_config, user_config):
     return client.create_fake_user (user_config)
 
 def create_and_sync_data (userlist, numTrips):
+    # Open use once OTP server works
+    """
     pool = Pool ()
     results = []
     for i in range (len (userlist)):
@@ -84,11 +94,51 @@ def create_and_sync_data (userlist, numTrips):
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
+    """
 
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (sync_user_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (load_user_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    # Example test calendar
+    test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (sync_calendar_data, [userlist[i], test_calendar]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    """
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (load_calendar_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+    """
+
+    pool = Pool (len (userlist) + 1)
+    target_date = datetime.datetime(2020, 3, 15, tzinfo=calendarTimeZone)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (get_arrival_time, [userlist[i], target_date]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -103,6 +153,24 @@ def sync_user_data (user):
     user.sync_data_to_server ()
     new_len = len (user._measurements_cache)
     return (old_len, new_len)
+
+def load_user_data (user):
+    data = user.load_data_from_server()
+    return data
+
+def sync_calendar_data(user, calendar_file):
+    user.sync_calendar_to_server(calendar_file)
+
+def load_calendar_data(user):
+    return user.load_calendar_from_server()
+
+def get_arrival_time(user, date):
+    addresses = clsrsd.request_service({'user': user._config['email']}, 'calendar')
+    json_dict = dict()
+    json_dict['pm_address'] = addresses[0]
+    json_dict['date'] = date.isoformat()
+    r = requests.post (addresses[1] + "/get_last_event", json=json_dict, verify=certificate_bundle_path)
+    return r.json()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")

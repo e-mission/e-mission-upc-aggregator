@@ -1,7 +1,7 @@
 version: "3"
 services:
   web-server:
-    image: emission/test-server:latest
+    image: emission/test-server:1.0
     depends_on:
       - db
     environment:
@@ -19,7 +19,7 @@ services:
     networks:
       - emission
   db:
-    image: emission/mongo-custom:latest
+    image: emission/mongo-custom:1.0
     hostname: db$ctr
     deploy:
       replicas: 1

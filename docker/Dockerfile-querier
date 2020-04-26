@@ -1,5 +1,5 @@
 # python 3
-FROM continuumio/miniconda3
+FROM continuumio/miniconda3:4.6.14
 
 MAINTAINER K. Shankari (shankari@eecs.berkeley.edu)
 # set working directory
@@ -9,11 +9,10 @@ WORKDIR /usr/src/app
 RUN git clone https://github.com/njriasan/e-mission-upc-aggregator.git .
 
 # update the branch. If you are using a different branch than master change the branch name.
-RUN git checkout tls
+RUN git checkout kubernetes
 
 # setup python environment.
-RUN conda env update --name emission --file setup/environment36.yml
-RUN /bin/bash -c "source activate emission; pip install six --upgrade"
+RUN setup/setup.sh
 
 # install nodejs, npm and bower
 RUN apt-get update

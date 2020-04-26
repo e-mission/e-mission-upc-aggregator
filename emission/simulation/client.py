@@ -25,18 +25,15 @@ class EmissionFakeDataGenerator(Client):
         self._user_factory = FakeUser
         # Additional info for user cloud
         key = gen_random_key ()
-        profile = gp.AlgProfile ()
-        # Add all known algs to default algs.
-        #profile.add_to_aggs("test_analyst")
-        profile.add_all_to_default_algs()
-        self._usercloud = escu.UserCloud (key, profile)
+        self._usercloud = escu.UserCloud (key)
 
     def create_fake_user(self, config):
         #TODO: parse the config object
-        uuid = self._register_fake_user(config['email'])
-        config['uuid'] = uuid
-        config['check_url'] = self._config['emission_server_base_url'] + self._config['spawn_usercloud_endpoint']
-        config['upload_url'] = self._usercloud.address + self._config['user_cache_endpoint']
+        self._register_fake_user(config['email'])
+        config['check_url'] = self._config['emission_server_base_url'] + self._config['service_endpoint']
+        config['pm_url'] = self._usercloud.address
+        config['upload_url'] = self._usercloud.address + self._config['store_endpoint']
+        config['download_url'] = self._usercloud.address + self._config['load_endpoint']
         #config['pipeline_url'] = self._usercloud.address + self._config['algorithm_endpoint']
         return self._user_factory(config)
 
@@ -44,13 +41,6 @@ class EmissionFakeDataGenerator(Client):
         data = {'user': email}
         #url = self._config['emission_server_base_url'] + self._config['register_user_endpoint'] 
         self._usercloud.init_usercloud (data, self._config['emission_server_base_url'])
-        r = requests.post(self._usercloud.address + self._config['register_user_endpoint'], json=data, verify=certificate_bundle_path)
-        r.raise_for_status()
-        uuid = r.json()['uuid']
-        #TODO: This is a hack to make all the genereated entries JSON encodeable. 
-        #Might be a bad Idead to stringify the uuid. For instance, 
-        # the create_entry function expects uuid of type UUID
-        return str(uuid)
 
     def _parse_user_config(self, config):
         #TODO: This function shoudl be used to parser user config object and check that the paramaters are valid.

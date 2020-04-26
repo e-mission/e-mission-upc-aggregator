@@ -2,7 +2,7 @@
 #Configure web server
 
 #Pull the latest changes from the repo
-cd /usr/src/app && git pull origin tls
+cd /usr/src/app && git pull origin kubernetes
 
 #set database URL using environment variable
 echo ${DB_HOST}
@@ -29,4 +29,5 @@ cat conf/net/api/webserver.conf
 source activate emission
 
 # launch the webapp
-./e-mission-py.bash emission/net/api/cfc_webapp.py
+#./e-mission-py.bash emission/net/api/cfc_webapp.py
+./e-mission-py.bash Compute_Layer/Services/PM/pm.py
