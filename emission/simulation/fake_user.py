@@ -77,7 +77,7 @@ class FakeUser:
         test["metadata"]["write_ts"] = "1587026989"
         test["metadata"]["type"] = "document"
         test["metadata"]["key"] = "test"
-        test["data_ts"] = "1000491904"
+        test["data_ts"] = 1501592401
         data = [test]
 
         ### END OF TEST

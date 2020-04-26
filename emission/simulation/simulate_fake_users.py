@@ -13,6 +13,7 @@ from Compute_Layer.shared_resources.ical import calendarTimeZone
 from emission.net.int_service.machine_configs import certificate_bundle_path
 from dateutil.parser import parse
 import geojson
+from Computer_Layer.Services.queriers.queries import recieve_query
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
@@ -133,12 +134,59 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
-    """
 
     pool = Pool (len (userlist) + 1)
     target_date = datetime.datetime(2020, 3, 15, tzinfo=calendarTimeZone)
     for i in range (len (userlist)):
         results.append (pool.apply_async (get_arrival_time, [userlist[i], target_date]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+    """
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (launch_sum_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (launch_sum_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (launch_ae_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (launch_ae_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+    
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (launch_rc_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10, 30]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (launch_rc_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10, 30]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -180,3 +228,35 @@ if __name__ == "__main__":
             help="Number of trips taken by each user")
     items = parser.parse_args ()
     main (items.user_count, items.trip_count)
+
+def launch_sum_query(service_addr, pm_addr, start_ts, end_ts, alpha, offset):
+    query = dict()
+    query['query_type'] = "sum"
+    query['start_ts'] = start_ts
+    query['end_ts'] = end_ts
+    query['alpha'] = alpha
+    query['offset'] = offset
+    return launch_query(service_addr, pm_addr, query)
+
+def launch_ae_query(service_addr, pm_addr, start_ts, end_ts, alpha, offset):
+    query = dict()
+    query['query_type'] = "ae"
+    query['start_ts'] = start_ts
+    query['end_ts'] = end_ts
+    query['alpha'] = alpha
+    query['offset'] = offset
+    return launch_query(service_addr, pm_addr, query)
+
+def launch_rc_query(service_addr, pm_addr, start_ts, end_ts, alpha, r_start, r_end): 
+    query = dict()
+    query['query_type'] = "rc"
+    query['start_ts'] = start_ts
+    query['end_ts'] = end_ts
+    query['alpha'] = alpha
+    query['r_start'] = r_start
+    query['r_end'] = r_end
+    return launch_query(service_addr, pm_addr, query)
+
+def launch_query(service_addr, pm_addr, query):
+    receive_query(pm_addr, query)
+

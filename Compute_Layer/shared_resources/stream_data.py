@@ -27,7 +27,7 @@ def get_usercache_decode_types():
     types['metadata'] = metadata_types
 
     # Add data
-    types['data_ts'] = ["builtins", "str"]
+    types['data_ts'] = ["builtins", "int"]
     return types
 
 def get_usercache_encode_types():

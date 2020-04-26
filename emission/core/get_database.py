@@ -18,16 +18,10 @@ except:
 
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
-<<<<<<< HEAD
-mongoHostPort = 27017
-_current_db = None
-=======
 config_file.close()
 
 print("Connecting to database URL "+url)
 _current_db = MongoClient(url).Stage_database
->>>>>>> 3555eb46b10d7a678af7e37d791bbac26d40b5c5
-#config_file.close()
 
 def _get_current_db():
     global _current_db
