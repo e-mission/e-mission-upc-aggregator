@@ -13,7 +13,7 @@ from Compute_Layer.shared_resources.ical import calendarTimeZone
 from emission.net.int_service.machine_configs import certificate_bundle_path
 from dateutil.parser import parse
 import geojson
-from Computer_Layer.Services.queriers.queries import recieve_query
+from Compute_Layer.Services.queries.queries import receive_query
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
@@ -145,6 +145,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
     """
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (launch_sum_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
     pool.close ()
@@ -153,6 +154,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
 
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (launch_sum_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
     pool.close ()
@@ -161,6 +163,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
 
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (launch_ae_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
     pool.close ()
@@ -169,6 +172,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
 
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (launch_ae_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
     pool.close ()
@@ -177,6 +181,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
     
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (launch_rc_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10, 30]))
     pool.close ()
@@ -185,6 +190,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
 
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (launch_rc_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10, 30]))
     pool.close ()
@@ -220,15 +226,6 @@ def get_arrival_time(user, date):
     r = requests.post (addresses[1] + "/get_last_event", json=json_dict, verify=certificate_bundle_path)
     return r.json()
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
-    parser.add_argument ("user_count", type=int,
-            help="Number of users to be created")
-    parser.add_argument ("trip_count", type=int,
-            help="Number of trips taken by each user")
-    items = parser.parse_args ()
-    main (items.user_count, items.trip_count)
-
 def launch_sum_query(service_addr, pm_addr, start_ts, end_ts, alpha, offset):
     query = dict()
     query['query_type'] = "sum"
@@ -259,4 +256,13 @@ def launch_rc_query(service_addr, pm_addr, start_ts, end_ts, alpha, r_start, r_e
 
 def launch_query(service_addr, pm_addr, query):
     receive_query(pm_addr, query)
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
+    parser.add_argument ("user_count", type=int,
+            help="Number of users to be created")
+    parser.add_argument ("trip_count", type=int,
+            help="Number of trips taken by each user")
+    items = parser.parse_args ()
+    main (items.user_count, items.trip_count)
 
