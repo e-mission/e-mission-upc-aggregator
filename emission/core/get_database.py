@@ -157,10 +157,6 @@ def get_usercache_db():
                             ("metadata.key", pymongo.ASCENDING)])
     UserCache.create_index([("metadata.write_ts", pymongo.DESCENDING)])
     UserCache.create_index([("data.ts", pymongo.DESCENDING)], sparse=True)
-<<<<<<< HEAD
-
-=======
->>>>>>> 3555eb46b10d7a678af7e37d791bbac26d40b5c5
     return UserCache
 
 def get_timeseries_db():
