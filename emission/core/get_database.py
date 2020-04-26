@@ -18,8 +18,15 @@ except:
 
 config_data = json.load(config_file)
 url = config_data["timeseries"]["url"]
+<<<<<<< HEAD
 mongoHostPort = 27017
 _current_db = None
+=======
+config_file.close()
+
+print("Connecting to database URL "+url)
+_current_db = MongoClient(url).Stage_database
+>>>>>>> 3555eb46b10d7a678af7e37d791bbac26d40b5c5
 #config_file.close()
 
 def _get_current_db():
@@ -156,7 +163,10 @@ def get_usercache_db():
                             ("metadata.key", pymongo.ASCENDING)])
     UserCache.create_index([("metadata.write_ts", pymongo.DESCENDING)])
     UserCache.create_index([("data.ts", pymongo.DESCENDING)], sparse=True)
+<<<<<<< HEAD
 
+=======
+>>>>>>> 3555eb46b10d7a678af7e37d791bbac26d40b5c5
     return UserCache
 
 def get_timeseries_db():
@@ -268,8 +278,9 @@ def get_fake_sections_db():
 # pymongo 3.0. 
 # https://github.com/e-mission/e-mission-server/issues/533#issuecomment-349430623
 def save(db, entry):
-#     if '_id' in entry:
-#         db.replace_one({'_id': entry['_id']}, entry, upsert=True)
-#     else:
-#         db.replace_one({}, entry, upsert=True)
-    db.save(entry)
+    if '_id' in entry:
+        result = db.replace_one({'_id': entry['_id']}, entry, upsert=True)
+        # logging.debug("entry has id, calling with match, result = %s" % result.raw_result)
+    else:
+        result = db.insert_one(entry)
+        # logging.debug("entry has id, calling without match, result = %s" % result.inserted_id)

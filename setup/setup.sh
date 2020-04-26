@@ -5,10 +5,11 @@
 # - on OSX: /Users/<user>/miniconda3/bin/conda
 # - on Windows: C:/Users/<user>/Miniconda3/Scripts/conda
 
+. setup/checks/check_for_conda.sh
+
 echo "Setting up blank environment"
 conda create --name emission python=3.6
-
-. activate emission
+conda activate emission
 
 echo "Downloading packages"
 curl -o /tmp/cachetools-2.1.0-py_0.tar.bz2 -L https://anaconda.org/conda-forge/cachetools/2.1.0/download/noarch/cachetools-2.1.0-py_0.tar.bz2
@@ -18,11 +19,8 @@ curl -o /tmp/more-itertools-8.2.0-py_0.tar.bz2 -L https://anaconda.org/conda-for
 curl -o /tmp/pyasn1-0.4.8-py_0.tar.bz2 -L https://anaconda.org/conda-forge/pyasn1/0.4.8/download/noarch/pyasn1-0.4.8-py_0.tar.bz2
 curl -o /tmp/pyasn1-modules-0.2.7-py_0.tar.bz2 -L https://anaconda.org/conda-forge/pyasn1-modules/0.2.7/download/noarch/pyasn1-modules-0.2.7-py_0.tar.bz2
 
-ls /tmp/
-
 echo "Installing manually downloaded packages"
 conda install /tmp/*.bz2 -v -n emission
 
 echo "Updating using conda now"
 conda env update --name emission --file setup/environment36.yml
-

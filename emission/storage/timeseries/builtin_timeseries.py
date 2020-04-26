@@ -65,6 +65,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
                 "manual/incident": self.timeseries_db,
                 "manual/mode_confirm": self.timeseries_db,
                 "manual/purpose_confirm": self.timeseries_db,
+                "manual/destination_confirm": self.timeseries_db,
                 "segmentation/raw_trip": self.analysis_timeseries_db,
                 "segmentation/raw_place": self.analysis_timeseries_db,
                 "segmentation/raw_section": self.analysis_timeseries_db,
@@ -376,7 +377,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
             logging.debug("entry was fine, no need to fix it")
 
         logging.debug("Inserting entry %s into error timeseries" % entry)
-        edb.get_timeseries_error_db().insert(entry)
+        edb.get_timeseries_error_db().insert_one(entry)
 
     @staticmethod
     def update(entry):

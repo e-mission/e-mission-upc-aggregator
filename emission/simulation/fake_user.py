@@ -9,8 +9,6 @@ import socket
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 from emission.net.int_service.machine_configs import certificate_bundle_path
-import Compute_Layer.shared_resources.stream_data as clsrsd
-import Compute_Layer.shared_resources.ical as clsri
 
 class FakeUser:
     """
@@ -70,44 +68,41 @@ class FakeUser:
     def sync_data_to_server(self):
         #Remove the _id field
         measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
-        #data = measurements_no_id
-        ### TEST FOR LOAD/STORE WHILE OTP IS DOWN
-        test = dict()
-        test["metadata"] = dict()
-        test["metadata"]["write_ts"] = "1587026989"
-        test["metadata"]["type"] = "document"
-        test["metadata"]["key"] = "test"
-        test["data_ts"] = "1000491904"
-        data = [test]
 
-        ### END OF TEST
-        error = clsrsd.store_usercache_data(self._config['upload_url'], 
-                certificate_bundle_path, data)
-        if not error:
+        #Send data to server
+        data = {
+            'phone_to_server': measurements_no_id,
+            'user': self._email
+        }
+
+        error = False
+        try:
+            r = requests.post(self._config['upload_url'], json=data, timeout=300, verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+
+            #We may have failed because the usercloud was paused. Let's contact the controller and try one more time
+            try:
+                r = requests.post(self._config['check_url'], json={'user': self._email}, timeout=5, verify=certificate_bundle_path)
+                if r.ok:
+
+                    # If this succeeded then we have the address of our cloud again (with the timer reset)
+                    self._config['upload_url'] = r.text
+                    r = requests.post(self._config['upload_url'], json=data, timeout=5, verify=certificate_bundle_path)
+                    if r.ok:
+                        error = False 
+            except (socket.timeout) as e:
+                error = True
+        if error:
+            print('Something went wrong when trying to sync your data. Try again or use save_cache_to_file to save your data.')
+            print(r.content)
+        else:
             self._flush_cache()
-
-    def load_data_from_server(self):
-        search_fields = [{"metadata.type": "document"}, {"_id": "False"}]
-        should_sort = True
-        sort = {'metadata.write_ts': "True"}
-        data, error = clsrsd.load_usercache_data(self._config['download_url'], 
-                certificate_bundle_path, search_fields, should_sort, sort)
-        return data
-
-    def sync_calendar_to_server(self, calendar_file):
-        data = clsri.readCalendarAsEventList(calendar_file)
-        error = clsrsd.store_calendar_data(self._config['upload_url'], 
-                certificate_bundle_path, data)
-
-
-    def load_calendar_from_server(self):
-        #search_fields = [{"metadata.type": "calendar"}, {"_id": "False"}]
-        search_fields = [{"data.start_time": {"$lt": "2020-03-15T12:00:00"}}, {"_id": "False"}]
-        should_sort = True
-        sort = {'data.end_time': "True"}
-        data, error = clsrsd.load_calendar_data(self._config['download_url'], 
-                certificate_bundle_path, search_fields, should_sort, sort)
-        return data
+            print("%d entries were sucessfully synced to the server" % len(measurements_no_id))
 
     def run_pipeline (self):
         # Make a call 
