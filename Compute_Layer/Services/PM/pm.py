@@ -209,6 +209,7 @@ privacy_budget = 2.0
 @post ("/privacy_budget")
 def reduce_privacy_budget():
     global privacy_budget
+    cost = float(request.json['cost'])
     if privacy_budget - cost < 0:
         return {"success": False, "budget" : ""}
     else:
