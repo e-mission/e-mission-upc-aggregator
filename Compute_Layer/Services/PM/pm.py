@@ -202,7 +202,7 @@ def storeData():
       logging.debug("Succesfully stored user data")
 
 # Temporary. Random privacy budget chosen for testing.
-privacy_budget = 2.0
+privacy_budget = 10.0
 
 # Function used to deduct from the privacy budget. Returns
 # whether or not it was possible to reduce the privacy budget.
