@@ -1,7 +1,7 @@
 import requests
 import socket
 
-from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path
+from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, privacy_budget_endpoint, load_endpoint, store_endpoint
 
 def get_usercache_keys():
     keys_dict = dict()
@@ -119,7 +119,7 @@ def store_data(target_address, certificate_path, data_type, keys, data, decode_t
         json_entries['keys'] = keys
         json_entries['data'] = data
         json_entries['decode_types'] = decode_types
-        r = requests.post(target_address, json=json_entries, timeout=300,
+        r = requests.post(target_address + store_endpoint, json=json_entries, timeout=300,
                 verify=certificate_path)
     except (socket.timeout) as e:
         error = True
@@ -151,7 +151,7 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
             json_entries['sort'] = sort
         else:
             json_entries['should_sort'] = "False"
-        r = requests.post(target_address, json=json_entries, timeout=300,
+        r = requests.post(target_address + load_endpoint, json=json_entries, timeout=300,
                 verify=certificate_path)
     except (socket.timeout) as e:
         error = True
@@ -167,12 +167,18 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
         return (r.json(), error)
 
 def request_service(username, service_name):
-    controller_addr = controller_ip + ":" + str(controller_port) + service_endpoint
+    controller_addr = controller_ip + ":" + str(controller_port)
     print (username)
     print (controller_addr)
     json_values = dict()
     json_values['user'] = username
     json_values['service'] = service_name
-    r = requests.post (controller_addr, json=json_values, verify=certificate_bundle_path)
+    r = requests.post (controller_addr + service_endpoint, json=json_values, verify=certificate_bundle_path)
     json_values = r.json()
     return json_values['addresses']
+
+def deduct_privacy(target_address, cost):
+    r = requests.post (target_address + privacy_budget_endpoint, json={'cost': cost}, verify=certificate_bundle_path)
+    print(r.text)
+    return r.json()
+

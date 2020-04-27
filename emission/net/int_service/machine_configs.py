@@ -22,6 +22,7 @@ service_endpoint = config_data["service_endpoint"]
 cloud_key_endpoint = config_data["cloud_key_endpoint"]
 cloud_aggregate_endpoint = config_data["cloud_aggregate_endpoint"]
 query_endpoint = config_data["query_endpoint"]
+privacy_budget_endpoint = config_data["privacy_budget_endpoint"]
 certificate_bundle_path = config_data["certificate_bundle"]
 
 config_file.close ()

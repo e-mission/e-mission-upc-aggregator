@@ -20,6 +20,7 @@
     "cloud_key_endpoint" : "/cloud/key",
     "cloud_aggregate_endpoint" : "/run/aggregate",
     "query_endpoint" : "/receive_query",
+    "privacy_budget_endpoint" : "/privacy_budget",
     "_certificate_bundle_comment" : "path provided to were trusted certificates are located on a machine",
     "certificate_bundle": "conf/net/certificates/public-certs.pem"
 }

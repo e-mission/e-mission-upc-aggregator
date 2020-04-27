@@ -250,8 +250,7 @@ def launch_rc_query(service_addr, pm_addr, start_ts, end_ts, alpha, r_start, r_e
     query['start_ts'] = start_ts
     query['end_ts'] = end_ts
     query['alpha'] = alpha
-    query['r_start'] = r_start
-    query['r_end'] = r_end
+    query['offset'] = (r_end - r_start) / 2
     return launch_query(service_addr, pm_addr, query)
 
 def launch_query(service_addr, pm_addr, query):
