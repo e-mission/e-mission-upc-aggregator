@@ -110,14 +110,14 @@ def setInitPrivacyBudget():
     return starting_budget
 
 def setPrivacyBudget(budget):
-    table = getDatabaseTable("privacyBudget")
+    table = get_database_table("privacyBudget")
     query = {"entrytype": "privacy_budget"}
     budget_dict = {"privacy_budget" : budget}
     document = {'$set': budget_dict}
     result = table.update(query, document, upsert=True)
 
 def getPrivacyBudget():
-    table = getDatabaseTable("privacyBudget")
+    table = get_database_table("privacyBudget")
     search_fields = [{"entrytype": "privacy_budget"}, {"_id": "False"}]
     retrievedData = table.find(search_fields, filtered)
     return retrievedData
