@@ -125,6 +125,7 @@ def getPrivacyBudget():
     if len(datalist) == 0:
         return None
     else:
+        print(datalist[0])
         return datalist[0]
 
 
