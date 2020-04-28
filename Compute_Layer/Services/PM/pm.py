@@ -236,7 +236,7 @@ def reduce_privacy_budget():
         privacy_budget = float(budget)
     cost = float(request.json['cost'])
     # Remove returning the budget after testing
-    if budget - cost < 0:
+    if privacy_budget - cost < 0:
         return {"success": False, "budget" : ""}
     else:
         privacy_budget -= cost
