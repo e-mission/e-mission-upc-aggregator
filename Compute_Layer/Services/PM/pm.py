@@ -127,7 +127,7 @@ def getPrivacyBudget():
         return None
     else:
         logging.debug("PB load is {}".format(datalist[0]))
-        return datalist[0]
+        return datalist[0]["privacy_budget"]
 
 
 @post('/data/load')
