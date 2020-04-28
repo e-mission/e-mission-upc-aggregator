@@ -229,7 +229,7 @@ privacy_budget = 10.0
 @post ("/privacy_budget")
 def reduce_privacy_budget():
     budget = getPrivacyBudget()
-    if len(budget):
+    if len(budget) == 0:
         budget = setInitPrivacyBudget()
     else:
         return {"success": True, "budget" : budget}
