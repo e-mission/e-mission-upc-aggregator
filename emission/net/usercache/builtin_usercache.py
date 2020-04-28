@@ -77,7 +77,10 @@ class BuiltinUserCache(ucauc.UserCache):
 
     @staticmethod
     def get_uuid_list():
-        return get_usercache_db().distinct("user_id")
+        if isinstance(user_id, clsrsd.PM_UUID):
+            return []
+        else:
+            return get_usercache_db().distinct("user_id")
 
     def putDocument(self, key, value):
         """
@@ -107,6 +110,7 @@ class BuiltinUserCache(ucauc.UserCache):
                     'metadata.type': 'document',
                     'metadata.key': key}
         # logging.debug("Updating %s spec to %s" % (self.user_id, document))
+        # FIXME change to a store one
         result = self.db.update_one(queryDoc,
                                 document,
                                 upsert=True)
@@ -151,6 +155,7 @@ class BuiltinUserCache(ucauc.UserCache):
         """
         read_ts = time.time()
         combo_query = self._get_msg_query(None, None)
+        #FIXME place the load data here
         count = self.db.find(combo_query).count()
         logging.debug("For %s, found %s messages in usercache" %
                       (self.user_id, count))
@@ -172,6 +177,7 @@ class BuiltinUserCache(ucauc.UserCache):
         return self.getKeyListForType("message")
 
     def getKeyListForType(self, message_type):
+        #FIXME place the load data here
         return self.db.find({"user_id": self.user_id, "metadata.type": message_type}).distinct("metadata.key")
 
     def clearObsoleteDocument(self, key):
@@ -185,5 +191,6 @@ class BuiltinUserCache(ucauc.UserCache):
                     'metadata.type': 'document',
                     'metadata.key': key}
         
+        #FIXME place the delete data here
         result = self.db.delete_many(queryDoc)
         logging.debug("Result of removing document with key %s is %s" % (key, result))

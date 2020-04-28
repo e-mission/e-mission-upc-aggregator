@@ -76,7 +76,6 @@ class BuiltinUserCacheHandler(enuah.UserCacheHandler):
                 # incoming entries are consistent with them. That's why we have the
                 # convert_to_common_format step. So let's just wrap this in a
                 # generic attrdict for now.
-                # FIXME
                 entry = ad.AttrDict(entry_doc)
                 unified_entry = enuf.convert_to_common_format(entry)
                 unified_entry_list.append(unified_entry)
@@ -92,7 +91,6 @@ class BuiltinUserCacheHandler(enuah.UserCacheHandler):
 
         if len(unified_entry_list) > 0:
             try:
-                # FIXME
                 ts.bulk_insert(unified_entry_list, etsa.EntryType.DATA_TYPE)
             except pymongo.errors.DuplicateKeyError as e:
                 logging.info("document already present in timeseries, skipping since read-only")
@@ -100,9 +98,7 @@ class BuiltinUserCacheHandler(enuah.UserCacheHandler):
             logging.info("In moveToLongTerm, no entries to save")
 
         logging.debug("Deleting all entries for query %s" % time_query)
-        # FIXME
         uc.clearProcessedMessages(time_query)
-        # FIXME
         esp.mark_usercache_done(self.user_id, last_ts_processed)
 
     def storeViewsToCache(self):

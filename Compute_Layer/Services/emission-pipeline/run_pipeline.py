@@ -52,10 +52,8 @@ def run_pipeline(pm_addr):
     with ect.Timer() as uct:
         logging.info("*" * 10 + "moving to long term" + "*" * 10)
         print(str(arrow.now()) + "*" * 10 + "moving to long term" + "*" * 10)
-        # use store data
         uh.moveToLongTerm()
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.USERCACHE.name,
                              time.time(), uct.elapsed)
 
@@ -70,7 +68,7 @@ def run_pipeline(pm_addr):
     # become so much slower recently. Let's try to actually delete the
     # spurious entries or at least mark them as obsolete and see if that helps.
 
-    # use load data
+    # FIXME replace with load or load one
     if edb.get_timeseries_db().find({"user_id": uuid}).distinct("metadata.key") == ["stats/pipeline_time"]:
         logging.debug("Found no entries for %s, skipping" % uuid)
         return
@@ -80,7 +78,6 @@ def run_pipeline(pm_addr):
         print(str(arrow.now()) + "*" * 10 + "UUID %s: filter accuracy if needed" % uuid + "*" * 10)
         eaicf.filter_accuracy(uuid)
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.ACCURACY_FILTERING.name,
                              time.time(), aft.elapsed)
 
@@ -89,7 +86,6 @@ def run_pipeline(pm_addr):
         print(str(arrow.now()) + "*" * 10 + "UUID %s: segmenting into trips" % uuid + "*" * 10)
         eaist.segment_current_trips(uuid)
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.TRIP_SEGMENTATION.name,
                              time.time(), tst.elapsed)
 
@@ -98,7 +94,6 @@ def run_pipeline(pm_addr):
         print(str(arrow.now()) + "*" * 10 + "UUID %s: segmenting into sections" % uuid + "*" * 10)
         eaiss.segment_current_sections(uuid)
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.SECTION_SEGMENTATION.name,
                              time.time(), sst.elapsed)
 
@@ -107,7 +102,6 @@ def run_pipeline(pm_addr):
         print(str(arrow.now()) + "*" * 10 + "UUID %s: smoothing sections" % uuid + "*" * 10)
         eaicl.filter_current_sections(uuid)
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.JUMP_SMOOTHING.name,
                              time.time(), jst.elapsed)
 
@@ -116,7 +110,6 @@ def run_pipeline(pm_addr):
         print(str(arrow.now()) + "*" * 10 + "UUID %s: cleaning and resampling timeline" % uuid + "*" * 10)
         eaicr.clean_and_resample(uuid)
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.CLEAN_RESAMPLING.name,
                              time.time(), crt.elapsed)
 
@@ -125,7 +118,6 @@ def run_pipeline(pm_addr):
         print(str(arrow.now()) + "*" * 10 + "UUID %s: inferring transportation mode" % uuid + "*" * 10)
         eacimp.predict_mode(uuid)
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.MODE_INFERENCE.name,
                              time.time(), crt.elapsed)
 
@@ -135,6 +127,5 @@ def run_pipeline(pm_addr):
         # use store data
         uh.storeViewsToCache()
 
-    # use store data
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.OUTPUT_GEN.name,
                              time.time(), ogt.elapsed)

@@ -15,7 +15,12 @@ import emission.storage.timeseries.abstract_timeseries as esta
 
 import emission.core.wrapper.entry as ecwe
 
+import Compute_Layer.shared_resources.stream_data as clsrsd
+
+
 ts_enum_map = None
+ts_enum_map_upc = None
+
 
 def get_ts_enum_map():
     global ts_enum_map
@@ -23,6 +28,15 @@ def get_ts_enum_map():
         ts_enum_map = {
             esta.EntryType.DATA_TYPE: edb.get_timeseries_db(),
             esta.EntryType.ANALYSIS_TYPE: edb.get_analysis_timeseries_db()
+    return ts_enum_map
+
+def get_ts_enum_map_upc():
+    global ts_enum_map_upc
+    if ts_enum_map_upc is None:
+        ts_enum_map_upc = {
+            esta.EntryType.DATA_TYPE: clsrsd.TimeseriesData
+            esta.EntryType.ANALYSIS_TYPE: clsrsd.AnalysisTimeseriesData
+
         }
     return ts_enum_map
 
@@ -35,7 +49,10 @@ class BuiltinTimeSeries(esta.TimeSeries):
         self.type_query = lambda entry_type: {"metadata.type": entry_type}
         self.user_query = {"user_id": self.user_id} # UUID is mandatory for this version
         # FIXME need to fix import. Probably want to replace the map and db so that something useful can reuse that code
-        if type(user_id) != PM_UUID:
+        if isinstance(user_id, clsrsd.PM_UUID):
+            self.timeseries_db = get_ts_enum_map_upc ()[esta.EntryType.DATA_TYPE](user_id)
+            self.analysis_timeseries_db = get_ts_enum_map_upc ()[esta.EntryType.ANALYSIS_TYPE](user_id)
+        else:
             self.timeseries_db = get_ts_enum_map ()[esta.EntryType.DATA_TYPE]
             self.analysis_timeseries_db = get_ts_enum_map ()[esta.EntryType.ANALYSIS_TYPE]
         # Design question: Should the stats be a separate database, or should it be part
@@ -48,53 +65,54 @@ class BuiltinTimeSeries(esta.TimeSeries):
         # it separately. On the other hand, then the load/store from timeseries won't work
         # if it is a separate database. Let's do the right thing and change the storage/
         # shift to a different timeseries if we need to
-            self.ts_map = {
-                    "background/location": self.timeseries_db,
-                    "background/filtered_location": self.timeseries_db,
-                    "background/motion_activity": self.timeseries_db,
-                    "background/battery": self.timeseries_db,
-                    "statemachine/transition": self.timeseries_db,
-                    "config/sensor_config": self.timeseries_db,
-                    "config/sync_config": self.timeseries_db,
-                    "config/consent": self.timeseries_db,
-                    "stats/server_api_time": self.timeseries_db,
-                    "stats/server_api_error": self.timeseries_db,
-                    "stats/pipeline_time": self.timeseries_db,
-                    "stats/pipeline_error": self.timeseries_db,
-                    "stats/client_time": self.timeseries_db,
-                    "stats/client_nav_event": self.timeseries_db,
-                    "stats/client_error": self.timeseries_db,
-                    "manual/incident": self.timeseries_db,
-                    "manual/mode_confirm": self.timeseries_db,
-                    "manual/purpose_confirm": self.timeseries_db,
-                    "manual/destination_confirm": self.timeseries_db,
-                    "segmentation/raw_trip": self.analysis_timeseries_db,
-                    "segmentation/raw_place": self.analysis_timeseries_db,
-                    "segmentation/raw_section": self.analysis_timeseries_db,
-                    "segmentation/raw_stop": self.analysis_timeseries_db,
-                    "segmentation/raw_untracked": self.analysis_timeseries_db,
-                    "analysis/smoothing": self.analysis_timeseries_db,
-                    "analysis/cleaned_trip": self.analysis_timeseries_db,
-                    "analysis/cleaned_place": self.analysis_timeseries_db,
-                    "analysis/cleaned_section": self.analysis_timeseries_db,
-                    "analysis/cleaned_stop": self.analysis_timeseries_db,
-                    "analysis/cleaned_untracked": self.analysis_timeseries_db,
-                    "analysis/recreated_location": self.analysis_timeseries_db,
-                    "metrics/daily_user_count": self.analysis_timeseries_db,
-                    "metrics/daily_mean_count": self.analysis_timeseries_db,
-                    "metrics/daily_user_distance": self.analysis_timeseries_db,
-                    "metrics/daily_mean_distance": self.analysis_timeseries_db,
-                    "metrics/daily_user_duration": self.analysis_timeseries_db,
-                    "metrics/daily_mean_duration": self.analysis_timeseries_db,
-                    "metrics/daily_user_median_speed": self.analysis_timeseries_db,
-                    "metrics/daily_mean_median_speed": self.analysis_timeseries_db,
-                    "inference/prediction": self.analysis_timeseries_db,
-                    "analysis/inferred_section": self.analysis_timeseries_db
-                }
+        self.ts_map = {
+                "background/location": self.timeseries_db,
+                "background/filtered_location": self.timeseries_db,
+                "background/motion_activity": self.timeseries_db,
+                "background/battery": self.timeseries_db,
+                "statemachine/transition": self.timeseries_db,
+                "config/sensor_config": self.timeseries_db,
+                "config/sync_config": self.timeseries_db,
+                "config/consent": self.timeseries_db,
+                "stats/server_api_time": self.timeseries_db,
+                "stats/server_api_error": self.timeseries_db,
+                "stats/pipeline_time": self.timeseries_db,
+                "stats/pipeline_error": self.timeseries_db,
+                "stats/client_time": self.timeseries_db,
+                "stats/client_nav_event": self.timeseries_db,
+                "stats/client_error": self.timeseries_db,
+                "manual/incident": self.timeseries_db,
+                "manual/mode_confirm": self.timeseries_db,
+                "manual/purpose_confirm": self.timeseries_db,
+                "manual/destination_confirm": self.timeseries_db,
+                "segmentation/raw_trip": self.analysis_timeseries_db,
+                "segmentation/raw_place": self.analysis_timeseries_db,
+                "segmentation/raw_section": self.analysis_timeseries_db,
+                "segmentation/raw_stop": self.analysis_timeseries_db,
+                "segmentation/raw_untracked": self.analysis_timeseries_db,
+                "analysis/smoothing": self.analysis_timeseries_db,
+                "analysis/cleaned_trip": self.analysis_timeseries_db,
+                "analysis/cleaned_place": self.analysis_timeseries_db,
+                "analysis/cleaned_section": self.analysis_timeseries_db,
+                "analysis/cleaned_stop": self.analysis_timeseries_db,
+                "analysis/cleaned_untracked": self.analysis_timeseries_db,
+                "analysis/recreated_location": self.analysis_timeseries_db,
+                "metrics/daily_user_count": self.analysis_timeseries_db,
+                "metrics/daily_mean_count": self.analysis_timeseries_db,
+                "metrics/daily_user_distance": self.analysis_timeseries_db,
+                "metrics/daily_mean_distance": self.analysis_timeseries_db,
+                "metrics/daily_user_duration": self.analysis_timeseries_db,
+                "metrics/daily_mean_duration": self.analysis_timeseries_db,
+                "metrics/daily_user_median_speed": self.analysis_timeseries_db,
+                "metrics/daily_mean_median_speed": self.analysis_timeseries_db,
+                "inference/prediction": self.analysis_timeseries_db,
+                "analysis/inferred_section": self.analysis_timeseries_db
+            }
 
 
     @staticmethod
     def get_uuid_list():
+        # FIXME replace 
         return edb.get_timeseries_db().distinct("user_id")
 
     def get_timeseries_db(self, key):
@@ -171,6 +189,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         return self.get_entry_from_id(key, row['_id'])
 
     def get_entry_from_id(self, key, entry_id):
+        # Replace with load one
         entry_doc = self.get_timeseries_db(key).find_one({"_id": entry_id})
         if entry_doc is None:
             return None
@@ -218,6 +237,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         # workaround for https://github.com/e-mission/e-mission-server/issues/271
         # during the migration
         if key_list is None or len(key_list) > 0:
+            # FIXME Replace with Load
             ts_db_cursor = tsdb.find(
                 self._get_query(key_list, time_query, geo_query,
                                 extra_query_list))
@@ -236,6 +256,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
             # Out[593]: 449869
             ts_db_result.limit(25 * 10000)
         else:
+            # FIXME Replace with Load
             ts_db_result = tsdb.find(INVALID_QUERY)
 
         logging.debug("finished querying values for %s, count = %d" % (key_list, ts_db_result.count()))
@@ -247,6 +268,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         query_ts = float(ts) if type(ts) == np.int64 or type(ts) == np.float64 else ts
         query = {"user_id": self.user_id, "metadata.key": key, ts_key: query_ts}
         logging.debug("get_entry_at_ts query = %s" % query)
+        # FIXME Replace with Load one
         retValue = self.get_timeseries_db(key).find_one(query)
         logging.debug("get_entry_at_ts result = %s" % retValue)
         return retValue
@@ -324,6 +346,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
                 try:
                     glist = list(g)
                     logging.debug("Inserting %s entries for key %s" % (len(glist), k))
+                    # FIXME Replace with store many
                     self.get_timeseries_db(k).insert_many(glist, ordered=True)
                 except pymongo.errors.BulkWriteError as e:
                     logging.info("Got errors %s while saving %d entries for key %s" % 
@@ -331,6 +354,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         else:
             multi_result = None
             try:
+                # FIXME Replace with store many
                 multi_result = get_ts_enum_map ()[data_type].insert_many(entries, ordered=False)
                 logging.debug("Returning multi_result.inserted_ids = %s... of length %d" % 
                     (multi_result.inserted_ids[:10], len(multi_result.inserted_ids)))
@@ -355,6 +379,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
             logging.debug("entry was fine, no need to fix it")
 
         logging.debug("Inserting entry %s into timeseries" % entry)
+        # FIXME Replace with store one
         ins_result = self.get_timeseries_db(entry.metadata.key).insert_one(entry)
         return ins_result.inserted_id
 
@@ -364,6 +389,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         it and returns the object ID
         """
         logging.debug("insert_data called")
+        # FIXME Replace with store one
         entry = ecwe.Entry.create_entry(user_id, key, data)
         return self.insert(entry)
 
@@ -378,7 +404,8 @@ class BuiltinTimeSeries(esta.TimeSeries):
         else:
             logging.debug("entry was fine, no need to fix it")
 
-        logging.debug("Inserting entry %s into error timeseries" % entry)
+        logging.debug("Inserting entry %s into error timeseries" % entry)            
+        # FIXME Replace with store one
         edb.get_timeseries_error_db().insert_one(entry)
 
     @staticmethod
@@ -392,6 +419,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         logging.debug("update called")
         ts = esta.TimeSeries.get_time_series(entry.user_id)
         logging.debug("Saving entry %s into timeseries" % entry)
+        # FIXME Replace with store
         edb.save(ts.get_timeseries_db(entry.metadata.key), entry)
 
     @staticmethod
@@ -408,5 +436,6 @@ class BuiltinTimeSeries(esta.TimeSeries):
         # Make sure that we update the existing entry instead of creating a new one
         new_entry['_id'] = obj_id
         logging.debug("updating entry %s into timeseries" % new_entry)
+        # FIXME Replace with store
         edb.save(ts.get_timeseries_db(key), new_entry)
 

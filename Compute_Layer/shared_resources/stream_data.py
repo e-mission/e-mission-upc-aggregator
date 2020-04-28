@@ -59,7 +59,28 @@ def get_usercache_encode_types():
     types['data_ts'] = ["builtins", "str"]
     return types
 
-# Class used to replace the db
+# Classes used to replace the db() calls
+class AnalysisTimeseriesData:
+    def __init__(self, target_address):
+        self.target_address = target_address
+
+    def store(self, data):
+        pass
+    
+    def load(self, search_fields, should_sort=False, sort=None):
+        pass
+
+class TimeseriesData:
+    def __init__(self, target_address):
+        self.target_address = target_address
+
+    def store(self, data):
+        pass
+    
+    def load(self, search_fields, should_sort=False, sort=None):
+        pass
+
+
 class UsercacheData:
     def __init__(self, target_address):
         self.target_address = target_address
@@ -70,6 +91,7 @@ class UsercacheData:
     def load(self, search_fields, should_sort=False, sort=None):
         return load_usercache_data(self.target_address, search_fields, should_sort, sort) 
 
+### End of classes
 
 def store_usercache_data(target_address, data):
     return store_data(target_address, "Stage_usercache", 

@@ -192,7 +192,9 @@ def mark_stage_done(user_id, stage, last_processed_ts):
         logging.info("For stage %s, last_ts_processed is unchanged" % stage)
     curr_state.curr_run_ts = None
     logging.debug("About to save object %s" % curr_state)
+    # FIXME Replace with a storeee data
     edb.save(edb.get_pipeline_state_db(), curr_state)
+    # FIXME Replace with a load data
     logging.debug("After saving state %s, list is %s" % (curr_state,
         list(edb.get_pipeline_state_db().find({"user_id": user_id}))))
 
@@ -205,7 +207,9 @@ def mark_stage_failed(user_id, stage):
     # we also reset the curr_run_ts to indicate that we are not currently running
     curr_state.curr_run_ts = None
     logging.debug("About to save object %s" % curr_state)
+    # FIXME Replace with a storee data
     edb.save(edb.get_pipeline_state_db(), curr_state)
+    # FIXME Replace with a load data
     logging.debug("After saving state %s, list is %s" % (curr_state,
         list(edb.get_pipeline_state_db().find({"user_id": user_id}))))
 
@@ -244,7 +248,9 @@ def get_time_range_for_stage(user_id, stage):
 
     curr_state.curr_run_ts = end_ts
     logging.debug("About to save object %s" % curr_state)
+    # FIXME Replace with a store data
     edb.save(edb.get_pipeline_state_db(), curr_state)
+    # FIXME Replace with a load data
     logging.debug("After saving state %s, list is %s" % (curr_state,
         list(edb.get_pipeline_state_db().find({"user_id": user_id}))))
     return ret_query
