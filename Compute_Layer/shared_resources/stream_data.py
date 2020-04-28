@@ -72,7 +72,7 @@ class UsercacheData:
 
 
 def store_usercache_data(target_address, data):
-    return store_data(target_address, certificate_path,"Stage_usercache", 
+    return store_data(target_address, "Stage_usercache", 
             get_usercache_keys(), data, get_usercache_decode_types())
 
 
@@ -129,12 +129,12 @@ def get_calendar_encode_types():
     return types
 
 def store_calendar_data(target_address, data):
-    return store_data(target_address, certificate_path, "Stage_calendar",
+    return store_data(target_address, "Stage_calendar",
             get_calendar_keys(), data, get_calendar_decode_types())
 
 def load_calendar_data(target_address, search_fields, 
         should_sort=False, sort=None):
-    return load_data(target_address, certificate_path, "Stage_calendar", 
+    return load_data(target_address, "Stage_calendar", 
             get_calendar_keys(), search_fields, get_calendar_decode_types(),
             get_calendar_encode_types(), should_sort, sort)
 

@@ -81,8 +81,7 @@ class FakeUser:
         data = [test]
 
         ### END OF TEST
-        error = clsrsd.store_usercache_data(self._config['upload_url'], 
-                data)
+        error = clsrsd.store_usercache_data(self._config['upload_url'], data)
         if not error:
             self._flush_cache()
 
