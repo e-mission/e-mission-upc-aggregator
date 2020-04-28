@@ -9,7 +9,7 @@ import abc
 import numpy as np
 import sys
 import requests
-from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path
+from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, upc_port
 import Compute_Layer.shared_resources.stream_data as clsrsd
 
 def privacy_budget_pass(query):
@@ -116,8 +116,11 @@ class RC(Query):
     def __repr__(self):
         return "ae"
 
-#@post('/receive_query')
-def receive_query(pm_addr, query):
+@post('/receive_query')
+def receive_query():
+    print("reached")
+    pm_addr = request.json['pm_address']
+    query = request.json['query']
     # TODO: pass in user_cloud_addr.
     print ("The query has begun")
     query_object = query_type_mapping[query['query_type']]
@@ -128,12 +131,12 @@ def receive_query(pm_addr, query):
     legal_query = budget_deduction_results['success']
     if not legal_query:
         print("Failure 1")
-        return None
+        return {'query_result': ''}
     search_fields = [{"data_ts": {"$lt": query['end_ts'], "$gt": query['start_ts']}}, {"_id": "False"}]
     json_data, failure  = clsrsd.load_usercache_data(pm_addr, certificate_bundle_path, search_fields)
     if failure:
         print("Failure 2")
-        return failure
+        return {'query_result': ''}
     return receive_user_data(json_data, query_object)
 
 def receive_user_data(json_data, query_object):
@@ -149,28 +152,33 @@ def receive_user_data(json_data, query_object):
 
 query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
 
-"""
-if __name__ == "__main__":
-    query_type_mapping = {'sum' : Sum(), 'ae': AE(), 'rc': RC()}
+if __name__ == '__main__':
+    try:
+        webserver_log_config = json.load(open("conf/log/webserver.conf", "r"))
+    except:
+        webserver_log_config = json.load(open("conf/log/webserver.conf.sample", "r"))
+
+    # To avoid config file for tests
+    server_host = socket.gethostbyname(socket.gethostname())
+
+
     # The selection of SSL versus non-SSL should really be done through a config
     # option and not through editing source code, so let's make this keyed off the
     # port number
-    if querier_port == "443":
+    if upc_port == 8000:
       # We support SSL and want to use it
       try:
         key_file = open('conf/net/keys.json')
       except:
-        logging.debug("certificates not configured, falling back to sample, default certificates")
         key_file = open('conf/net/keys.json.sample')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]
       chain_cert = key_data["chain_certificate"]
       private_key = key_data["private_key"]
 
-      run(host=socket.gethostbyname(socket.gethostname()), port=querier_port, server='cheroot', debug=True,
+      run(host=server_host, port=upc_port, server='cheroot', debug=True,
           certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
     else:
       # Non SSL option for testing on localhost
       print("Running with HTTPS turned OFF - use a reverse proxy on production")
-      run(host=socket.gethostbyname(socket.gethostname()), port=querier_port, server='cheroot', debug=True)
-"""
+      run(host=server_host, port=upc_port, server='cheroot', debug=True)

@@ -147,7 +147,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
+        results.append (pool.apply_async (launch_sum_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -156,7 +156,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
+        results.append (pool.apply_async (launch_sum_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -165,7 +165,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_ae_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
+        results.append (pool.apply_async (launch_ae_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -174,7 +174,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_ae_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
+        results.append (pool.apply_async (launch_ae_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -183,7 +183,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_rc_query, [None, userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10, 30]))
+        results.append (pool.apply_async (launch_rc_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10, 30]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -192,7 +192,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_rc_query, [None, userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10, 30]))
+        results.append (pool.apply_async (launch_rc_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10, 30]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -254,7 +254,11 @@ def launch_rc_query(service_addr, pm_addr, start_ts, end_ts, alpha, r_start, r_e
     return launch_query(service_addr, pm_addr, query)
 
 def launch_query(service_addr, pm_addr, query):
-    receive_query(pm_addr, query)
+    json_dict = dict()
+    json_dict['pm_address'] = pm_addr
+    json_dict['query'] = query
+    r = requests.post (service_addr + "/receive_query", json=json_dict, verify=certificate_bundle_path)
+    return r.json()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
