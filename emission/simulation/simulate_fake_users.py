@@ -147,7 +147,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, [userlist[i]], 1501592400, 1564664400, .01, 10]))
+        results.append (pool.apply_async (launch_sum_query, [userlist[i], 1501592400, 1564664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
