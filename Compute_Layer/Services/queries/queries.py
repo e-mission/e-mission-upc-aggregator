@@ -133,7 +133,7 @@ def receive_query():
         print("Failure 1")
         return {'query_result': ''}
     search_fields = [{"data_ts": {"$lt": query['end_ts'], "$gt": query['start_ts']}}, {"_id": "False"}]
-    json_data, failure  = clsrsd.load_usercache_data(pm_addr, certificate_bundle_path, search_fields)
+    json_data, failure  = clsrsd.load_usercache_data(pm_addr, search_fields)
     if failure:
         print("Failure 2")
         return {'query_result': ''}

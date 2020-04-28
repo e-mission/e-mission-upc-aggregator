@@ -40,8 +40,7 @@ def get_last_event_from_server(upload_address, date):
     search_fields = [{"data.end_time": {"$lt": day_end, "$gt": day_start}}, {"_id": "False"}]
     should_sort = True
     sort = {'data.end_time': "False"}
-    data, error = clsrsd.load_calendar_data(upload_address, 
-            certificate_bundle_path, search_fields, should_sort, sort)
+    data, error = clsrsd.load_calendar_data(upload_address, search_fields, should_sort, sort)
     if error:
         return None
     else:
