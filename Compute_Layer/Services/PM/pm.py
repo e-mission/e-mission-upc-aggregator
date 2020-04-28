@@ -221,8 +221,6 @@ def storeData():
     else:
       logging.debug("Succesfully stored user data")
 
-# Temporary. Random privacy budget chosen for testing.
-privacy_budget = 10.0
 
 # Function used to deduct from the privacy budget. Returns
 # whether or not it was possible to reduce the privacy budget.
@@ -232,7 +230,7 @@ def reduce_privacy_budget():
     if len(budget) == 0:
         privacy_budget = setInitPrivacyBudget()
     else:
-        return {"success": True, "budget" : privacy_budget}
+        return {"success": True, "budget" : budget}
         privacy_budget = float(budget)
     cost = float(request.json['cost'])
     # Remove returning the budget after testing
