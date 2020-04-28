@@ -231,7 +231,7 @@ def storeData():
 @post ("/privacy_budget")
 def reduce_privacy_budget():
     budget = getPrivacyBudget()
-    if len(budget) == 0:
+    if budget is None:
         privacy_budget = setInitPrivacyBudget()
     else:
         privacy_budget = float(budget)
