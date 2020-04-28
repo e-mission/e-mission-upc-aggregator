@@ -121,7 +121,11 @@ def getPrivacyBudget():
     search_fields = {"entrytype": "privacy_budget"}
     filtered = {"_id": "False"}
     retrievedData = table.find(search_fields, filtered)
-    return list(retrievedData)
+    datalist = list(retrievedData)
+    if len(datalist) == 0:
+        return None
+    else:
+        return datalist[0]['privacy_budget']
 
 
 @post('/data/load')
@@ -230,7 +234,6 @@ def reduce_privacy_budget():
     if len(budget) == 0:
         privacy_budget = setInitPrivacyBudget()
     else:
-        return budget
         privacy_budget = float(budget)
     cost = float(request.json['cost'])
     # Remove returning the budget after testing
