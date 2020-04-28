@@ -118,7 +118,8 @@ def setPrivacyBudget(budget):
 
 def getPrivacyBudget():
     table = get_database_table("privacyBudget")
-    search_fields = [{"entrytype": "privacy_budget"}, {"_id": "False"}]
+    search_fields = {"entrytype": "privacy_budget"}
+    filtered = {"_id": "False"}
     retrievedData = table.find(search_fields, filtered)
     return retrievedData
 
