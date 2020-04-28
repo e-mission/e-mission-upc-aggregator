@@ -47,16 +47,17 @@ def _get_current_db():
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
     return _current_db
 
-def get_database_table(table, keys):
+def get_database_table(table, keys=None):
     Table = _get_current_db()[table]
-    for key, elements in keys.items():
-        # Should add checks for typing
-        key_parts = key.split("\n")
-        data_types = elements[0]
-        assert(len(key_parts) == len(data_types))
-        index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0])) for i in range(len(key_parts))]
-        is_sparse = elements[1] == "True"
-        Table.create_index(index_pairs, sparse=is_sparse)
+    if keys is not None:
+        for key, elements in keys.items():
+            # Should add checks for typing
+            key_parts = key.split("\n")
+            data_types = elements[0]
+            assert(len(key_parts) == len(data_types))
+            index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0])) for i in range(len(key_parts))]
+            is_sparse = elements[1] == "True"
+            Table.create_index(index_pairs, sparse=is_sparse)
     return Table
 
 # Helper function the returns if the value is a leaf node.
@@ -102,6 +103,24 @@ def process_key(key, data=None, types=None):
       if types:
         type_elem = type_elem[part]
     return prev_data_dict, data_elem, type_elem, parts[-1]
+
+def setInitPrivacyBudget():
+    starting_budget = 10.0 # Replace this with a sensible value.
+    setPrivacyBudget(starting_budget)
+    return starting_budget
+
+def setPrivacyBudget(budget):
+    table = getDatabaseTable("privacyBudget")
+    query = {"entrytype": "privacy_budget"}
+    budget_dict = {"privacy_budget" : budget}
+    document = {'$set': budget_dict}
+    result = table.update(query, document, upsert=True)
+
+def getPrivacyBudget(budget):
+    table = getDatabaseTable("privacyBudget")
+    search_fields = [{"entrytype": "privacy_budget"}, {"_id": "False"}]
+    retrievedData = table.find(search_fields, filtered)
+    return retrievedData
 
 
 @post('/data/load')
@@ -208,12 +227,18 @@ privacy_budget = 10.0
 # whether or not it was possible to reduce the privacy budget.
 @post ("/privacy_budget")
 def reduce_privacy_budget():
-    global privacy_budget
+    budget = getPrivacyBudget()
+    if len(budget):
+        budget = setInitPrivacyBudget()
+    else:
+        budget = float(budget)
     cost = float(request.json['cost'])
-    if privacy_budget - cost < 0:
+    # Remove returning the budget after testing
+    if budget - cost < 0:
         return {"success": False, "budget" : ""}
     else:
         privacy_budget -= cost
+        setPrivacyBudget(privacy_budget)
         return {"success": True, "budget" : privacy_budget}
 
 

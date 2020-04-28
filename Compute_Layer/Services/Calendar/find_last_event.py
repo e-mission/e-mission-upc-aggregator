@@ -53,7 +53,7 @@ def get_last_event_from_server(upload_address, date):
 
 @post("/get_last_event")
 def get_arrival_time():
-    upload_address = request.json['pm_address'] + load_endpoint
+    upload_address = request.json['pm_address']
     # Extract the date and round down
     date = parse(request.json['date'])
     last_event = get_last_event_from_server(upload_address, date)
