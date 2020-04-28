@@ -147,7 +147,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
+        results.append (pool.apply_async (launch_sum_query, [userlist[i]], 1501592400, 1564664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -156,7 +156,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
+        results.append (pool.apply_async (launch_sum_query, [userlist[i], 1601592400, 1664664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -165,7 +165,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_ae_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10]))
+        results.append (pool.apply_async (launch_ae_query, [userlist[i], 1501592400, 1564664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -174,7 +174,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_ae_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10]))
+        results.append (pool.apply_async (launch_ae_query, [userlist[i], 1601592400, 1664664400, .01, 10]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -183,7 +183,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_rc_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1501592400, 1564664400, .01, 10, 30]))
+        results.append (pool.apply_async (launch_rc_query, [userlist[i], 1501592400, 1564664400, .01, 10, 30]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -192,7 +192,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_rc_query, ["https://127.0.1.1:8000", userlist[i]._config['download_url'], 1601592400, 1664664400, .01, 10, 30]))
+        results.append (pool.apply_async (launch_rc_query, [userlist[i], 1601592400, 1664664400, .01, 10, 30]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -226,38 +226,39 @@ def get_arrival_time(user, date):
     r = requests.post (addresses[1] + "/get_last_event", json=json_dict, verify=certificate_bundle_path)
     return r.json()
 
-def launch_sum_query(service_addr, pm_addr, start_ts, end_ts, alpha, offset):
+def launch_sum_query(user, start_ts, end_ts, alpha, offset):
     query = dict()
     query['query_type'] = "sum"
     query['start_ts'] = start_ts
     query['end_ts'] = end_ts
     query['alpha'] = alpha
     query['offset'] = offset
-    return launch_query(service_addr, pm_addr, query)
+    return launch_query(user, query)
 
-def launch_ae_query(service_addr, pm_addr, start_ts, end_ts, alpha, offset):
+def launch_ae_query(user, start_ts, end_ts, alpha, offset):
     query = dict()
     query['query_type'] = "ae"
     query['start_ts'] = start_ts
     query['end_ts'] = end_ts
     query['alpha'] = alpha
     query['offset'] = offset
-    return launch_query(service_addr, pm_addr, query)
+    return launch_query(user, query)
 
-def launch_rc_query(service_addr, pm_addr, start_ts, end_ts, alpha, r_start, r_end): 
+def launch_rc_query(user, start_ts, end_ts, alpha, r_start, r_end): 
     query = dict()
     query['query_type'] = "rc"
     query['start_ts'] = start_ts
     query['end_ts'] = end_ts
     query['alpha'] = alpha
     query['offset'] = (r_end - r_start) / 2
-    return launch_query(service_addr, pm_addr, query)
+    return launch_query(user, query)
 
-def launch_query(service_addr, pm_addr, query):
+def launch_query(user, query):
+    addresses = clsrsd.request_service({'user': user._config['email']}, 'query')
     json_dict = dict()
-    json_dict['pm_address'] = pm_addr
+    json_dict['pm_address'] = addresses[0]
     json_dict['query'] = query
-    r = requests.post (service_addr + "/receive_query", json=json_dict, verify=certificate_bundle_path)
+    r = requests.post (addresses[1] + "/receive_query", json=json_dict, verify=certificate_bundle_path)
     return r.json()
 
 if __name__ == "__main__":

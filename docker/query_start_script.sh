@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 #Configure web server
 
-
 #Pull the latest changes from the repo
 cd /usr/src/app && git pull origin kubernetes
 
@@ -23,11 +22,12 @@ if [ -z ${WEB_SERVER_HOST}} ] ; then
 else
     sed "s_localhost_${WEB_SERVER_HOST}_" conf/net/api/webserver.conf.sample > conf/net/api/webserver.conf
 fi
-
 cat conf/net/api/webserver.conf
+
 #TODO: start cron jobs
 # change python environment
 source activate emission
 
 # launch the webapp
-./e-mission-py.bash emission/net/int_service/query_microservice.py
+#./e-mission-py.bash emission/net/api/cfc_webapp.py
+./e-mission-py.bash Compute_Layer/Services/querier/querier.py

@@ -1,6 +1,6 @@
 {"PM": 
     {"service_file": "docker/docker-compose.yml"}, 
-"basic-querier": 
-    {"service_file": "docker/docker-compose-test-querier.yml"},
+"query": 
+    {"service_file": "docker/docker-compose-query.yml"},
 "calendar":
     {"service_file": "docker/docker-compose-calendar.yml"}}
