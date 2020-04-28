@@ -82,7 +82,7 @@ class FakeUser:
 
         ### END OF TEST
         error = clsrsd.store_usercache_data(self._config['upload_url'], 
-                certificate_bundle_path, data)
+                data)
         if not error:
             self._flush_cache()
 
@@ -91,13 +91,13 @@ class FakeUser:
         should_sort = True
         sort = {'metadata.write_ts': "True"}
         data, error = clsrsd.load_usercache_data(self._config['download_url'], 
-                certificate_bundle_path, search_fields, should_sort, sort)
+                search_fields, should_sort, sort)
         return data
 
     def sync_calendar_to_server(self, calendar_file):
         data = clsri.readCalendarAsEventList(calendar_file)
         error = clsrsd.store_calendar_data(self._config['upload_url'], 
-                certificate_bundle_path, data)
+                data)
 
 
     def load_calendar_from_server(self):
@@ -106,7 +106,7 @@ class FakeUser:
         should_sort = True
         sort = {'data.end_time': "True"}
         data, error = clsrsd.load_calendar_data(self._config['download_url'], 
-                certificate_bundle_path, search_fields, should_sort, sort)
+                search_fields, should_sort, sort)
         return data
 
     def run_pipeline (self):

@@ -14,6 +14,7 @@ import pymongo
 import emission.net.usercache.abstract_usercache as ucauc # ucauc = usercache.abstract_usercache
 from emission.core.get_database import get_usercache_db
 
+import Compute_Layer.shared_resources.stream_data as clsrsd
 """
 Format of the usercache_db.
 Note that this assumes that we have a single user cache object per user.
@@ -63,7 +64,12 @@ class BuiltinUserCache(ucauc.UserCache):
         self.key_query = lambda key: {"metadata.key": key};
         self.ts_query = lambda tq: BuiltinUserCache._get_ts_query(tq)
         self.type_query = lambda entry_type: {"metadata.type": entry_type}
-        self.db = get_usercache_db()
+        # FIXME need to fix the import once decided
+        if isinstance(user_id, clsrsd.PM_UUID):
+            # Replace this with the class holding function calls
+            self.db = clsrsd.UsercacheData(user_id)
+        else:
+            self.db = get_usercache_db()
 
     @staticmethod
     def _get_ts_query(tq):
@@ -132,6 +138,8 @@ class BuiltinUserCache(ucauc.UserCache):
         # the write timestamp, because we use the last_ts_processed to mark the
         # beginning of the entry for the next query. So let's sort by the
         # write_ts before returning.
+
+        #FIXME place the load data here
         retrievedMsgs = list(self.db.find(combo_query).sort("metadata.write_ts", pymongo.ASCENDING).limit(100000))
         logging.debug("Found %d messages in response to query %s" % (len(retrievedMsgs), combo_query))
         return retrievedMsgs

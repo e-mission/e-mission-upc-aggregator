@@ -34,8 +34,10 @@ class BuiltinTimeSeries(esta.TimeSeries):
         self.key_query = lambda key: {"metadata.key": key}
         self.type_query = lambda entry_type: {"metadata.type": entry_type}
         self.user_query = {"user_id": self.user_id} # UUID is mandatory for this version
-        self.timeseries_db = get_ts_enum_map ()[esta.EntryType.DATA_TYPE]
-        self.analysis_timeseries_db = get_ts_enum_map ()[esta.EntryType.ANALYSIS_TYPE]
+        # FIXME need to fix import. Probably want to replace the map and db so that something useful can reuse that code
+        if type(user_id) != PM_UUID:
+            self.timeseries_db = get_ts_enum_map ()[esta.EntryType.DATA_TYPE]
+            self.analysis_timeseries_db = get_ts_enum_map ()[esta.EntryType.ANALYSIS_TYPE]
         # Design question: Should the stats be a separate database, or should it be part
         # of the timeseries database? Technically, it should be part of the timeseries
         # database. However, I am concerned about the performance of the database
@@ -46,49 +48,49 @@ class BuiltinTimeSeries(esta.TimeSeries):
         # it separately. On the other hand, then the load/store from timeseries won't work
         # if it is a separate database. Let's do the right thing and change the storage/
         # shift to a different timeseries if we need to
-        self.ts_map = {
-                "background/location": self.timeseries_db,
-                "background/filtered_location": self.timeseries_db,
-                "background/motion_activity": self.timeseries_db,
-                "background/battery": self.timeseries_db,
-                "statemachine/transition": self.timeseries_db,
-                "config/sensor_config": self.timeseries_db,
-                "config/sync_config": self.timeseries_db,
-                "config/consent": self.timeseries_db,
-                "stats/server_api_time": self.timeseries_db,
-                "stats/server_api_error": self.timeseries_db,
-                "stats/pipeline_time": self.timeseries_db,
-                "stats/pipeline_error": self.timeseries_db,
-                "stats/client_time": self.timeseries_db,
-                "stats/client_nav_event": self.timeseries_db,
-                "stats/client_error": self.timeseries_db,
-                "manual/incident": self.timeseries_db,
-                "manual/mode_confirm": self.timeseries_db,
-                "manual/purpose_confirm": self.timeseries_db,
-                "manual/destination_confirm": self.timeseries_db,
-                "segmentation/raw_trip": self.analysis_timeseries_db,
-                "segmentation/raw_place": self.analysis_timeseries_db,
-                "segmentation/raw_section": self.analysis_timeseries_db,
-                "segmentation/raw_stop": self.analysis_timeseries_db,
-                "segmentation/raw_untracked": self.analysis_timeseries_db,
-                "analysis/smoothing": self.analysis_timeseries_db,
-                "analysis/cleaned_trip": self.analysis_timeseries_db,
-                "analysis/cleaned_place": self.analysis_timeseries_db,
-                "analysis/cleaned_section": self.analysis_timeseries_db,
-                "analysis/cleaned_stop": self.analysis_timeseries_db,
-                "analysis/cleaned_untracked": self.analysis_timeseries_db,
-                "analysis/recreated_location": self.analysis_timeseries_db,
-                "metrics/daily_user_count": self.analysis_timeseries_db,
-                "metrics/daily_mean_count": self.analysis_timeseries_db,
-                "metrics/daily_user_distance": self.analysis_timeseries_db,
-                "metrics/daily_mean_distance": self.analysis_timeseries_db,
-                "metrics/daily_user_duration": self.analysis_timeseries_db,
-                "metrics/daily_mean_duration": self.analysis_timeseries_db,
-                "metrics/daily_user_median_speed": self.analysis_timeseries_db,
-                "metrics/daily_mean_median_speed": self.analysis_timeseries_db,
-                "inference/prediction": self.analysis_timeseries_db,
-                "analysis/inferred_section": self.analysis_timeseries_db
-            }
+            self.ts_map = {
+                    "background/location": self.timeseries_db,
+                    "background/filtered_location": self.timeseries_db,
+                    "background/motion_activity": self.timeseries_db,
+                    "background/battery": self.timeseries_db,
+                    "statemachine/transition": self.timeseries_db,
+                    "config/sensor_config": self.timeseries_db,
+                    "config/sync_config": self.timeseries_db,
+                    "config/consent": self.timeseries_db,
+                    "stats/server_api_time": self.timeseries_db,
+                    "stats/server_api_error": self.timeseries_db,
+                    "stats/pipeline_time": self.timeseries_db,
+                    "stats/pipeline_error": self.timeseries_db,
+                    "stats/client_time": self.timeseries_db,
+                    "stats/client_nav_event": self.timeseries_db,
+                    "stats/client_error": self.timeseries_db,
+                    "manual/incident": self.timeseries_db,
+                    "manual/mode_confirm": self.timeseries_db,
+                    "manual/purpose_confirm": self.timeseries_db,
+                    "manual/destination_confirm": self.timeseries_db,
+                    "segmentation/raw_trip": self.analysis_timeseries_db,
+                    "segmentation/raw_place": self.analysis_timeseries_db,
+                    "segmentation/raw_section": self.analysis_timeseries_db,
+                    "segmentation/raw_stop": self.analysis_timeseries_db,
+                    "segmentation/raw_untracked": self.analysis_timeseries_db,
+                    "analysis/smoothing": self.analysis_timeseries_db,
+                    "analysis/cleaned_trip": self.analysis_timeseries_db,
+                    "analysis/cleaned_place": self.analysis_timeseries_db,
+                    "analysis/cleaned_section": self.analysis_timeseries_db,
+                    "analysis/cleaned_stop": self.analysis_timeseries_db,
+                    "analysis/cleaned_untracked": self.analysis_timeseries_db,
+                    "analysis/recreated_location": self.analysis_timeseries_db,
+                    "metrics/daily_user_count": self.analysis_timeseries_db,
+                    "metrics/daily_mean_count": self.analysis_timeseries_db,
+                    "metrics/daily_user_distance": self.analysis_timeseries_db,
+                    "metrics/daily_mean_distance": self.analysis_timeseries_db,
+                    "metrics/daily_user_duration": self.analysis_timeseries_db,
+                    "metrics/daily_mean_duration": self.analysis_timeseries_db,
+                    "metrics/daily_user_median_speed": self.analysis_timeseries_db,
+                    "metrics/daily_mean_median_speed": self.analysis_timeseries_db,
+                    "inference/prediction": self.analysis_timeseries_db,
+                    "analysis/inferred_section": self.analysis_timeseries_db
+                }
 
 
     @staticmethod

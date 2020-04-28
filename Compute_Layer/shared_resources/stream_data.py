@@ -3,6 +3,21 @@ import socket
 
 from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, privacy_budget_endpoint, load_endpoint, store_endpoint
 
+# Class used to store pm when running the pipeline
+class PM_UUID:
+    def __init__(pm_addr):
+        self.pm_addr = pm_addr
+
+    def getAddress():
+        return self.pm_addr
+
+def remove_user_id_from_dicts(possible_dict):
+    if isinstance(possible_dict, dict):
+        if "user_id" in possible_dict:
+            del possible_dict["user_id"]
+        for val in possible_dict.values():
+            remove_user_id_from_dicts(val)
+
 def get_usercache_keys():
     keys_dict = dict()
     index1 = ["metadata.write_ts",
@@ -44,14 +59,26 @@ def get_usercache_encode_types():
     types['data_ts'] = ["builtins", "str"]
     return types
 
-def store_usercache_data(target_address, certificate_path, data):
+# Class used to replace the db
+class UsercacheData:
+    def __init__(self, target_address):
+        self.target_address = target_address
+
+    def store(self, data):
+        return store_usercache_data(self.target_address, data)
+    
+    def load(self, search_fields, should_sort=False, sort=None):
+        return load_usercache_data(self.target_address, search_fields, should_sort, sort) 
+
+
+def store_usercache_data(target_address, data):
     return store_data(target_address, certificate_path,"Stage_usercache", 
             get_usercache_keys(), data, get_usercache_decode_types())
 
 
-def load_usercache_data(target_address, certificate_path, search_fields, 
+def load_usercache_data(target_address, search_fields, 
         should_sort=False, sort=None):
-    return load_data(target_address, certificate_path, "Stage_usercache", 
+    return load_data(target_address, "Stage_usercache", 
             get_usercache_keys(), search_fields, get_usercache_decode_types(), 
             get_usercache_encode_types(), should_sort, sort)
 
@@ -101,17 +128,20 @@ def get_calendar_encode_types():
     types['data'] = data_types
     return types
 
-def store_calendar_data(target_address, certificate_path, data):
+def store_calendar_data(target_address, data):
     return store_data(target_address, certificate_path, "Stage_calendar",
             get_calendar_keys(), data, get_calendar_decode_types())
 
-def load_calendar_data(target_address, certificate_path, search_fields, 
+def load_calendar_data(target_address, search_fields, 
         should_sort=False, sort=None):
     return load_data(target_address, certificate_path, "Stage_calendar", 
             get_calendar_keys(), search_fields, get_calendar_decode_types(),
             get_calendar_encode_types(), should_sort, sort)
 
-def store_data(target_address, certificate_path, data_type, keys, data, decode_types):
+def store_data(target_address, data_type, keys, data, decode_types, filter_user_id=True):
+    if filter_user_id:
+        remove_user_id_from_dicts(keys)
+        remove_user_id_from_dicts(data)
     error = False
     try:
         json_entries = dict()
@@ -120,7 +150,7 @@ def store_data(target_address, certificate_path, data_type, keys, data, decode_t
         json_entries['data'] = data
         json_entries['decode_types'] = decode_types
         r = requests.post(target_address + store_endpoint, json=json_entries, timeout=300,
-                verify=certificate_path)
+                verify=certificate_bundle_path)
     except (socket.timeout) as e:
         error = True
 
@@ -136,8 +166,11 @@ def store_data(target_address, certificate_path, data_type, keys, data, decode_t
 
 
 
-def load_data(target_address, certificate_path, data_type, keys, search_fields,
-        decode_types, encode_types, should_sort=False, sort=None):
+def load_data(target_address, data_type, keys, search_fields,
+        decode_types, encode_types, should_sort=False, sort=None, filter_user_id=True):
+    if filter_user_id:
+        remove_user_id_from_dicts(keys)
+        remove_user_id_from_dicts(search_fields)
     error = False
     try:
         json_entries = dict()
@@ -152,7 +185,7 @@ def load_data(target_address, certificate_path, data_type, keys, search_fields,
         else:
             json_entries['should_sort'] = "False"
         r = requests.post(target_address + load_endpoint, json=json_entries, timeout=300,
-                verify=certificate_path)
+                verify=certificate_bundle_path)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful

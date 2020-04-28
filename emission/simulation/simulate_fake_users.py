@@ -143,7 +143,7 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
-    """
+
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
@@ -197,6 +197,7 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
+    """
 
 def create_user_data (user, numTrips):
     for _ in range (numTrips):

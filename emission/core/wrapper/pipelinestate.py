@@ -24,6 +24,7 @@ class PipelineStages(enum.Enum):
     OUTPUT_GEN = 9
 
 class PipelineState(ecwb.WrapperBase):
+    # FIXME Remove user_id
     props = {"pipeline_stage": ecwb.WrapperBase.Access.RW,  # the value of the stage from the enum above
              "user_id": ecwb.WrapperBase.Access.RW, # the user whose state this is
              "curr_run_ts": ecwb.WrapperBase.Access.RW, # the last time in the currrent run (only set if the stage is currently running)
