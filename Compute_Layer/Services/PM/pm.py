@@ -115,11 +115,12 @@ def setPrivacyBudget(budget):
     budget_dict = {"privacy_budget" : budget}
     document = {'$set': budget_dict}
     result = table.update(query, document, upsert=True)
+    logging.debug("PB store is {}".format(result))
 
 def getPrivacyBudget():
     table = get_database_table("privacyBudget")
     search_fields = {"entrytype": "privacy_budget"}
-    filtered = {"_id": "False"}
+    filtered = {"_id": False}
     retrievedData = table.find(search_fields, filtered)
     datalist = list(retrievedData)
     if len(datalist) == 0:
