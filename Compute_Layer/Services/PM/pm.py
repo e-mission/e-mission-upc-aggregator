@@ -116,7 +116,7 @@ def setPrivacyBudget(budget):
     document = {'$set': budget_dict}
     result = table.update(query, document, upsert=True)
 
-def getPrivacyBudget(budget):
+def getPrivacyBudget():
     table = getDatabaseTable("privacyBudget")
     search_fields = [{"entrytype": "privacy_budget"}, {"_id": "False"}]
     retrievedData = table.find(search_fields, filtered)
