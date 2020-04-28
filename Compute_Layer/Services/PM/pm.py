@@ -121,7 +121,7 @@ def getPrivacyBudget():
     search_fields = {"entrytype": "privacy_budget"}
     filtered = {"_id": "False"}
     retrievedData = table.find(search_fields, filtered)
-    return retrievedData
+    return list(retrievedData)
 
 
 @post('/data/load')
