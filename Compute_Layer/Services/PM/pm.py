@@ -125,7 +125,7 @@ def getPrivacyBudget():
     if len(datalist) == 0:
         return None
     else:
-        return datalist[0]['privacy_budget']
+        return datalist[0]
 
 
 @post('/data/load')
