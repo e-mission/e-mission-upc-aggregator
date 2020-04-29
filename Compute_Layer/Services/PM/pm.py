@@ -194,10 +194,6 @@ def insertDepricatedData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
   stage_name = request.json['stage_name']
-  # query is the filter
-  query = request.json['query']
-  # Data is the data transferred
-  data = request.json['data']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']

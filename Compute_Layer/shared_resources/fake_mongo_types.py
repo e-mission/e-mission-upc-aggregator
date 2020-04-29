@@ -395,7 +395,11 @@ class AbstractCollection:
 
     def insert(self, doc_or_docs, manipulate=True, safe=None, check_keys=True,
             continue_on_error=False, **kwargs):
-        json_entries = json_dict()
+        json_entries = dict()
+        json_entries['stage_name'] = self.stage_name
+        remove_user_id_from_dicts(self.indices)
+        json_entries['indices'] = self.indices
+
         json_entries['doc_or_docs'] = doc_or_docs
         json_entries['manipulate'] = manipulate
         json_entries['safe'] = safe
@@ -408,7 +412,7 @@ class AbstractCollection:
 
         error = False
         try:
-            r = requests.post(target_address + insert_deprecated_endpoint, json=json_entries, timeout=600,
+            r = requests.post(self.target_address + insert_deprecated_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
@@ -434,6 +438,38 @@ class AbstractCollection:
         return FakeInsertOneResult(self.target_address, self.stage_name,
                 self.indices, data_dict, bypass_document_validation, session)
 
+    def update(spec, document, upsert=False, manipulate=False, safe=None, 
+            multi=False, check_keys=True):
+        json_entries = dict()
+        json_entries['stage_name'] = self.stage_name
+        remove_user_id_from_dicts(self.indices)
+        json_entries['indices'] = self.indices
+
+        json_entries['spec'] = spec
+        json_entries['document'] = document
+        json_entries['upsert'] = upsert
+        json_entries['manipulate'] = manipulate
+        json_entries['check_keys'] = check_keys
+        optional_args = ['safe', 'multi', 'w', 'wtimeout', 'j', 'fsync']
+        for arg in optional_args:
+            if arg in kwargs:
+                json_entries[arg] = kwargs[arg]
+
+        error = False
+        try:
+            r = requests.post(self.target_address + update_deprecated_endpoint, json=json_entries, timeout=600,
+                    verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+        if error:
+            assert(not error)
+        else:
+            data_json = r.json()
+            return data_json['resp']
+
     def update_many(self, query_dict, data_dict, upsert=False, 
             array_filters=None, bypass_document_validation=False, 
             collation=None):
@@ -448,34 +484,6 @@ class AbstractCollection:
                 self.indices, query_dict, data_dict, False, upsert=upsert,
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
-
-    def update(spec, document, upsert=False, manipulate=False, safe=None, 
-            multi=False, check_keys=True):
-        json_entries = json_dict()
-        json_entries['spec'] = spec
-        json_entries['document'] = document
-        json_entries['upsert'] = upsert
-        json_entries['manipulate'] = manipulate
-        json_entries['check_keys'] = check_keys
-        optional_args = ['safe', 'multi', 'w', 'wtimeout', 'j', 'fsync']
-        for arg in optional_args:
-            if arg in kwargs:
-                json_entries[arg] = kwargs[arg]
-
-        error = False
-        try:
-            r = requests.post(target_address + update_deprecated_endpoint, json=json_entries, timeout=600,
-                    verify=certificate_bundle_path)
-        except (socket.timeout) as e:
-            error = True
-        #Check if sucessful
-        if not r.ok or error:
-            error = True
-        if error:
-            assert(not error)
-        else:
-            data_json = r.json()
-            return data_json['resp']
 
     def delete_many(self, query_dict, collation=None, session=None):
         return FakeDeleteResult(self.target_address, self.stage_name,
