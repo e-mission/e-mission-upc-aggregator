@@ -14,10 +14,10 @@ def remove_user_id_from_dicts(possible_dict):
 # Class used to fake a cursor
 class FakeCursor:
 
-    def __init__(self, target_address, stage_name, keys, query_dict, filter_dict, is_many):
+    def __init__(self, target_address, stage_name, indices, query_dict, filter_dict, is_many):
         self.target_address = target_address
         self.stage_name = stage_name
-        self.keys = remove_user_id_from_dicts(keys)
+        self.indices = remove_user_id_from_dicts(indices)
         self.query_dict = remove_user_id_from_dicts(query_dict)
         self.filter_dict = remove_user_id_from_dict(filter_dict)
         self.is_many = is_many
@@ -32,8 +32,7 @@ class FakeCursor:
         self.iter_counter = 0
         return self
 
-    def next(self):
-        # db read
+    def next(self:
         if self.limit != 0 and self.iter_counter > self.limit:
             raise StopIteration
         else:
@@ -149,7 +148,7 @@ class FakeCursor:
     def get_load_data_entries(self):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
-        json_entries['keys'] = self.keys
+        json_entries['indices'] = self.indices
         json_entries['query'] = self.query_dict
         json_entries['should_sort'] = self.sort_fields is not None
         json_entries['batch_size'] = self.batch_size
@@ -180,21 +179,44 @@ class FakeCursor:
 
 class FakeInsertOneResult:
 
-    def __init__(self, target_address, stage_name, keys, data_dict):
-        keys = remove_user_id_from_dicts(keys)
-        data_dict = remove_user_id_from_dicts(data_dict)
-
-
-class FakeInsertManyResult:
-
-    def __init__(self, target_address, stage_name, keys, data_dict):
-        keys = remove_user_id_from_dicts(keys)
+    def __init__(self, target_address, stage_name, indices, data_dict):
+        indices = remove_user_id_from_dicts(indices)
         data_dict = remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
         json_entries['stage_name'] = stage_name
-        json_entries['keys'] = keys
+        json_entries['indices'] = indices
+        json_entries['data'] = data_dict
+        json_entries['is_many'] = False
+        # Make the call to db insert one
+        error = False
+        try:
+            r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600,
+                    verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+        if error:
+            assert(not error)
+        else:
+            data_json = r.json()
+            # Fill in with the results of the db call
+            self.acknowledged = data_json['acknowledeged']
+            self.inserted_id = data_json['inserted_id']
+
+class FakeInsertManyResult:
+
+    def __init__(self, target_address, stage_name, indices, data_dict):
+        indices = remove_user_id_from_dicts(indices)
+        data_dict = remove_user_id_from_dicts(data_dict)
+
+        # Setup the json
+        json_entries = dict()
+        json_entries['stage_name'] = stage_name
+        json_entries['indices'] = indices
         json_entries['data'] = data_dict
         json_entries['is_many'] = True
         # Make the call to db insert one
@@ -218,15 +240,15 @@ class FakeInsertManyResult:
 
 class FakeUpdateResult:
 
-    def __init__(self, target_address, stage_name, keys, query_dict, data_dict, is_many):
-        keys = remove_user_id_from_dicts(keys)
+    def __init__(self, target_address, stage_name, indices, query_dict, data_dict, is_many):
+        indices = remove_user_id_from_dicts(indices)
         query_dict = remove_user_id_from_dicts(query_dict)
         data_dict = remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
         json_entries['stage_name'] = stage_name
-        json_entries['keys'] = keys
+        json_entries['indices'] = indices
         json_entries['query'] = query_dict
         json_entries['data'] = data_dict
         json_entries['is_many'] = is_many
@@ -253,14 +275,14 @@ class FakeUpdateResult:
 
 class FakeDeleteResult:
 
-    def __init__(self, target_address, stage_name, keys, query_dict, is_many):
-        keys = remove_user_id_from_dicts(keys)
+    def __init__(self, target_address, stage_name, indices, query_dict, is_many):
+        indices = remove_user_id_from_dicts(indices)
         query_dict = remove_user_id_from_dicts(query_dict)
 
         # Setup the json
         json_entries = dict()
         json_entries['stage_name'] = stage_name
-        json_entries['keys'] = keys
+        json_entries['indices'] = indices
         json_entries['query'] = query_dict
         json_entries['is_many'] = is_many
         # Make the call to db insert one
@@ -284,103 +306,103 @@ class FakeDeleteResult:
 
 # Classes used to replace the db() calls
 class AbstractData:
-    def __init__(self, target_address, stage_name, keys):
+    def __init__(self, target_address, stage_name, indices):
         self.target_address = target_address
         self.stage_name = stage_name
-        self.keys = keys
+        self.indices = indices
 
     def insert(self, data_dict_list):
         return FakeInsertManyResult(self.target_address, self.stage_name,
-                self.keys, data_dict)
+                self.indices, data_dict)
 
     def insert_one(self, data_dict):
         return FakeInsertOneResult(self.target_address, self.stage_name,
-                self.keys, data_dict)
+                self.indices, data_dict)
 
     def update(self, query_dict, values_dict):
         return FakeUpdateResult(self.target_address, self.stage_name,
-                self.keys, query_dict, data_dict, True)
+                self.indices, query_dict, data_dict, True)
     
     def update_one(self, query_dict, values_dict):
         return FakeUpdateResult(self.target_address, self.stage_name,
-                self.keys, query_dict, data_dict, False)
+                self.indices, query_dict, data_dict, False)
 
     def delete_many(self, query_dict):
         return FakeDeleteResult(self.target_address, self.stage_name,
-                self.keys, query_dict, True)
+                self.indices, query_dict, True)
 
     def delete_one(self, query_dict):
         return FakeDeleteResult(self.target_address, self.stage_name,
-                self.keys, query_dict, False)
+                self.indices, query_dict, False)
 
     def find(self, query_dict, filter_dict):
         return FakeCursor(self.target_address, self.stage_name,
-                self.keys, query_dict, filter_dict, True)
+                self.indices, query_dict, filter_dict, True)
 
     def find_one(self, query_dict, filter_dict):
         return FakeCursor(self.target_address, self.stage_name,
-                self.keys, query_dict, filter_dict, False)
+                self.indices, query_dict, filter_dict, False)
 
 class AnalysisTimeseriesData(AbstractData):
 
     def __init__(self, target_address):
-        keys_dict = dict()
-        keys_dict["data.start_ts"] = [[pymongo.DESCENDING], True]
-        keys_dict["data.end_ts"] = [[pymongo.DESCENDING], True]
-        keys_dict["data.start_loc"] = [[pymongo.GEOSPHERE], True]
-        keys_dict["data.end_loc"] = [[pymongo.GEOSPHERE], True]
-        self.append_local_dt_keys(keys_dict, "data.start_local_dt")
-        self.append_local_dt_keys(keys_dict, "data.end_local_dt")
+        indices_dict = dict()
+        indices_dict["data.start_ts"] = [[pymongo.DESCENDING], True]
+        indices_dict["data.end_ts"] = [[pymongo.DESCENDING], True]
+        indices_dict["data.start_loc"] = [[pymongo.GEOSPHERE], True]
+        indices_dict["data.end_loc"] = [[pymongo.GEOSPHERE], True]
+        self.append_local_dt_indices(indices_dict, "data.start_local_dt")
+        self.append_local_dt_indices(indices_dict, "data.end_local_dt")
 
         # places and stops
-        keys_dict["data.enter_ts"] = [[pymongo.DESCENDING], True]
-        keys_dict["data.exit_ts"] = [[pymongo.DESCENDING], True]
-        self.append_local_dt_keys(keys_dict, "data.enter_local_dt")
-        self.append_local_dt_keys(keys_dict, "data.exit_local_dt")
+        indices_dict["data.enter_ts"] = [[pymongo.DESCENDING], True]
+        indices_dict["data.exit_ts"] = [[pymongo.DESCENDING], True]
+        self.append_local_dt_indices(indices_dict, "data.enter_local_dt")
+        self.append_local_dt_indices(indices_dict, "data.exit_local_dt")
 
-        keys_dict["data.location"] = [[pymongo.GEOSPHERE], True]
-        keys_dict["data.duration"] = [[pymongo.DESCENDING], True]
-        keys_dict["data.mode"] = [[pymongo.HASHED], True]
-        keys_dict["data.section"] = [[pymongo.HASHED], True]
+        indices_dict["data.location"] = [[pymongo.GEOSPHERE], True]
+        indices_dict["data.duration"] = [[pymongo.DESCENDING], True]
+        indices_dict["data.mode"] = [[pymongo.HASHED], True]
+        indices_dict["data.section"] = [[pymongo.HASHED], True]
 
         # recreated location
-        keys_dict["data.ts"] = [[pymongo.DESCENDING], True]
-        keys_dict["data.loc"] = [[pymongo.GEOSPHERE], True]
-        self.append_local_dt_keys(keys_dict, "data.local_dt") # recreated location
+        indices_dict["data.ts"] = [[pymongo.DESCENDING], True]
+        indices_dict["data.loc"] = [[pymongo.GEOSPHERE], True]
+        self.append_local_dt_indices(indices_dict, "data.local_dt") # recreated location
 
-        super().__init__(target_address, "Stage_analysis_timeseries", keys_dict)
+        super().__init__(target_address, "Stage_analysis_timeseries", indices_dict)
 
-    def append_local_dt_keys(self, keys_dict, key_prefix):
-        keys_dict["{}.year".format(key_prefix)] = [[pymongo.DESCENDING], True]
-        keys_dict["{}.month".format(key_prefix)] = [[pymongo.DESCENDING], True]
-        keys_dict["{}.day".format(key_prefix)] = [[pymongo.DESCENDING], True]
-        keys_dict["{}.hour".format(key_prefix)] = [[pymongo.DESCENDING], True]
-        keys_dict["{}.minute".format(key_prefix)] = [[pymongo.DESCENDING], True]
-        keys_dict["{}.second".format(key_prefix)] = [[pymongo.DESCENDING], True]
-        keys_dict["{}.weekday".format(key_prefix)] = [[pymongo.DESCENDING], True]
+    def append_local_dt_indices(self, indices_dict, index_prefix):
+        indices_dict["{}.year".format(index_prefix)] = [[pymongo.DESCENDING], True]
+        indices_dict["{}.month".format(index_prefix)] = [[pymongo.DESCENDING], True]
+        indices_dict["{}.day".format(index_prefix)] = [[pymongo.DESCENDING], True]
+        indices_dict["{}.hour".format(index_prefix)] = [[pymongo.DESCENDING], True]
+        indices_dict["{}.minute".format(index_prefix)] = [[pymongo.DESCENDING], True]
+        indices_dict["{}.second".format(index_prefix)] = [[pymongo.DESCENDING], True]
+        indices_dict["{}.weekday".format(index_prefix)] = [[pymongo.DESCENDING], True]
 
 class TimeseriesData(AbstractData):
 
     def __init__(self, target_address):
-        keys_dict = dict()
-        keys_dict["metadata.key"] =[[pymongo.HASHED], False]
-        keys_dict['metadata.write_ts'] = [[pymongo.DESCENDING], False]
-        keys_dict['data.ts'] = [[pymongo.DESCENDING], True]
-        keys_dict['data.loc'] = [[pymongo.GEOSPHERE], True]
-        super().__init__(target_address, "Stage_timeseries", keys_dict)
+        indices_dict = dict()
+        indices_dict["metadata.key"] =[[pymongo.HASHED], False]
+        indices_dict['metadata.write_ts'] = [[pymongo.DESCENDING], False]
+        indices_dict['data.ts'] = [[pymongo.DESCENDING], True]
+        indices_dict['data.loc'] = [[pymongo.GEOSPHERE], True]
+        super().__init__(target_address, "Stage_timeseries", indices_dict)
 
 class UsercacheData(AbstractData):
 
     def __init__(self, target_address):
-        keys_dict = dict()
+        indices_dict = dict()
         index1 = ["metadata.write_ts",
                 "metadata.key"]
-        key_one = "metadata.type"
+        index_one = "metadata.type"
         for elem in index1:
-            key_one += "\n" + elem
-        keys_dict[key_one] =[[pymongo.ASCENDING, pymongo.ASCENDING, pymongo.ASCENDING], False]
-        keys_dict['metadata.write_ts'] = [[pymongo.DESCENDING], False]
-        keys_dict['data.ts'] = [[pymongo.DESCENDING], True]
-        super().__init__(target_address, "Stage_usercache", keys_dict)
+            index_one += "\n" + elem
+        indices_dict[index_one] =[[pymongo.ASCENDING, pymongo.ASCENDING, pymongo.ASCENDING], False]
+        indices_dict['metadata.write_ts'] = [[pymongo.DESCENDING], False]
+        indices_dict['data.ts'] = [[pymongo.DESCENDING], True]
+        super().__init__(target_address, "Stage_usercache", indices_dict)
 
 ### End of classes
