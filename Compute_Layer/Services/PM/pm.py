@@ -167,8 +167,8 @@ def insertData():
   else:
     result = db.insert_one(data)
   result_dict = dict()
-  result_dict['acknowledged'] = result.acknowledged
-  result_dict['inserted_id'] = result.inserted_id
+  result_dict['acknowledged'] = JSONEncoder().encode(result.acknowledged)
+  result_dict['inserted_id'] = JSONEncoder().encode(result.inserted_id)
   return result_dict
 
 # TODO Handle optional parameters
@@ -192,11 +192,11 @@ def updateData():
   else:
     result = db.update_one(query, data)
   result_dict = dict()
-  result_dict['acknowledged'] = result.acknowledged
-  result_dict['matched_count'] = result.matched_count
-  result_dict['modified_count'] = result.modified_count
-  result_dict['raw_result'] = result.raw_result
-  result_dict['upserted_id'] = result.upserted_id
+  result_dict['acknowledged'] = JSONEncoder().encode(result.acknowledged)
+  result_dict['matched_count'] = JSONEncoder().encode(result.matched_count)
+  result_dict['modified_count'] = JSONEncoder().encode(result.modified_count)
+  result_dict['raw_result'] = JSONEncoder().encode(result.raw_result)
+  result_dict['upserted_id'] = JSONEncoder().encode(result.upserted_id)
   return result_dict
 
 # TODO Handle optional parameters
@@ -218,9 +218,9 @@ def deleteData():
   else:
     result = db.delete_one(query, data)
   result_dict = dict()
-  result_dict['acknowledged'] = result.acknowledged
-  result_dict['deleted_count'] = result.deleted_count
-  result_dict['raw_result'] = result.raw_result
+  result_dict['acknowledged'] = JSONEncoder().encode(result.acknowledged)
+  result_dict['deleted_count'] = JSONEncoder().encode(result.deleted_count)
+  result_dict['raw_result'] = JSONEncoder().encode(result.raw_result)
   return result_dict
 
 # Function used to deduct from the privacy budget. Returns
