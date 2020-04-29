@@ -161,13 +161,13 @@ def insertData():
   is_many = request.json['is_many']
   # Get the database
   db = get_collection(stage_name, indices)
+  result_dict = dict()
   if is_many:
     result = db.insert(data)
     result_dict['inserted_ids'] = result.inserted_ids
   else:
     result = db.insert_one(data)
     result_dict['inserted_id'] = result.inserted_id
-  result_dict = dict()
   result_dict['acknowledged'] = result.acknowledged
   return JSONEncoder().encode(result_dict)
 
