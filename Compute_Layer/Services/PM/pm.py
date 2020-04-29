@@ -114,7 +114,8 @@ def getCursor():
   should_sort = request.json['should_sort'] == "True"
   if should_sort:
     sort_info = request.json['sort']
-    cursor.sort(sort_info)
+    sort_direction = request.json['sort_direction']
+    cursor.sort(sort_info, sort_direction)
   cursor.skip(skip)
   cursor.limit(limit)
   return cursor
