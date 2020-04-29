@@ -50,7 +50,7 @@ class FakeCursor:
         self._collation = collation
         self._hint = hint
         self._max_scan = max_scan
-        self._max_time_ns = max_time_ns
+        self._max_time_ms = max_time_ms
         self._max = max
         self._min = min
         self._return_key = return_key
@@ -219,7 +219,7 @@ class FakeCursor:
         json_entries['collation'] = self._collation
         json_entries['hint'] = self._hint
         json_entries['max_scan'] = self._max_scan
-        json_entries['max_time_ns'] = self._max_time_ns
+        json_entries['max_time_ms'] = self._max_time_ms
         json_entries['max'] = self._max
         json_entries['min'] = self._min
         json_entries['return_key'] = self._return_key

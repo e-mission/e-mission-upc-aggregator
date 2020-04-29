@@ -121,7 +121,7 @@ def getCursor():
   collation = request.json['collation']
   hint = request.json['hint']
   max_scan = request.json['max_scan']
-  max_time_ns = request.json['max_time_ns']
+  max_time_ms = request.json['max_time_ms']
   max = request.json['max']
   min = request.json['min']
   return_key = request.json['return_key']
@@ -133,12 +133,12 @@ def getCursor():
   if is_many:
     cursor = db.find(filter, projection, skip, limit, no_cursor_timeout,
         cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
-        batch_size, manipulate, collation, hint, max_scan, max_time_ns,
+        batch_size, manipulate, collation, hint, max_scan, max_time_ms,
         max, min, return_key, show_record_id, snapshot, comment)
   else:
     cursor = db.find_one(filter, projection, skip, limit, no_cursor_timeout,
         cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
-        batch_size, manipulate, collation, hint, max_scan, max_time_ns,
+        batch_size, manipulate, collation, hint, max_scan, max_time_ms,
         max, min, return_key, show_record_id, snapshot, comment)
 
   return cursor
