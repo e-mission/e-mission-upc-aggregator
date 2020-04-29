@@ -128,7 +128,7 @@ def findData():
     data = getCursor().next()
   except StopIteration:
     data = []
-  result_dict = {'data' : resp}
+  result_dict = {'data' : data}
   return JSONEncoder().encode(result_dict)
 
 @post('/data/count')
