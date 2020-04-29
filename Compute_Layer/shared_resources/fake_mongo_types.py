@@ -54,7 +54,7 @@ class FakeCursor:
             else:
                 self.iter_counter += len(result)
                 self.skip = old_skip
-                return elem
+                return result
 
             
 

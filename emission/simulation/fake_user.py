@@ -75,7 +75,7 @@ class FakeUser:
         ### TEST FOR LOAD/STORE WHILE OTP IS DOWN
         test = dict()
         test["metadata"] = dict()
-        test["metadata"]["write_ts"] = "1587026989"
+        test["metadata"]["write_ts"] = 1587026989
         test["metadata"]["type"] = "document"
         test["metadata"]["key"] = "test"
         test["data"] = dict()
@@ -89,8 +89,8 @@ class FakeUser:
 
     def load_data_from_server(self):
         query = {"metadata.type": "document"}
-        filters = {"_id": "False"}
-        sort_vals = {'metadata.write_ts': "True"}
+        filters = {"_id": False}
+        sort_vals = {'metadata.write_ts': True}
         db = clsrfmt.UsercacheData(self._config['download_url'])
         cursor = db.find(query, filters).sort(sort_vals)
         for elem in cursor:
