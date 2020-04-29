@@ -1,35 +1,8 @@
 import requests
 import socket
+import abc
 
 from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, privacy_budget_endpoint, load_endpoint, store_endpoint
-
-# Class used to store pm when running the pipeline
-class PM_UUID:
-    def __init__(pm_addr):
-        self.pm_addr = pm_addr
-
-    def getAddress():
-        return self.pm_addr
-
-def remove_user_id_from_dicts(possible_dict):
-    if isinstance(possible_dict, dict):
-        if "user_id" in possible_dict:
-            del possible_dict["user_id"]
-        for val in possible_dict.values():
-            remove_user_id_from_dicts(val)
-
-def get_usercache_keys():
-    keys_dict = dict()
-    index1 = ["metadata.write_ts",
-            "metadata.key"]
-    key_one = "metadata.type"
-    for elem in index1:
-        key_one += "\n" + elem
-    keys_dict[key_one] =[["ASCENDING", "ASCENDING", "ASCENDING"], "False"]
-    keys_dict['metadata.write_ts'] = [["DESCENDING"], "False"]
-    keys_dict['data_ts'] = [["DESCENDING"], "True"]
-    return keys_dict
-
 
 def get_usercache_decode_types():
     types = dict()
@@ -59,39 +32,6 @@ def get_usercache_encode_types():
     types['data_ts'] = ["builtins", "str"]
     return types
 
-# Classes used to replace the db() calls
-class AnalysisTimeseriesData:
-    def __init__(self, target_address):
-        self.target_address = target_address
-
-    def store(self, data):
-        pass
-    
-    def load(self, search_fields, should_sort=False, sort=None):
-        pass
-
-class TimeseriesData:
-    def __init__(self, target_address):
-        self.target_address = target_address
-
-    def store(self, data):
-        pass
-    
-    def load(self, search_fields, should_sort=False, sort=None):
-        pass
-
-
-class UsercacheData:
-    def __init__(self, target_address):
-        self.target_address = target_address
-
-    def store(self, data):
-        return store_usercache_data(self.target_address, data)
-    
-    def load(self, search_fields, should_sort=False, sort=None):
-        return load_usercache_data(self.target_address, search_fields, should_sort, sort) 
-
-### End of classes
 
 def store_usercache_data(target_address, data):
     return store_data(target_address, "Stage_usercache", 
@@ -160,10 +100,7 @@ def load_calendar_data(target_address, search_fields,
             get_calendar_keys(), search_fields, get_calendar_decode_types(),
             get_calendar_encode_types(), should_sort, sort)
 
-def store_data(target_address, data_type, keys, data, decode_types, filter_user_id=True):
-    if filter_user_id:
-        remove_user_id_from_dicts(keys)
-        remove_user_id_from_dicts(data)
+def store_data(target_address, data_type, keys, data, decode_types):
     error = False
     try:
         json_entries = dict()
@@ -189,10 +126,7 @@ def store_data(target_address, data_type, keys, data, decode_types, filter_user_
 
 
 def load_data(target_address, data_type, keys, search_fields,
-        decode_types, encode_types, should_sort=False, sort=None, filter_user_id=True):
-    if filter_user_id:
-        remove_user_id_from_dicts(keys)
-        remove_user_id_from_dicts(search_fields)
+        decode_types, encode_types, should_sort=False, sort=None):
     error = False
     try:
         json_entries = dict()
