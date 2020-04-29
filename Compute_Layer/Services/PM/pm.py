@@ -126,7 +126,10 @@ def findData():
       abort (403, "Cannot load data without a key.\n") 
   cursor = getCursor()
   data = getCursor().next()
+  logging.debug("Data looks like {}".format(data))
+  logging.debug("Str Data looks like {}".format(str(data)))
   resp = JSONEncoder().encode(data)
+  logging.debug("resp Data looks like {}".format(resp))
   return {'data' : resp}
 
 @post('/data/count')
