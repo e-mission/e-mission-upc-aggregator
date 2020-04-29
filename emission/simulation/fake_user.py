@@ -10,6 +10,7 @@ import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 from emission.net.int_service.machine_configs import certificate_bundle_path
 import Compute_Layer.shared_resources.stream_data as clsrsd
+import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 import Compute_Layer.shared_resources.ical as clsri
 
 class FakeUser:
@@ -78,20 +79,22 @@ class FakeUser:
         test["metadata"]["type"] = "document"
         test["metadata"]["key"] = "test"
         test["data_ts"] = 1501592401
-        data = [test]
+        data = test
 
         ### END OF TEST
-        error = clsrsd.store_usercache_data(self._config['upload_url'], data)
-        if not error:
-            self._flush_cache()
+        db = clsrfmt.UsercacheData(self._config['upload_url'])
+        resp = db.insert_one(test)
+        print(resp.acknowledged)
 
     def load_data_from_server(self):
-        search_fields = [{"metadata.type": "document"}, {"_id": "False"}]
-        should_sort = True
-        sort = {'metadata.write_ts': "True"}
-        data, error = clsrsd.load_usercache_data(self._config['download_url'], 
-                search_fields, should_sort, sort)
-        return data
+        query = {"metadata.type": "document"}
+        filters = {"_id": "False"}
+        sort_vals = {'metadata.write_ts': "True"}
+        db = clsrfmt.UsercacheData(self._config['download_url'])
+        cursor = db.find(query, filters).sort(sort_vals)
+        for elem in cursor:
+            print(elem)
+        return list(cursor)
 
     def sync_calendar_to_server(self, calendar_file):
         data = clsri.readCalendarAsEventList(calendar_file)

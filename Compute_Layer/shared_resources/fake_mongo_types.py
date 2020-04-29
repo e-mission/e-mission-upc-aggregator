@@ -32,7 +32,7 @@ class FakeCursor:
         self.iter_counter = 0
         return self
 
-    def next(self:
+    def next(self):
         if self.limit != 0 and self.iter_counter > self.limit:
             raise StopIteration
         else:
