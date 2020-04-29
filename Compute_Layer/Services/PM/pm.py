@@ -47,62 +47,18 @@ def _get_current_db():
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
     return _current_db
 
-def get_database_table(table, keys=None):
-    Table = _get_current_db()[table]
-    if keys is not None:
-        for key, elements in keys.items():
+def get_database_table(stage_name, indices=None):
+    Table = _get_current_db()[stage_name]
+    if indices is not None:
+        for index, elements in indices.items():
             # Should add checks for typing
-            key_parts = key.split("\n")
+            index_parts = index.split("\n")
             data_types = elements[0]
-            assert(len(key_parts) == len(data_types))
-            index_pairs = [(key_parts[i], getattr(sys.modules["pymongo"], data_types[0])) for i in range(len(key_parts))]
-            is_sparse = elements[1] == "True"
+            assert(len(index_parts) == len(data_types))
+            index_pairs = [(index_parts[i], data_types[0]) for i in range(len(index_parts))]
+            is_sparse = elements[1]
             Table.create_index(index_pairs, sparse=is_sparse)
     return Table
-
-# Helper function the returns if the value is a leaf node.
-# If it is it just returns True, otherwise it calls the function
-# recursively and any dictionaries holding a leaf will apply the
-# func.
-def apply_func_if_not_leaf(value, func):
-  if isinstance(value, dict):
-    for key, data in value.copy().items():
-      if (apply_func_if_not_leaf(data, func)):
-        value[key] = func(data)
-    return False
-  else:
-    return True
-
-"""
-    Returns the function specified by the module and function names.
-    The function name may also be a method, in which case it will be
-    class.method. For generality we will assume a recursive situation.
-"""
-def returnSpecifiedFunction(name_components):
-    # Should add a check to whitelist only data processing functions
-    assert(len(name_components) == 2)
-    module_name = name_components[0]
-    func_name = name_components[1]
-    if module_name not in sys.modules:
-      import_module(module_name)
-    func = sys.modules[module_name]
-    func_components = func_name.split(".")
-    for name in func_components:
-        func = getattr(func, name)
-    return func
-
-def process_key(key, data=None, types=None):
-    parts = key.split('.')
-    prev_data_dict = data
-    data_elem = data
-    type_elem = types
-    for part in parts:
-      if data:
-        prev_data_dict = data_elem
-        data_elem = data_elem[part]
-      if types:
-        type_elem = type_elem[part]
-    return prev_data_dict, data_elem, type_elem, parts[-1]
 
 def setInitPrivacyBudget():
     starting_budget = 10.0 # Replace this with a sensible value.
@@ -111,17 +67,14 @@ def setInitPrivacyBudget():
 
 def setPrivacyBudget(budget):
     table = get_database_table("privacyBudget")
-    query = {"entrytype": "privacy_budget"}
     budget_dict = {"privacy_budget" : budget}
-    document = {'$set': budget_dict}
-    result = table.update(query, document, upsert=True)
-    logging.debug("PB store is {}".format(result))
+    result = table.insert_one(budget)
 
 def getPrivacyBudget():
     table = get_database_table("privacyBudget")
     search_fields = {"entrytype": "privacy_budget"}
     filtered = {"_id": False}
-    retrievedData = table.find(search_fields, filtered)
+    retrievedData = table.find_one(search_fields, filtered)
     datalist = list(retrievedData)
     if len(datalist) == 0:
         return None
@@ -129,104 +82,131 @@ def getPrivacyBudget():
         logging.debug("PB load is {}".format(datalist[0]))
         return datalist[0]["privacy_budget"]
 
-
-@post('/data/load')
-def loadData():
-  if enc_key is None:
-      abort (403, "Cannot load data without a key.\n") 
-  logging.debug("Called data.load")
-  data_type = request.json['data_type']
-  # Keys is a json dict mapping keys to [data_type, is_sparse]
-  # Each key is of the form itemA.itemB.....itemZ,
-  # When entry "itemA.itemB...itemZ" + "\n" + "..." should store data[itemA][itemB]...[itemZ]
-  keys = request.json['keys']
-  # Decode types is a list with the same entries as the query list that is the list
-  # of function names used to decode the json data
-  decode_types = request.json['decode_types']
-  # Decode types is a list with the same entries as the data list that is the list
-  # of function names used to decode the json data
-  encode_types = request.json['encode_types']
-  # Holds a dict mapping field name to value for a search
+# TODO add support optional parameters
+def getCursor():
+  stage_name = request.json['stage_name']
+  # query is the filter
+  query = requst.json['query']
+  filter_dict = requst.json['filter']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  is_many = request.json['is_many']
   elements = request.json['search_fields']
-  search_fields = elements[0]
-  for elem_location, value in search_fields.copy().items():
-    key_parts = elem_location.split("\n")
-    for elem in key_parts:
-      _, _, type_elem, _ = process_key(elem, None, decode_types)
-      func = returnSpecifiedFunction(type_elem)
-      if apply_func_if_not_leaf(value, func):
-        search_fields[elem_location] = func(value)
+  should_sort = request.json['should_sort']
+  batch_size = request.json['batch_size']
+  skip = request.json['skip']
 
-  filtered = elements[1]
-  for key, value in filtered.copy().items():
-      filtered[key] = value == "True"
+  db = get_database_table(data_type, indices)
+  if is_many:
+    cursor = table.find_many(query, filter_dict)
+  else:
+    cursor = table.find_one(query, filter_dict)
 
-  # Get the database
-  logging.debug("Search fields are {}".format (search_fields))
-  table = get_database_table(data_type, keys)
-  retrievedData = table.find(search_fields, filtered)
   should_sort = request.json['should_sort'] == "True"
   if should_sort:
-    # Holds if there is a value to sort on and if so what direction
     sort_info = request.json['sort']
-    assert(len(sort_info) == 1)
-    for key, value in sort_info.items():
-      sort_field = key
-      if value == 'True':
-        sort_direction = pymongo.ASCENDING
-      else:
-        sort_direction = pymongo.DESCENDING
-    retrievedData = retrievedData.sort(sort_field, sort_direction)
-  retrievedData = list(retrievedData)
-  logging.debug("Retreived data is {}".format(retrievedData))
-  for item in retrievedData:
-    for key in list(keys.keys()):
-      key_parts = key.split("\n")
-      for elem in key_parts:
-        prev_data_dict, data_elem, type_elem, end = process_key(elem, item, encode_types)
-        func = returnSpecifiedFunction(type_elem)
-        processed_data_elem = func(data_elem)
-        prev_data_dict[end] = processed_data_elem
-  return {'data' : retrievedData}
+    cursor.sort(sort_info)
+  cursor.skip(skip)
+  cursor.batch_size(batch_size)
+  return cursor
 
-@post('/data/store')
-def storeData():
+@post('/data/find')
+def findData():
+  if enc_key is None:
+      abort (403, "Cannot load data without a key.\n") 
+  return {'data' : getCursor().next()}
+
+@post('/data/count')
+def countData():
+  if enc_key is None:
+      abort (403, "Cannot load data without a key.\n")
+  cursor = getCursor()
+  with_limit_and_skip = request.json['with_limit_and_skip']
+  return {'count' : cursor.count(with_limit_and_skip)}
+
+@post('/data/distinct')
+def distinctData():
+  if enc_key is None:
+      abort (403, "Cannot load data without a key.\n")
+  cursor = getCursor()
+  distinct_key = request.json['distinct_key']
+  return {'distinct' : cursor.distinct(distinct_key)}
+
+# TODO Handle optional parameters
+@post('/data/insert')
+def insertData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  logging.debug("Called data.store")
-  data_type = request.json['data_type']
+  stage_name = request.json['stage_name']
   # Data is the data transferred
-  data_list = request.json['data']
-  # Keys is a json dict mapping keys to [data_type, is_sparse]
-  # Each key is of the form itemA.itemB.....itemZ,
-  # When entry itemA.itemB...itemZ should store data[itemA][itemB]...[itemZ]
-  keys = request.json['keys']
-  # Decode types is a list with the same entries as the data list that is the list
-  # of function names used to decode the json data
-  decode_types = request.json['decode_types']
+  data = request.json['data']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  is_many = request.json['is_many']
   # Get the database
-  table = get_database_table(data_type, keys)
-  # Ignore any preprocessing
-  for data in data_list:
-    query = {}
-    for key in list(keys.keys()):
-      key_parts = key.split("\n")
-      for elem in key_parts:
-        prev_data_dict, data_elem, type_elem, end = process_key(elem, data, decode_types)
-        func = returnSpecifiedFunction(type_elem)
-        processed_data_elem = func(data_elem)
-        query[elem] = processed_data_elem
-        prev_data_dict[end] = processed_data_elem
-    logging.debug("Query is {}".format (query))
-    logging.debug("Data is {}".format (data))
-    document = {'$set': data}
-    result = table.update(query, document, upsert=True)
-    if 'err' in result and result['err'] is not None:
-      logging.error("In storeData, err = %s" % result['err'])
-      raise Exception()
-    else:
-      logging.debug("Succesfully stored user data")
+  db = get_database_table(stage_name, indices)
+  if is_many:
+    result = db.insert_many(data)
+  else:
+    result = db.insert_one(data)
+  result_dict = dict()
+  result_dict['acknowledged'] = result.acknowledged
+  result_dict['inserted_id'] = result.inserted_id
+  return result_dict
 
+# TODO Handle optional parameters
+@post('/data/update')
+def updateData():
+  if enc_key is None:
+      abort (403, "Cannot store data without a key.\n") 
+  stage_name = request.json['stage_name']
+  # query is the filter
+  query = requst.json['query']
+  # Data is the data transferred
+  data = request.json['data']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  is_many = request.json['is_many']
+  # Get the database
+  db = get_database_table(stage_name, indices)
+  if is_many:
+    result = db.update_many(query, data)
+  else:
+    result = db.update_one(query, data)
+  result_dict = dict()
+  result_dict['acknowledged'] = result.acknowledged
+  result_dict['matched_count'] = result.matched_count
+  result_dict['modified_count'] = result.modified_count
+  result_dict['raw_result'] = result.raw_result
+  result_dict['upserted_id'] = result.upserted_id
+  return result_dict
+
+# TODO Handle optional parameters
+@post('/data/delete')
+def deleteData():
+  if enc_key is None:
+      abort (403, "Cannot store data without a key.\n") 
+  stage_name = request.json['stage_name']
+  # query is the filter
+  query = requst.json['query']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  is_many = request.json['is_many']
+  # Get the database
+  db = get_database_table(stage_name, indices)
+  if is_many:
+    result = db.delete_many(query, data)
+  else:
+    result = db.delete_one(query, data)
+  result_dict = dict()
+  result_dict['acknowledged'] = result.acknowledged
+  result_dict['deleted_count'] = result.deleted_count
+  result_dict['raw_result'] = result.raw_result
+  return result_dict
 
 # Function used to deduct from the privacy budget. Returns
 # whether or not it was possible to reduce the privacy budget.

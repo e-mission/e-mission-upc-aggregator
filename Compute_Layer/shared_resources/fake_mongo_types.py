@@ -150,6 +150,7 @@ class FakeCursor:
         json_entries['stage_name'] = self.stage_name
         json_entries['indices'] = self.indices
         json_entries['query'] = self.query_dict
+        json_entries['filter'] = self.filter_dict
         json_entries['should_sort'] = self.sort_fields is not None
         json_entries['batch_size'] = self.batch_size
         json_entries['is_many'] = self.is_many
@@ -204,7 +205,7 @@ class FakeInsertOneResult:
         else:
             data_json = r.json()
             # Fill in with the results of the db call
-            self.acknowledged = data_json['acknowledeged']
+            self.acknowledged = data_json['acknowledged']
             self.inserted_id = data_json['inserted_id']
 
 class FakeInsertManyResult:
@@ -234,7 +235,7 @@ class FakeInsertManyResult:
         else:
             data_json = r.json()
             # Fill in with the results of the db call
-            self.acknowledged = data_json['acknowledeged']
+            self.acknowledged = data_json['acknowledged']
             self.inserted_id = data_json['inserted_id']
 
 
