@@ -164,11 +164,11 @@ def insertData():
   result_dict = dict()
   if is_many:
     result = db.insert_many(data)
-    result_dict['ids'] = result
+    result_dict['inserted_ids'] = result.inserted_ids
   else:
     result = db.insert_one(data)
     result_dict['inserted_id'] = result.inserted_id
-    result_dict['acknowledged'] = result.acknowledged
+  result_dict['acknowledged'] = result.acknowledged
   return JSONEncoder().encode(result_dict)
 
 # TODO Handle optional parameters

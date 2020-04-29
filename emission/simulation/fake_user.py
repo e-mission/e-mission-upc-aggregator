@@ -92,7 +92,7 @@ class FakeUser:
 
         ### END OF TEST
         db = clsrfmt.UsercacheData(self._config['upload_url'])
-        resp = db.insert(data)
+        resp = db.insert_many(data)
         print(resp)
 
     def load_data_from_server(self):

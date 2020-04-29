@@ -321,31 +321,9 @@ class AbstractData:
         self.stage_name = stage_name
         self.indices = indices
 
-    def insert(self, data_dict_list):
-        remove_user_id_from_dicts(self.indices)
-        remove_user_id_from_dicts(data_dict_list)
-
-        # Setup the json
-        json_entries = dict()
-        json_entries['stage_name'] = stage_name
-        json_entries['indices'] = indices
-        json_entries['data'] = data_dict
-        json_entries['is_many'] = True
-        # Make the call to db insert one
-        error = False
-        try:
-            r = requests.post(self.target_address + insert_endpoint, json=json_entries, timeout=600,
-                    verify=certificate_bundle_path)
-        except (socket.timeout) as e:
-            error = True
-        #Check if sucessful
-        if not r.ok or error:
-            error = True
-        if error:
-            assert(not error)
-        else:
-            data_json = r.json()
-            return data_json['ids']
+    def insert_many(self, data_dict_list):
+        return FakeInsertManyResult(self.target_address, self.stage_name,
+                self.indices, data_dict_list)
 
     def insert_one(self, data_dict):
         return FakeInsertOneResult(self.target_address, self.stage_name,
