@@ -329,7 +329,7 @@ class FakeDeleteResult:
             self.raw_result = data_json['raw_result']
 
 # Classes used to replace the db() calls
-class AbstractData:
+class AbstractCollection:
     def __init__(self, target_address, stage_name, indices):
         self.target_address = target_address
         self.stage_name = stage_name
@@ -367,7 +367,7 @@ class AbstractData:
         return FakeCursor(self.target_address, self.stage_name,
                 self.indices, query_dict, filter_dict, False)
 
-class AnalysisTimeseriesData(AbstractData):
+class AnalysisTimeseriesCollection(AbstractCollection):
 
     def __init__(self, target_address):
         indices_dict = dict()
@@ -405,7 +405,7 @@ class AnalysisTimeseriesData(AbstractData):
         indices_dict["{}.second".format(index_prefix)] = [[pymongo.DESCENDING], True]
         indices_dict["{}.weekday".format(index_prefix)] = [[pymongo.DESCENDING], True]
 
-class TimeseriesData(AbstractData):
+class TimeseriesCollection(AbstractCollection):
 
     def __init__(self, target_address):
         indices_dict = dict()
@@ -415,7 +415,7 @@ class TimeseriesData(AbstractData):
         indices_dict['data.loc'] = [[pymongo.GEOSPHERE], True]
         super().__init__(target_address, "Stage_timeseries", indices_dict)
 
-class UsercacheData(AbstractData):
+class UsercacheCollection(AbstractCollection):
 
     def __init__(self, target_address):
         indices_dict = dict()

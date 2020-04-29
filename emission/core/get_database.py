@@ -156,7 +156,7 @@ def get_perturbed_trips_db():
 def get_usercache_db():
     #current_db = MongoClient().Stage_database
     if run_upc:
-        return clsrfmt.UsercacheData(pm_address)
+        return clsrfmt.UsercacheCollection(pm_address)
     else:
         UserCache = _get_current_db().Stage_usercache
         UserCache.create_index([("user_id", pymongo.ASCENDING),
@@ -170,7 +170,7 @@ def get_usercache_db():
 def get_timeseries_db():
     #current_db = MongoClient().Stage_database
     if run_upc:
-        return clsrfmt.TimeSeriesData(pm_address)
+        return clsrfmt.TimeSeriesCollection(pm_address)
     else:
         TimeSeries = _get_current_db().Stage_timeseries
         TimeSeries.create_index([("user_id", pymongo.HASHED)])
@@ -193,7 +193,7 @@ def get_analysis_timeseries_db():
     """
     #current_db = MongoClient().Stage_database
     if run_upc:
-        return clsrfmt.AnalysisTimeSeriesData(pm_address)
+        return clsrfmt.AnalysisTimeSeriesCollection(pm_address)
     else:
         AnalysisTimeSeries = _get_current_db().Stage_analysis_timeseries
         AnalysisTimeSeries.create_index([("user_id", pymongo.HASHED)])

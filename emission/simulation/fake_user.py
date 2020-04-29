@@ -91,21 +91,21 @@ class FakeUser:
         data = [test1, test2]
 
         ### END OF TEST
-        db = clsrfmt.UsercacheData(self._config['upload_url'])
+        db = clsrfmt.UsercacheCollection(self._config['upload_url'])
         resp = db.insert_many(data)
         print(resp)
 
     def update_data_to_server(self):
         query = {"metadata.type": "document"}
         newValues = {"$set" : {"metadata.key" : "update_test"}}
-        db = clsrfmt.UsercacheData(self._config['upload_url'])
+        db = clsrfmt.UsercacheCollection(self._config['upload_url'])
         result = db.update_many(query, newValues)
 
     def load_data_from_server(self):
         query = {"metadata.type": "document"}
         filters = {"_id": False}
         sort_vals = {'metadata.write_ts': True}
-        db = clsrfmt.UsercacheData(self._config['download_url'])
+        db = clsrfmt.UsercacheCollection(self._config['download_url'])
         cursor = db.find(query, filters).sort(sort_vals)
         for elem in cursor:
             print(elem)
@@ -113,7 +113,7 @@ class FakeUser:
 
     def delete_data_from_server(self):
         query = {"metadata.type": "document"}
-        db = clsrfmt.UsercacheData(self._config['download_url'])
+        db = clsrfmt.UsercacheCollection(self._config['download_url'])
         cursor = db.delete_one(query)
 
     def sync_calendar_to_server(self, calendar_file):
