@@ -56,8 +56,8 @@ def _get_current_db():
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
     return _current_db
 
-def get_database_table(stage_name, indices=None):
-    Table = _get_current_db()[stage_name]
+def get_collection(stage_name, indices=None):
+    collection = _get_current_db()[stage_name]
     if indices is not None:
         for index, elements in indices.items():
             # Should add checks for typing
@@ -66,8 +66,8 @@ def get_database_table(stage_name, indices=None):
             assert(len(index_parts) == len(data_types))
             index_pairs = [(index_parts[i], data_types[0]) for i in range(len(index_parts))]
             is_sparse = elements[1]
-            Table.create_index(index_pairs, sparse=is_sparse)
-    return Table
+            collection.create_index(index_pairs, sparse=is_sparse)
+    return collection
 
 def setInitPrivacyBudget():
     starting_budget = 10.0 # Replace this with a sensible value.
@@ -75,12 +75,12 @@ def setInitPrivacyBudget():
     return starting_budget
 
 def setPrivacyBudget(budget):
-    table = get_database_table("privacyBudget")
+    table = get_collection("privacyBudget")
     budget_dict = {"privacy_budget" : budget}
     result = table.insert_one(budget)
 
 def getPrivacyBudget():
-    table = get_database_table("privacyBudget")
+    table = get_collection("privacyBudget")
     search_fields = {"entrytype": "privacy_budget"}
     filtered = {"_id": False}
     retrievedData = table.find_one(search_fields, filtered)
@@ -105,9 +105,9 @@ def getCursor():
   batch_size = request.json['batch_size']
   skip = request.json['skip']
 
-  db = get_database_table(stage_name, indices)
+  db = get_collection(stage_name, indices)
   if is_many:
-    cursor = db.find_many(query, filter_dict)
+    cursor = db.find(query, filter_dict)
   else:
     cursor = db.find_one(query, filter_dict)
 
@@ -160,9 +160,9 @@ def insertData():
   indices = request.json['indices']
   is_many = request.json['is_many']
   # Get the database
-  db = get_database_table(stage_name, indices)
+  db = get_collection(stage_name, indices)
   if is_many:
-    result = db.insert_many(data)
+    result = db.insert(data)
   else:
     result = db.insert_one(data)
   result_dict = dict()
@@ -185,9 +185,9 @@ def updateData():
   indices = request.json['indices']
   is_many = request.json['is_many']
   # Get the database
-  db = get_database_table(stage_name, indices)
+  db = get_collection(stage_name, indices)
   if is_many:
-    result = db.update_many(query, data)
+    result = db.update(query, data)
   else:
     result = db.update_one(query, data)
   result_dict = dict()
@@ -211,7 +211,7 @@ def deleteData():
   indices = request.json['indices']
   is_many = request.json['is_many']
   # Get the database
-  db = get_database_table(stage_name, indices)
+  db = get_collection(stage_name, indices)
   if is_many:
     result = db.delete_many(query, data)
   else:
