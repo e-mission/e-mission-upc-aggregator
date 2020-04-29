@@ -185,7 +185,7 @@ def updateData():
   # Get the database
   db = get_collection(stage_name, indices)
   if is_many:
-    result = db.update(query, data)
+    result = db.update_many(query, data)
   else:
     result = db.update_one(query, data)
   result_dict = dict()

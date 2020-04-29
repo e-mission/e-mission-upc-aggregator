@@ -95,12 +95,18 @@ class FakeUser:
         resp = db.insert_many(data)
         print(resp)
 
+    def update_data_to_server(self):
+        query = {"metadata.type": "document"}
+        newValues = {"$set" : {"metadata.key" : "update_test"}}
+        db = clsrfmt.UsercacheData(self._config['upload_url'])
+        result = db.update_many(query, newValues)
+
     def load_data_from_server(self):
         query = {"metadata.type": "document"}
         filters = {"_id": False}
         sort_vals = {'metadata.write_ts': True}
         db = clsrfmt.UsercacheData(self._config['download_url'])
-        cursor = db.find(query, filters).sort(sort_vals).batch_size(1)
+        cursor = db.find(query, filters).sort(sort_vals)
         for elem in cursor:
             print(elem)
         return list(cursor)

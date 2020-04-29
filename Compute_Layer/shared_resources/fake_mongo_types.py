@@ -30,32 +30,41 @@ class FakeCursor:
         self._batch_size = 0
         self._sort_fields = None
         self._sort_direction = None
+        self._stored_data = []
+        self.array_offset = 0
 
     # Methods to make the fake cursor an iterable
     def __iter__(self):
         self.iter_counter = 0
+        self.array_offset = 0
+        self._stored_data = []
         return self
 
     def __next__(self):
         if self._limit != 0 and self.iter_counter > self._limit:
             raise StopIteration
         else:
-            # Save old cursor values for next calls
-            old_skip = self._skip
+            array_index = self.iter_counter - self.array_offset
+            if array_index >= len(self._stored_data):
+                # Save old cursor values for next calls
+                old_skip = self._skip
 
-            # Set the skip and batch_size to return only 1 value
-            self._skip = old_skip + self.iter_counter
+                # Set the skip and batch_size to return only 1 value
+                self._skip = old_skip + self.iter_counter
 
-            # db read
-            result = self.load_data()
-            print(result)
-            print(len(result))
-            if len(result) == 0:
-                raise StopIteration
-            else:
-                self.iter_counter += len(result)
-                self._skip = old_skip
-                return result
+                # db read
+                self.array_offset += len(self._stored_data)
+                array_index -= len(self._stored_data)
+                self._stored_data = self.load_data()
+                if not self.is_many:
+                    self._stored_data = [self._stored_data]
+                print(len(self._stored_data))
+                if len(self._stored_data) == 0:
+                    raise StopIteration
+                else:
+                    self._skip = old_skip
+            self.iter_counter += 1
+            return self._stored_data[array_index] 
 
             
 
@@ -82,24 +91,29 @@ class FakeCursor:
             if (self._limit != 0 and index >= self._limit) or (not self.is_many and index > 1):
                 raise IndexError
             else:
-                modified_start = self._skip
-                # Save old cursor values for next calls
-                old_skip = self.skip
-                old_batch_size = self._batch_size
+                array_index = self.iter_counter - self.array_offset
+                if array_index >= len(self._stored_data) or array_index < 0:
+                    # Save old cursor values for next calls
+                    old_skip = self._skip
 
-                # Set the skip and batch_size to return only 1 value
-                self._skip = old_skip + index
-                self._batch_size = 1 
+                    # Set the skip and batch_size to return only 1 value
+                    self._skip = old_skip + index
+                    self.has_many = False
 
-                # db read
-                result = self.load_data()
-                print(result)
-                elem = result[0]
-
-                # restore the cursor value
-                self._skip = old_skip
-                self._batch_size = old_batch_size
-                return elem
+                    # db read
+                    result = self.load_data()
+                    if not self.many:
+                        result = [result]
+                    new_offset = self._skip
+                    # restore the cursor value
+                    self._skip = old_skip
+                    self.has_many = old_has_many
+                    if len(result) == 0:
+                        raise IndexError
+                    else:
+                        self._store_data = result
+                        self.array_offset = self._skip
+                        return result[0]
         else:
             raise pymongo.errors.InvalidOperation
 
@@ -329,11 +343,11 @@ class AbstractData:
         return FakeInsertOneResult(self.target_address, self.stage_name,
                 self.indices, data_dict)
 
-    def update(self, query_dict, values_dict):
+    def update_many(self, query_dict, data_dict):
         return FakeUpdateResult(self.target_address, self.stage_name,
                 self.indices, query_dict, data_dict, True)
     
-    def update_one(self, query_dict, values_dict):
+    def update_one(self, query_dict, data_dict):
         return FakeUpdateResult(self.target_address, self.stage_name,
                 self.indices, query_dict, data_dict, False)
 

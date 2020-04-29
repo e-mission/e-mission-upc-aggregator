@@ -106,6 +106,7 @@ def create_and_sync_data (userlist, numTrips):
     print ([result.get () for result in results])
 
     pool = Pool (len (userlist) + 1)
+    results = []
     for i in range (len (userlist)):
         results.append (pool.apply_async (load_user_data, [userlist[i]]))
     pool.close ()
@@ -113,6 +114,23 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (update_user_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (load_user_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
     """
     # Example test calendar
     test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
@@ -207,6 +225,10 @@ def sync_user_data (user):
     user.sync_data_to_server ()
     new_len = len (user._measurements_cache)
     return (old_len, new_len)
+
+def update_user_data (user):
+    data = user.update_data_to_server()
+    return data
 
 def load_user_data (user):
     data = user.load_data_from_server()
