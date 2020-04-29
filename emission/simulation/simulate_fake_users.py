@@ -153,7 +153,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (insert_user_dep_data, [userlist[i]]))
+        results.append (pool.apply_async (sync_user_data_dep, [userlist[i]]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -171,7 +171,7 @@ def create_and_sync_data (userlist, numTrips):
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
-        results.append (pool.apply_async (update_user_dep_data, [userlist[i]]))
+        results.append (pool.apply_async (update_user_data_dep, [userlist[i]]))
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
@@ -291,7 +291,7 @@ def update_user_data (user):
     return data
 
 def update_user_data_dep (user):
-    data = user.update_dep_data_to_server()
+    data = user.update_data_dep_to_server()
     return data
 
 def delete_user_data (user):

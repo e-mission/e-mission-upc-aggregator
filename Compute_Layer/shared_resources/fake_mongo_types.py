@@ -437,8 +437,8 @@ class AbstractCollection:
         return FakeInsertOneResult(self.target_address, self.stage_name,
                 self.indices, data_dict, bypass_document_validation, session)
 
-    def update(spec, document, upsert=False, manipulate=False,
-            multi=False, check_keys=True):
+    def update(self, spec, document, upsert=False, manipulate=False,
+            multi=False, check_keys=True, **kwargs):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
         remove_user_id_from_dicts(self.indices)

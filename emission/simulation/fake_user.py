@@ -96,7 +96,7 @@ class FakeUser:
         print(resp)
 
 
-    def sync_data_to_server(self):
+    def sync_data_dep_to_server(self):
         #Remove the _id field
         measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
         #data = measurements_no_id
