@@ -95,8 +95,8 @@ def getPrivacyBudget():
 def getCursor():
   stage_name = request.json['stage_name']
   # query is the filter
-  query = requst.json['query']
-  filter_dict = requst.json['filter']
+  query = request.json['query']
+  filter_dict = request.json['filter']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
@@ -178,7 +178,7 @@ def updateData():
       abort (403, "Cannot store data without a key.\n") 
   stage_name = request.json['stage_name']
   # query is the filter
-  query = requst.json['query']
+  query = request.json['query']
   # Data is the data transferred
   data = request.json['data']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
@@ -206,7 +206,7 @@ def deleteData():
       abort (403, "Cannot store data without a key.\n") 
   stage_name = request.json['stage_name']
   # query is the filter
-  query = requst.json['query']
+  query = request.json['query']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']

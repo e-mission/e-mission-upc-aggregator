@@ -22,7 +22,7 @@ class FakeCursor:
         self.indices = indices
         remove_user_id_from_dicts(query_dict)
         self.query_dict = query_dict
-        remove_user_id_from_dict(filter_dict)
+        remove_user_id_from_dicts(filter_dict)
         self.filter_dict = filter_dict
         self.is_many = is_many
         self.limit = 0
@@ -36,7 +36,7 @@ class FakeCursor:
         self.iter_counter = 0
         return self
 
-    def next(self):
+    def __next__(self):
         if self.limit != 0 and self.iter_counter > self.limit:
             raise StopIteration
         else:
@@ -104,13 +104,14 @@ class FakeCursor:
 
     def batch_size(self, batch_size):
         self.batch_size = batch_size
+        return self
 
     def count(self, with_limit_and_skip=False):
         # db read
         json_entries = self.get_load_data_entries()
         json_entries['with_limit_and_skip'] = with_limit_and_skip
         try:
-            r = requests.post(target_address + count_endpoint, json=json_entries, timeout=600,
+            r = requests.post(self.target_address + count_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
@@ -128,7 +129,7 @@ class FakeCursor:
         json_entries = self.get_load_data_entries()
         json_entries['distinct_key'] = key
         try:
-            r = requests.post(target_address + distinct_endpoint, json=json_entries, timeout=600,
+            r = requests.post(self.target_address + distinct_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
@@ -144,10 +145,12 @@ class FakeCursor:
 
     def limit(self, limit):
         self.limit = limit
+        return self
 
     def sort(self, key_or_list, direction=None):
         self.sort_fields = key_or_list
         self.direction = direction
+        return self
 
     def get_load_data_entries(self):
         json_entries = dict()
@@ -167,7 +170,7 @@ class FakeCursor:
         json_entries['skip'] = self.skip
         error = False
         try:
-            r = requests.post(target_address + load_endpoint, json=json_entries, timeout=600,
+            r = requests.post(self.target_address + load_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
