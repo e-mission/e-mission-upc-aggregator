@@ -15,21 +15,48 @@ def remove_user_id_from_dicts(possible_dict):
 # Class used to fake a cursor
 class FakeCursor:
 
-    def __init__(self, target_address, stage_name, indices, query_dict, filter_dict, is_many):
+    def __init__(self, target_address, stage_name, indices, is_many, 
+            filter=None, projection=None, skip=0, limit=0, 
+            no_cursor_timeout=False, cursor_type=CursorType.NON_TAILABLE, 
+            sort=None, allow_partial_results=False, oplog_replay=False, 
+            modifiers=None, batch_size=0, manipulate=True, collation=None, 
+            hint=None, max_scan=None, max_time_ms=None, max=None, min=None, 
+            return_key=False, show_record_id=False, snapshot=False, 
+            comment=None):
+
         self.target_address = target_address
         self.stage_name = stage_name
         remove_user_id_from_dicts(indices)
         self.indices = indices
-        remove_user_id_from_dicts(query_dict)
-        self.query_dict = query_dict
-        remove_user_id_from_dicts(filter_dict)
-        self.filter_dict = filter_dict
         self.is_many = is_many
-        self._limit = 0
-        self._skip = 0
-        self._batch_size = 0
-        self._sort_fields = None
-        self._sort_direction = None
+
+
+        # Optional args
+        remove_user_id_from_dicts(filter)
+        self._filter = filter
+        remove_user_id_from_dicts(projection)
+        self._projection = projection
+        self._skip = skip
+        self._limit = limit
+        self._no_cursor_timeout = no_cursor_timeout
+        self._cursor_type = cursor_type
+        self._sort = sort
+        self._allow_partial_results = allow_partial_results
+        self._oplog_replay = oplog_replay
+        self._modifiers = modifiers
+        self._batch_size = batch_size
+        self._manipulate = manipulate
+        self._collation = collation
+        self._hint = hint
+        self._max_scan = max_scan
+        self._max_time_ns = max_time_ns
+        self._max = max
+        self._min = min
+        self._return_key = return_key
+        self._show_record_id = show_record_id
+        self._snapshot = snapshot
+        self._comment = comment
+
         self._stored_data = []
         self.array_offset = 0
 
@@ -163,27 +190,46 @@ class FakeCursor:
         return self
 
     def sort(self, key_or_list, direction=None):
-        self.sort_fields = key_or_list
-        self.sort_direction = direction
+        if isinstance(key_or_list, list):
+            self._sort = key_or_list
+        else:
+            self._sort = [key_or_list, direction]
         return self
 
     def get_load_data_entries(self):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
         json_entries['indices'] = self.indices
-        json_entries['query'] = self.query_dict
-        json_entries['filter'] = self.filter_dict
-        json_entries['should_sort'] = self.sort_fields is not None
-        json_entries['limit'] = self._batch_size
         json_entries['is_many'] = self.is_many
-        if self.sort_fields:
-            json_entries['sort_fields'] = self.sort_fields
-            json_entries['sort_direction'] = self.sort_direction
+        
+        # Optional args
+        json_entries['filter'] = self._filter
+        json_entries['projection'] = self._projection
+        json_entries['skip'] = self._skip
+        json_entries['limit'] = self._limit
+        json_entries['no_cursor_timeout'] = self._no_cursor_timeout
+        json_entries['cursor_type'] = self._cursor_type
+        json_entries['sort'] = self._sort
+        json_entries['allow_partial_results'] = self._allow_partial_results
+        json_entries['oplog_replay'] = self._oplog_replay
+        json_entries['modifiers'] = self._modifiers
+        json_entries['batch_size'] = self._batch_size
+        json_entries['manipulate'] = self._manipulate
+        json_entries['collation'] = self._collation
+        json_entries['hint'] = self._hint
+        json_entries['max_scan'] = self._max_scan
+        json_entries['max_time_ns'] = self._max_time_ns
+        json_entries['max'] = self._max
+        json_entries['min'] = self._min
+        json_entries['return_key'] = self._return_key
+        json_entries['show_record_id'] = self._show_record_id
+        json_entries['snapshot'] = self._snapshot
+        json_entries['comment'] = self._comment
+
         return json_entries
 
     def load_data(self):
         json_entries = self.get_load_data_entries()
-        json_entries['skip'] = self._skip
         error = False
         try:
             r = requests.post(self.target_address + load_endpoint, json=json_entries, timeout=600,
@@ -380,13 +426,13 @@ class AbstractCollection:
         return FakeDeleteResult(self.target_address, self.stage_name,
                 self.indices, query_dict, False, collation)
 
-    def find(self, query_dict, filter_dict):
+    def find(self, filter=None, *args, **kwargs):
         return FakeCursor(self.target_address, self.stage_name,
-                self.indices, query_dict, filter_dict, True)
+                self.indices, True, filter, *args, **kwargs)
 
-    def find_one(self, query_dict, filter_dict):
+    def find_one(self, filter=None, *args, **kwargs):
         return FakeCursor(self.target_address, self.stage_name,
-                self.indices, query_dict, filter_dict, False)
+                self.indices, False, filter, *args, **kwargs)
 
 class AnalysisTimeseriesCollection(AbstractCollection):
 

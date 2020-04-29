@@ -101,23 +101,46 @@ def getCursor():
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
   is_many = request.json['is_many']
-  should_sort = request.json['should_sort']
-  limit = request.json['limit']
-  skip = request.json['skip']
+  
 
   db = get_collection(stage_name, indices)
-  if is_many:
-    cursor = db.find(query, filter_dict)
-  else:
-    cursor = db.find_one(query, filter_dict)
+  
+  # find arguments
+  filter = request.json['filter']
+  projection = request.json['projection']
+  skip = request.json['skip']
+  limit = request.json['limit']
+  no_cursor_timeout = request.json['no_cursor_timeout']
+  cursor_type = request.json['cursor_type']
+  sort = request.json['sort']
+  allow_partial_results = request.json['allow_partial_results']
+  oplog_replay = request.json['oplog_replay']
+  modifiers = request.json['modifiers']
+  batch_size = request.json['batch_size']
+  manipulate = request.json['manipulate']
+  collation = request.json['collation']
+  hint = request.json['hint']
+  max_scan = request.json['max_scan']
+  max_time_ns = request.json['max_time_ns']
+  max = request.json['max']
+  min = request.json['min']
+  return_key = request.json['return_key']
+  show_record_id = request.json['show_record_id']
+  snapshot = request.json['snapshot']
+  comment = request.json['comment']
 
-  should_sort = request.json['should_sort'] == "True"
-  if should_sort:
-    sort_info = request.json['sort']
-    sort_direction = request.json['sort_direction']
-    cursor.sort(sort_info, sort_direction)
-  cursor.skip(skip)
-  cursor.limit(limit)
+
+  if is_many:
+    cursor = db.find(filter, projection, skip, limit, no_cursor_timeout,
+        cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
+        batch_size, manipulate, collation, hint, max_scan, max_time_ns,
+        max, min, return_key, show_record_id, snapshot, comment)
+  else:
+    cursor = db.find_one(filter, projection, skip, limit, no_cursor_timeout,
+        cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
+        batch_size, manipulate, collation, hint, max_scan, max_time_ns,
+        max, min, return_key, show_record_id, snapshot, comment)
+
   return cursor
 
 @post('/data/find')
