@@ -95,11 +95,38 @@ class FakeUser:
         resp = db.insert_many(data)
         print(resp)
 
+
+    def sync_data_to_server(self):
+        #Remove the _id field
+        measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
+        #data = measurements_no_id
+        ### TEST FOR LOAD/STORE WHILE OTP IS DOWN
+        test1 = dict()
+        test1["metadata"] = dict()
+        test1["metadata"]["write_ts"] = 15870269747
+        test1["metadata"]["type"] = "document"
+        test1["metadata"]["key"] = "test"
+        test1["data"] = dict()
+        test1["data"]["ts"] = 2524242223
+
+        data = [test1]
+
+        ### END OF TEST
+        db = clsrfmt.UsercacheCollection(self._config['upload_url'])
+        resp = db.insert(data)
+        print(resp)
+
     def update_data_to_server(self):
         query = {"metadata.type": "document"}
         newValues = {"$set" : {"metadata.key" : "update_test"}}
         db = clsrfmt.UsercacheCollection(self._config['upload_url'])
         result = db.update_many(query, newValues)
+
+    def update_data_dep_to_server(self):
+        query = {"metadata.type": "document"}
+        newValues = {"$set" : {"metadata.key" : "update_dep"}}
+        db = clsrfmt.UsercacheCollection(self._config['upload_url'])
+        result = db.update(query, newValues)
 
     def load_data_from_server(self):
         query = {"metadata.type": "document"}

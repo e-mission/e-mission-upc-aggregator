@@ -149,6 +149,42 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (insert_user_dep_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (load_user_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (update_user_dep_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
+
+    pool = Pool (len (userlist) + 1)
+    results = []
+    for i in range (len (userlist)):
+        results.append (pool.apply_async (load_user_data, [userlist[i]]))
+    pool.close ()
+    [result.wait () for result in results]
+    pool.join ()
+    print ([result.get () for result in results])
     """
     # Example test calendar
     test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
@@ -244,8 +280,18 @@ def sync_user_data (user):
     new_len = len (user._measurements_cache)
     return (old_len, new_len)
 
+def sync_user_data_dep (user):
+    old_len = len (user._measurements_cache)
+    user.sync_data_dep_to_server ()
+    new_len = len (user._measurements_cache)
+    return (old_len, new_len)
+
 def update_user_data (user):
     data = user.update_data_to_server()
+    return data
+
+def update_user_data_dep (user):
+    data = user.update_dep_data_to_server()
     return data
 
 def delete_user_data (user):

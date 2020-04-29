@@ -91,7 +91,6 @@ def getPrivacyBudget():
         logging.debug("PB load is {}".format(datalist[0]))
         return datalist[0]["privacy_budget"]
 
-# TODO add support optional parameters
 def getCursor():
   stage_name = request.json['stage_name']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
@@ -165,7 +164,6 @@ def distinctData():
   distinct_key = request.json['distinct_key']
   return {'distinct' : cursor.distinct(distinct_key)}
 
-# TODO Handle optional parameters
 @post('/data/insert')
 def insertData():
   if enc_key is None:
@@ -191,7 +189,45 @@ def insertData():
   result_dict['acknowledged'] = result.acknowledged
   return JSONEncoder().encode(result_dict)
 
-# TODO Handle optional parameters
+@post('/data/insert-deprecated')
+def insertDepricatedData():
+  if enc_key is None:
+      abort (403, "Cannot store data without a key.\n") 
+  stage_name = request.json['stage_name']
+  # query is the filter
+  query = request.json['query']
+  # Data is the data transferred
+  data = request.json['data']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  # Get the database
+  db = get_collection(stage_name, indices)
+
+  # Get fields
+  doc_or_docs = request.json['doc_or_docs']
+  manipulate = request.json['manipulate']
+  safe = request.json['safe']
+  check_keys = request.json['check_keys']
+  continue_on_error = request.json['continue_on_error']
+  # kwargs
+  kwargs_dict = dict()
+  if 'w' in request.json:
+    kwargs_dict['w'] = request.json['w']
+  if 'wtimeout' in request.json:
+    kwargs_dict['wtimeout'] = request.json['wtimeout']
+  if 'j' in request.json:
+    kwargs_dict['j'] = request.json['j']
+  if 'fsync' in request.json:
+    kwargs_dict['fsync'] = request.json['fsync']
+
+  result = db.insert(doc_or_docs, manipulate, safe, check_keys
+          continue_on_error, **kwargs_dict)
+
+  result_dict = {'resp': result}
+
+  return JSONEncoder().encode(result_dict)
+
 @post('/data/update')
 def updateData():
   if enc_key is None:
@@ -226,7 +262,49 @@ def updateData():
   result_dict['upserted_id'] = result.upserted_id
   return JSONEncoder().encode(result_dict)
 
-# TODO Handle optional parameters
+@post('/data/update-deprecated')
+def updateDepricatedData():
+  if enc_key is None:
+      abort (403, "Cannot store data without a key.\n") 
+  stage_name = request.json['stage_name']
+  # query is the filter
+  query = request.json['query']
+  # Data is the data transferred
+  data = request.json['data']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  # Get the database
+  db = get_collection(stage_name, indices)
+
+  # Get fields
+  spec = request.json['spec']
+  document = request.json['document']
+  upsert = request.json['upsert']
+  manipulate = request.json['manipulate']
+  check_keys = request.json['check_keys']
+  # kwargs
+  kwargs_dict = dict()
+  
+  if 'safe' in request.json:
+    kwargs_dict['safe'] = request.json['safe']
+  if 'multi' in request.json:
+    kwargs_dict['multi'] = request.json['multi']
+  if 'w' in request.json:
+    kwargs_dict['w'] = request.json['w']
+  if 'wtimeout' in request.json:
+    kwargs_dict['wtimeout'] = request.json['wtimeout']
+  if 'j' in request.json:
+    kwargs_dict['j'] = request.json['j']
+  if 'fsync' in request.json:
+    kwargs_dict['fsync'] = request.json['fsync']
+
+  result = db.update(spec, document, upsert, manipulate, check_keys, **kwargs_dict)
+
+  result_dict = {'resp': result}
+
+  return JSONEncoder().encode(result_dict)
+
 @post('/data/delete')
 def deleteData():
   if enc_key is None:
@@ -282,10 +360,6 @@ def add_encrypt_key():
             s.sendall (enc_key.to_bytes (32, byteorder='big'))
             s.recv(1024)
 
-# TODO:
-# 1. Add a generic interface for streaming data
-# 2. Add differential privacy details into memory and add operations to modify
-#    them.
 # Future work may also include adding permission checks here.
 
 if __name__ == '__main__':
