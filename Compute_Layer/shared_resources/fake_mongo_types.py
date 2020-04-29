@@ -182,7 +182,6 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
-            print(data_json)
             return data_json['data']
 
 # Classes used to fake results from insert, update, and delete

@@ -124,10 +124,7 @@ def findData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
   cursor = getCursor()
-  try:
-    data = getCursor().next()
-  except StopIteration:
-    data = []
+  data = list(getCursor())
   result_dict = {'data' : data}
   return JSONEncoder().encode(result_dict)
 
