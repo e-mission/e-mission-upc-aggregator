@@ -221,7 +221,7 @@ def insertDepricatedData():
   if 'fsync' in request.json:
     kwargs_dict['fsync'] = request.json['fsync']
 
-  result = db.insert(doc_or_docs, manipulate, safe, check_keys
+  result = db.insert(doc_or_docs, manipulate, safe, check_keys,
           continue_on_error, **kwargs_dict)
 
   result_dict = {'resp': result}
