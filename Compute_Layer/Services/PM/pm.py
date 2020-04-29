@@ -94,13 +94,9 @@ def getPrivacyBudget():
 # TODO add support optional parameters
 def getCursor():
   stage_name = request.json['stage_name']
-  # query is the filter
-  query = request.json['query']
-  filter_dict = request.json['filter']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
-  is_many = request.json['is_many']
   
 
   db = get_collection(stage_name, indices)
@@ -129,6 +125,7 @@ def getCursor():
   snapshot = request.json['snapshot']
   comment = request.json['comment']
 
+  is_many = request.json['is_many']
 
   if is_many:
     cursor = db.find(filter, projection, skip, limit, no_cursor_timeout,
