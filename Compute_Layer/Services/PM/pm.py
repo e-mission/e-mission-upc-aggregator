@@ -186,12 +186,23 @@ def updateData():
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
   is_many = request.json['is_many']
+  upsert = request.json['upsert']
+  bypass_document_validation = request.json['bypass_document_validation']
+  collation = request.json['collation']
+  json_entries['array_filters'] = array_filters
+  session = request.json['session']
   # Get the database
   db = get_collection(stage_name, indices)
   if is_many:
-    result = db.update_many(query, data)
+    result = db.update_many(query, data, upsert=upsert, 
+                array_filters=array_filters,
+                bypass_document_validation=bypass_document_validation,
+                collation=collation, session=session)
   else:
-    result = db.update_one(query, data)
+    result = db.update_one(query, data,upsert=upsert, 
+                array_filters=array_filters,
+                bypass_document_validation=bypass_document_validation,
+                collation=collation, session=session)
   result_dict = dict()
   result_dict['acknowledged'] = result.acknowledged
   result_dict['matched_count'] = result.matched_count
