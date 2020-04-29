@@ -393,7 +393,7 @@ class AbstractCollection:
         self.stage_name = stage_name
         self.indices = indices
 
-    def insert(self, doc_or_docs, manipulate=True, safe=None, check_keys=True,
+    def insert(self, doc_or_docs, manipulate=True, check_keys=True,
             continue_on_error=False, **kwargs):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
@@ -402,7 +402,6 @@ class AbstractCollection:
 
         json_entries['doc_or_docs'] = doc_or_docs
         json_entries['manipulate'] = manipulate
-        json_entries['safe'] = safe
         json_entries['check_keys'] = check_keys
         json_entries['continue_on_error'] = continue_on_error
         optional_args = ['w', 'wtimeout', 'j', 'fsync']
@@ -438,7 +437,7 @@ class AbstractCollection:
         return FakeInsertOneResult(self.target_address, self.stage_name,
                 self.indices, data_dict, bypass_document_validation, session)
 
-    def update(spec, document, upsert=False, manipulate=False, safe=None, 
+    def update(spec, document, upsert=False, manipulate=False,
             multi=False, check_keys=True):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
@@ -450,7 +449,7 @@ class AbstractCollection:
         json_entries['upsert'] = upsert
         json_entries['manipulate'] = manipulate
         json_entries['check_keys'] = check_keys
-        optional_args = ['safe', 'multi', 'w', 'wtimeout', 'j', 'fsync']
+        optional_args = ['multi', 'w', 'wtimeout', 'j', 'fsync']
         for arg in optional_args:
             if arg in kwargs:
                 json_entries[arg] = kwargs[arg]

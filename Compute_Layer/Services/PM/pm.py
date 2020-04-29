@@ -203,7 +203,6 @@ def insertDepricatedData():
   # Get fields
   doc_or_docs = request.json['doc_or_docs']
   manipulate = request.json['manipulate']
-  safe = request.json['safe']
   check_keys = request.json['check_keys']
   continue_on_error = request.json['continue_on_error']
   # kwargs
@@ -217,7 +216,7 @@ def insertDepricatedData():
   if 'fsync' in request.json:
     kwargs_dict['fsync'] = request.json['fsync']
 
-  result = db.insert(doc_or_docs, manipulate, safe, check_keys,
+  result = db.insert(doc_or_docs, manipulate, check_keys,
           continue_on_error, **kwargs_dict)
 
   result_dict = {'resp': result}
@@ -282,8 +281,6 @@ def updateDepricatedData():
   # kwargs
   kwargs_dict = dict()
   
-  if 'safe' in request.json:
-    kwargs_dict['safe'] = request.json['safe']
   if 'multi' in request.json:
     kwargs_dict['multi'] = request.json['multi']
   if 'w' in request.json:
