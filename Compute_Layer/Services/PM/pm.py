@@ -101,7 +101,6 @@ def getCursor():
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
   is_many = request.json['is_many']
-  elements = request.json['search_fields']
   should_sort = request.json['should_sort']
   batch_size = request.json['batch_size']
   skip = request.json['skip']
