@@ -105,7 +105,7 @@ def getCursor():
   batch_size = request.json['batch_size']
   skip = request.json['skip']
 
-  db = get_database_table(data_type, indices)
+  db = get_database_table(stage_name, indices)
   if is_many:
     cursor = table.find_many(query, filter_dict)
   else:
