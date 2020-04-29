@@ -73,18 +73,26 @@ class FakeUser:
         measurements_no_id = [self._remove_id_field(entry) for entry in self._measurements_cache]
         #data = measurements_no_id
         ### TEST FOR LOAD/STORE WHILE OTP IS DOWN
-        test = dict()
-        test["metadata"] = dict()
-        test["metadata"]["write_ts"] = 1587026989
-        test["metadata"]["type"] = "document"
-        test["metadata"]["key"] = "test"
-        test["data"] = dict()
-        test["data"]["ts"] = 1501592401
-        data = test
+        test1 = dict()
+        test1["metadata"] = dict()
+        test1["metadata"]["write_ts"] = 1587026989
+        test1["metadata"]["type"] = "document"
+        test1["metadata"]["key"] = "test"
+        test1["data"] = dict()
+        test1["data"]["ts"] = 1501592401
+
+        test2 = dict()
+        test2["metadata"] = dict()
+        test2["metadata"]["write_ts"] = 1587026989
+        test2["metadata"]["type"] = "document"
+        test2["metadata"]["key"] = "test"
+        test2["data"] = dict()
+        test2["data"]["ts"] = 1501592408
+        data = [test1, test2]
 
         ### END OF TEST
         db = clsrfmt.UsercacheData(self._config['upload_url'])
-        resp = db.insert_one(test)
+        resp = db.insert(data)
         print(resp.acknowledged)
 
     def load_data_from_server(self):

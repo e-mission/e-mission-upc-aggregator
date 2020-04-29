@@ -245,7 +245,7 @@ class FakeInsertManyResult:
             data_json = r.json()
             # Fill in with the results of the db call
             self.acknowledged = data_json['acknowledged']
-            self.inserted_id = data_json['inserted_id']
+            self.inserted_ids = data_json['inserted_ids']
 
 
 class FakeUpdateResult:
@@ -323,7 +323,7 @@ class AbstractData:
 
     def insert(self, data_dict_list):
         return FakeInsertManyResult(self.target_address, self.stage_name,
-                self.indices, data_dict)
+                self.indices, data_dict_list)
 
     def insert_one(self, data_dict):
         return FakeInsertOneResult(self.target_address, self.stage_name,

@@ -113,6 +113,7 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
+    """
     # Example test calendar
     test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
 
@@ -125,7 +126,6 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
-    """
     pool = Pool (len (userlist) + 1)
     for i in range (len (userlist)):
         results.append (pool.apply_async (load_calendar_data, [userlist[i]]))
