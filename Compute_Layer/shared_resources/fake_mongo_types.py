@@ -49,6 +49,7 @@ class FakeCursor:
             # db read
             result = self.load_data()
             print(result)
+            print(len(result))
             if len(result) == 0:
                 raise StopIteration
             else:
@@ -181,6 +182,7 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
+            print(data_json)
             return data_json['data']
 
 # Classes used to fake results from insert, update, and delete
