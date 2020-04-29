@@ -17,10 +17,11 @@ class FakeCursor:
 
     def __init__(self, target_address, stage_name, indices, is_many, 
             filter=None, projection=None, skip=0, limit=0, 
-            no_cursor_timeout=False, cursor_type=CursorType.NON_TAILABLE, 
-            sort=None, allow_partial_results=False, oplog_replay=False, 
-            modifiers=None, batch_size=0, manipulate=True, collation=None, 
-            hint=None, max_scan=None, max_time_ms=None, max=None, min=None, 
+            no_cursor_timeout=False, 
+            cursor_type=pymongo.cursor.CursorType.NON_TAILABLE, sort=None, 
+            allow_partial_results=False, oplog_replay=False, modifiers=None, 
+            batch_size=0, manipulate=True, collation=None, hint=None, 
+            max_scan=None, max_time_ms=None, max=None, min=None, 
             return_key=False, show_record_id=False, snapshot=False, 
             comment=None):
 
