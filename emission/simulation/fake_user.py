@@ -111,6 +111,11 @@ class FakeUser:
             print(elem)
         return list(cursor)
 
+    def delete_data_from_server(self):
+        query = {"metadata.type": "document"}
+        db = clsrfmt.UsercacheData(self._config['download_url'])
+        cursor = db.delete_one(query)
+
     def sync_calendar_to_server(self, calendar_file):
         data = clsri.readCalendarAsEventList(calendar_file)
         error = clsrsd.store_calendar_data(self._config['upload_url'], 

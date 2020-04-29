@@ -211,9 +211,9 @@ def deleteData():
   # Get the database
   db = get_collection(stage_name, indices)
   if is_many:
-    result = db.delete_many(query, data)
+    result = db.delete_many(query)
   else:
-    result = db.delete_one(query, data)
+    result = db.delete_one(query)
   result_dict = dict()
   result_dict['acknowledged'] = result.acknowledged
   result_dict['deleted_count'] = result.deleted_count
