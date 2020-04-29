@@ -16,8 +16,12 @@ for key, value in machines_dict.items ():
     machines_list.append ((key, float (value)))
 
 register_user_endpoint = config_data["register_user_endpoint"]
-store_endpoint = config_data["store_endpoint"]
 load_endpoint = config_data["load_endpoint"]
+delete_endpoint = config_data["delete_endpoint"]
+count_endpoint = config_data["count_endpoint"]
+distinct_endpoint = config_data["distinct_endpoint"]
+insert_endpoint = config_data["insert_endpoint"]
+update_endpoint = config_data["update_endpoint"]
 service_endpoint = config_data["service_endpoint"]
 cloud_key_endpoint = config_data["cloud_key_endpoint"]
 cloud_aggregate_endpoint = config_data["cloud_aggregate_endpoint"]

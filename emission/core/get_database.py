@@ -9,6 +9,7 @@ from pymongo import MongoClient
 import pymongo
 import os
 import json
+import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 
 try:
     config_file = open('conf/storage/db.conf')
@@ -22,6 +23,10 @@ config_file.close()
 
 print("Connecting to database URL "+url)
 _current_db = MongoClient(url).Stage_database
+
+# Global variables used to test and swap the api being called
+pm_address = None
+run_upc = False
 
 def _get_current_db():
     global _current_db
@@ -150,26 +155,32 @@ def get_perturbed_trips_db():
 
 def get_usercache_db():
     #current_db = MongoClient().Stage_database
-    UserCache = _get_current_db().Stage_usercache
-    UserCache.create_index([("user_id", pymongo.ASCENDING),
-                            ("metadata.type", pymongo.ASCENDING),
-                            ("metadata.write_ts", pymongo.ASCENDING),
-                            ("metadata.key", pymongo.ASCENDING)])
-    UserCache.create_index([("metadata.write_ts", pymongo.DESCENDING)])
-    UserCache.create_index([("data.ts", pymongo.DESCENDING)], sparse=True)
-    return UserCache
+    if run_upc:
+        return clsrfmt.UsercacheData(pm_address)
+    else:
+        UserCache = _get_current_db().Stage_usercache
+        UserCache.create_index([("user_id", pymongo.ASCENDING),
+                                ("metadata.type", pymongo.ASCENDING),
+                                ("metadata.write_ts", pymongo.ASCENDING),
+                                ("metadata.key", pymongo.ASCENDING)])
+        UserCache.create_index([("metadata.write_ts", pymongo.DESCENDING)])
+        UserCache.create_index([("data.ts", pymongo.DESCENDING)], sparse=True)
+        return UserCache
 
 def get_timeseries_db():
     #current_db = MongoClient().Stage_database
-    TimeSeries = _get_current_db().Stage_timeseries
-    TimeSeries.create_index([("user_id", pymongo.HASHED)])
-    TimeSeries.create_index([("metadata.key", pymongo.HASHED)])
-    TimeSeries.create_index([("metadata.write_ts", pymongo.DESCENDING)])
-    TimeSeries.create_index([("data.ts", pymongo.DESCENDING)], sparse=True)
+    if run_upc:
+        return clsrfmt.TimeSeriesData(pm_address)
+    else:
+        TimeSeries = _get_current_db().Stage_timeseries
+        TimeSeries.create_index([("user_id", pymongo.HASHED)])
+        TimeSeries.create_index([("metadata.key", pymongo.HASHED)])
+        TimeSeries.create_index([("metadata.write_ts", pymongo.DESCENDING)])
+        TimeSeries.create_index([("data.ts", pymongo.DESCENDING)], sparse=True)
 
-    TimeSeries.create_index([("data.loc", pymongo.GEOSPHERE)], sparse=True)
+        TimeSeries.create_index([("data.loc", pymongo.GEOSPHERE)], sparse=True)
 
-    return TimeSeries
+        return TimeSeries
 
 def get_timeseries_error_db():
     #current_db = MongoClient().Stage_database
@@ -181,10 +192,13 @@ def get_analysis_timeseries_db():
     " Stores the results of the analysis performed on the raw timeseries
     """
     #current_db = MongoClient().Stage_database
-    AnalysisTimeSeries = _get_current_db().Stage_analysis_timeseries
-    AnalysisTimeSeries.create_index([("user_id", pymongo.HASHED)])
-    _create_analysis_result_indices(AnalysisTimeSeries)
-    return AnalysisTimeSeries
+    if run_upc:
+        return clsrfmt.AnalysisTimeSeriesData(pm_address)
+    else:
+        AnalysisTimeSeries = _get_current_db().Stage_analysis_timeseries
+        AnalysisTimeSeries.create_index([("user_id", pymongo.HASHED)])
+        _create_analysis_result_indices(AnalysisTimeSeries)
+        return AnalysisTimeSeries
 
 def get_non_user_timeseries_db():
     """

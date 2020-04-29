@@ -14,6 +14,7 @@ from uuid import UUID
 import time
 
 import emission.core.get_database as edb
+from emission.core.get_database import pm_address, run_upc
 import emission.core.timer as ect
 
 import emission.core.wrapper.pipelinestate as ecwp
@@ -32,7 +33,7 @@ import emission.analysis.classification.inference.mode.pipeline as eacimp
 import emission.net.ext_service.habitica.executor as autocheck
 
 import emission.storage.decorations.stats_queries as esds
-import Compute_Layer.shared_resources.stream_data as clsrsd
+
 
 
 """
@@ -44,9 +45,11 @@ import Compute_Layer.shared_resources.stream_data as clsrsd
         5. Filter uuid
 """
 def run_pipeline(pm_addr):
-    # This will replace the UUID. We will purge uuid from all queries and instead use the uuid
-    # to hold the pm addr (and check its type)
-    uuid = clsrsd.PM_UUID(pm_addr)
+    global pm_address, run_upc
+    pm_address = pm_addr
+    run_upc = True
+    # uuid is never needed
+    uuid = None
     uh = euah.UserCacheHandler.getUserCacheHandler(uuid)
 
     with ect.Timer() as uct:
@@ -68,7 +71,6 @@ def run_pipeline(pm_addr):
     # become so much slower recently. Let's try to actually delete the
     # spurious entries or at least mark them as obsolete and see if that helps.
 
-    # FIXME replace with load or load one
     if edb.get_timeseries_db().find({"user_id": uuid}).distinct("metadata.key") == ["stats/pipeline_time"]:
         logging.debug("Found no entries for %s, skipping" % uuid)
         return

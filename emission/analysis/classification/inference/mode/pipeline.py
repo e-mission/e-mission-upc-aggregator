@@ -65,10 +65,8 @@ def del_all_objects(is_dry_run):
     if is_dry_run:
         logging.info("this is a dry-run, returning from del_objects_after without modifying anything")
     else:
-        # FIXME replace with delete many
         result = edb.get_analysis_timeseries_db().delete_many(del_query)
         logging.info("this is not a dry-run, result of deleting analysis entries is %s" % result.raw_result)
-        # FIXME replace with delete many
         result = edb.get_pipeline_state_db().delete_many(del_pipeline_query)
         logging.info("this is not a dry-run, result of deleting pipeline state is %s" % result.raw_result)
 
@@ -91,17 +89,14 @@ def del_objects_after(user_id, reset_ts, is_dry_run):
     logging.info("About to reset stage %s to %s" 
         % (ecwp.PipelineStages.MODE_INFERENCE, reset_ts))
     
-    # FIXME replace with load many
     logging.info("About to delete %d entries" 
         % edb.get_analysis_timeseries_db().find(del_query).count())
-    # FIXME replace with load many
     logging.info("About to delete entries with keys %s" 
         % edb.get_analysis_timeseries_db().find(del_query).distinct("metadata.key"))
     
     if is_dry_run:
         logging.info("this is a dry-run, returning from del_objects_after without modifying anything")
     else:
-        # FIXME replace with delete many
         result = edb.get_analysis_timeseries_db().delete_many(del_query)
         logging.info("this is not a dry-run, result of deleting analysis entries is %s" % result)
 

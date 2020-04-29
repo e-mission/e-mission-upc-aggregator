@@ -1,48 +1,8 @@
 import requests
 import socket
-import abc
+from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, privacy_budget_endpoint
 
-from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, privacy_budget_endpoint, load_endpoint, store_endpoint
-
-def get_usercache_decode_types():
-    types = dict()
-
-    # Add metadata
-    metadata_types = dict()
-    metadata_types["type"] = ["builtins", "str"]
-    metadata_types["write_ts"] = ["builtins", "str"]
-    metadata_types["key"] = ["builtins", "str"]
-    types['metadata'] = metadata_types
-
-    # Add data
-    types['data_ts'] = ["builtins", "int"]
-    return types
-
-def get_usercache_encode_types():
-    types = dict()
-
-    # Add metadata
-    metadata_types = dict()
-    metadata_types["type"] = ["builtins", "str"]
-    metadata_types["write_ts"] = ["builtins", "str"]
-    metadata_types["key"] = ["builtins", "str"]
-    types['metadata'] = metadata_types
-
-    # Add data
-    types['data_ts'] = ["builtins", "str"]
-    return types
-
-
-def store_usercache_data(target_address, data):
-    return store_data(target_address, "Stage_usercache", 
-            get_usercache_keys(), data, get_usercache_decode_types())
-
-
-def load_usercache_data(target_address, search_fields, 
-        should_sort=False, sort=None):
-    return load_data(target_address, "Stage_usercache", 
-            get_usercache_keys(), search_fields, get_usercache_decode_types(), 
-            get_usercache_encode_types(), should_sort, sort)
+#FIXME
 
 def get_calendar_keys():
     keys_dict = dict()
@@ -100,60 +60,6 @@ def load_calendar_data(target_address, search_fields,
             get_calendar_keys(), search_fields, get_calendar_decode_types(),
             get_calendar_encode_types(), should_sort, sort)
 
-def store_data(target_address, data_type, keys, data, decode_types):
-    error = False
-    try:
-        json_entries = dict()
-        json_entries['data_type'] = data_type
-        json_entries['keys'] = keys
-        json_entries['data'] = data
-        json_entries['decode_types'] = decode_types
-        r = requests.post(target_address + store_endpoint, json=json_entries, timeout=300,
-                verify=certificate_bundle_path)
-    except (socket.timeout) as e:
-        error = True
-
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        print('Something went wrong when trying to sync your {} data.'.format(data_type))
-        print(r.content)
-    else:
-        print("{} data sucessfully synced to the server".format(data_type))
-    return error
-
-
-
-def load_data(target_address, data_type, keys, search_fields,
-        decode_types, encode_types, should_sort=False, sort=None):
-    error = False
-    try:
-        json_entries = dict()
-        json_entries['data_type'] = data_type
-        json_entries['keys'] = keys
-        json_entries['search_fields'] = search_fields
-        json_entries['decode_types'] = decode_types
-        json_entries['encode_types'] = encode_types
-        if should_sort:
-            json_entries['should_sort'] = "True"
-            json_entries['sort'] = sort
-        else:
-            json_entries['should_sort'] = "False"
-        r = requests.post(target_address + load_endpoint, json=json_entries, timeout=300,
-                verify=certificate_bundle_path)
-    except (socket.timeout) as e:
-        error = True
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        print('Something went wrong when trying to load your {} data.'.format(data_type))
-        print(r.content)
-        return (None, error)
-    else:
-        print("{} data sucessfully loaded from the server".format(data_type))
-        return (r.json(), error)
 
 def request_service(username, service_name):
     controller_addr = controller_ip + ":" + str(controller_port)

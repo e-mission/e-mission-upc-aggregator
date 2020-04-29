@@ -1,12 +1,8 @@
 import pymongo
+import requests
+import socket
 
-# Class used to store pm when running the pipeline
-class PM_UUID:
-    def __init__(pm_addr):
-        self.pm_addr = pm_addr
-
-    def getAddress():
-        return self.pm_addr
+from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint 
 
 def remove_user_id_from_dicts(possible_dict):
     if isinstance(possible_dict, dict):
@@ -293,7 +289,7 @@ class AbstractData:
         self.stage_name = stage_name
         self.keys = keys
 
-    def insert_many(self, data_dict_list):
+    def insert(self, data_dict_list):
         return FakeInsertManyResult(self.target_address, self.stage_name,
                 self.keys, data_dict)
 
@@ -301,7 +297,7 @@ class AbstractData:
         return FakeInsertOneResult(self.target_address, self.stage_name,
                 self.keys, data_dict)
 
-    def update_many(self, query_dict, values_dict):
+    def update(self, query_dict, values_dict):
         return FakeUpdateResult(self.target_address, self.stage_name,
                 self.keys, query_dict, data_dict, True)
     

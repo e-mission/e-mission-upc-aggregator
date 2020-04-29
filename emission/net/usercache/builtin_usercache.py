@@ -13,8 +13,6 @@ import pymongo
 # Our imports
 import emission.net.usercache.abstract_usercache as ucauc # ucauc = usercache.abstract_usercache
 from emission.core.get_database import get_usercache_db
-
-import Compute_Layer.shared_resources.stream_data as clsrsd
 """
 Format of the usercache_db.
 Note that this assumes that we have a single user cache object per user.
@@ -64,12 +62,7 @@ class BuiltinUserCache(ucauc.UserCache):
         self.key_query = lambda key: {"metadata.key": key};
         self.ts_query = lambda tq: BuiltinUserCache._get_ts_query(tq)
         self.type_query = lambda entry_type: {"metadata.type": entry_type}
-        # FIXME need to fix the import once decided
-        if isinstance(user_id, clsrsd.PM_UUID):
-            # Replace this with the class holding function calls
-            self.db = clsrsd.UsercacheData(user_id)
-        else:
-            self.db = get_usercache_db()
+        self.db = get_usercache_db()
 
     @staticmethod
     def _get_ts_query(tq):
@@ -77,10 +70,7 @@ class BuiltinUserCache(ucauc.UserCache):
 
     @staticmethod
     def get_uuid_list():
-        if isinstance(user_id, clsrsd.PM_UUID):
-            return []
-        else:
-            return get_usercache_db().distinct("user_id")
+        return get_usercache_db().distinct("user_id")
 
     def putDocument(self, key, value):
         """
@@ -110,7 +100,6 @@ class BuiltinUserCache(ucauc.UserCache):
                     'metadata.type': 'document',
                     'metadata.key': key}
         # logging.debug("Updating %s spec to %s" % (self.user_id, document))
-        # FIXME change to a store one
         result = self.db.update_one(queryDoc,
                                 document,
                                 upsert=True)
@@ -143,7 +132,6 @@ class BuiltinUserCache(ucauc.UserCache):
         # beginning of the entry for the next query. So let's sort by the
         # write_ts before returning.
 
-        #FIXME place the load data here
         retrievedMsgs = list(self.db.find(combo_query).sort("metadata.write_ts", pymongo.ASCENDING).limit(100000))
         logging.debug("Found %d messages in response to query %s" % (len(retrievedMsgs), combo_query))
         return retrievedMsgs
@@ -155,7 +143,6 @@ class BuiltinUserCache(ucauc.UserCache):
         """
         read_ts = time.time()
         combo_query = self._get_msg_query(None, None)
-        #FIXME place the load data here
         count = self.db.find(combo_query).count()
         logging.debug("For %s, found %s messages in usercache" %
                       (self.user_id, count))
@@ -177,7 +164,6 @@ class BuiltinUserCache(ucauc.UserCache):
         return self.getKeyListForType("message")
 
     def getKeyListForType(self, message_type):
-        #FIXME place the load data here
         return self.db.find({"user_id": self.user_id, "metadata.type": message_type}).distinct("metadata.key")
 
     def clearObsoleteDocument(self, key):
@@ -191,6 +177,5 @@ class BuiltinUserCache(ucauc.UserCache):
                     'metadata.type': 'document',
                     'metadata.key': key}
         
-        #FIXME place the delete data here
         result = self.db.delete_many(queryDoc)
         logging.debug("Result of removing document with key %s is %s" % (key, result))
