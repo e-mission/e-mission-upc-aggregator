@@ -107,9 +107,9 @@ def getCursor():
 
   db = get_database_table(stage_name, indices)
   if is_many:
-    cursor = table.find_many(query, filter_dict)
+    cursor = db.find_many(query, filter_dict)
   else:
-    cursor = table.find_one(query, filter_dict)
+    cursor = db.find_one(query, filter_dict)
 
   should_sort = request.json['should_sort'] == "True"
   if should_sort:
