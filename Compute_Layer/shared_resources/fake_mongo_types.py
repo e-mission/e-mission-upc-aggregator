@@ -194,7 +194,7 @@ class FakeCursor:
         if isinstance(key_or_list, list):
             self._sort = key_or_list
         else:
-            self._sort = [key_or_list, direction]
+            self._sort = [(key_or_list, direction)]
         return self
 
     def get_load_data_entries(self):

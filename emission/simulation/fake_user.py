@@ -104,9 +104,9 @@ class FakeUser:
     def load_data_from_server(self):
         query = {"metadata.type": "document"}
         filters = {"_id": False}
-        sort_vals = {'metadata.write_ts': True}
+        sort_list = 'metadata.write_ts'
         db = clsrfmt.UsercacheCollection(self._config['download_url'])
-        cursor = db.find(query, filters).sort(sort_vals)
+        cursor = db.find(query, filters).sort(sort_list, 1)
         for elem in cursor:
             print(elem)
         return list(cursor)
