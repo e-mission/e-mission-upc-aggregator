@@ -159,12 +159,15 @@ def insertData():
   is_many = request.json['is_many']
   # Get the database
   db = get_collection(stage_name, indices)
+  bypass_document_validation = request.json['bypass_document_validation']
+  session = request.json['session']
   result_dict = dict()
   if is_many:
-    result = db.insert_many(data)
+    ordered = request.json['ordered']
+    result = db.insert_many(data, ordered, bypass_document_validation, session)
     result_dict['inserted_ids'] = result.inserted_ids
   else:
-    result = db.insert_one(data)
+    result = db.insert_one(data, bypass_document_validation, session)
     result_dict['inserted_id'] = result.inserted_id
   result_dict['acknowledged'] = result.acknowledged
   return JSONEncoder().encode(result_dict)
@@ -211,10 +214,12 @@ def deleteData():
   is_many = request.json['is_many']
   # Get the database
   db = get_collection(stage_name, indices)
+  collation = request.json['collation']
+  session = request.json['session']
   if is_many:
-    result = db.delete_many(query)
+    result = db.delete_many(query, collation, session)
   else:
-    result = db.delete_one(query)
+    result = db.delete_one(query, collation, session)
   result_dict = dict()
   result_dict['acknowledged'] = result.acknowledged
   result_dict['deleted_count'] = result.deleted_count

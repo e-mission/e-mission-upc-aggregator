@@ -203,7 +203,8 @@ class FakeCursor:
 
 class FakeInsertOneResult:
 
-    def __init__(self, target_address, stage_name, indices, data_dict):
+    def __init__(self, target_address, stage_name, indices, data_dict,
+            bypass_document_validation, session):
         remove_user_id_from_dicts(indices)
         remove_user_id_from_dicts(data_dict)
 
@@ -213,6 +214,8 @@ class FakeInsertOneResult:
         json_entries['indices'] = indices
         json_entries['data'] = data_dict
         json_entries['is_many'] = False
+        json_entries['bypass_document_validation'] = bypass_document_validation
+        json_entries['session'] = session
         # Make the call to db insert one
         error = False
         try:
@@ -233,7 +236,8 @@ class FakeInsertOneResult:
 
 class FakeInsertManyResult:
 
-    def __init__(self, target_address, stage_name, indices, data_dict):
+    def __init__(self, target_address, stage_name, indices, data_dict, ordered,
+            bypass_document_validation, session):
         remove_user_id_from_dicts(indices)
         remove_user_id_from_dicts(data_dict)
 
@@ -243,6 +247,9 @@ class FakeInsertManyResult:
         json_entries['indices'] = indices
         json_entries['data'] = data_dict
         json_entries['is_many'] = True
+        json_entries['ordered'] = ordered
+        json_entries['bypass_document_validation'] = bypass_document_validation
+        json_entries['session'] = session
         # Make the call to db insert one
         error = False
         try:
@@ -309,6 +316,8 @@ class FakeDeleteResult:
         json_entries['indices'] = indices
         json_entries['query'] = query_dict
         json_entries['is_many'] = is_many
+        json_entries['collation'] = collation
+        json_entries['session'] = session
         # Make the call to db insert one
         error = False
         try:
@@ -335,13 +344,16 @@ class AbstractCollection:
         self.stage_name = stage_name
         self.indices = indices
 
-    def insert_many(self, data_dict_list):
+    def insert_many(self, data_dict_list, ordered=True, 
+            bypass_document_validation=False, session=None):
         return FakeInsertManyResult(self.target_address, self.stage_name,
-                self.indices, data_dict_list)
+                self.indices, data_dict_list, ordered,
+                bypass_document_validation, session)
 
-    def insert_one(self, data_dict):
+    def insert_one(self, data_dict, bypass_document_validation=False,
+            session=None):
         return FakeInsertOneResult(self.target_address, self.stage_name,
-                self.indices, data_dict)
+                self.indices, data_dict, bypass_document_validation, session)
 
     def update_many(self, query_dict, data_dict):
         return FakeUpdateResult(self.target_address, self.stage_name,
@@ -351,13 +363,13 @@ class AbstractCollection:
         return FakeUpdateResult(self.target_address, self.stage_name,
                 self.indices, query_dict, data_dict, False)
 
-    def delete_many(self, query_dict):
+    def delete_many(self, query_dict, collation=None, session=None):
         return FakeDeleteResult(self.target_address, self.stage_name,
-                self.indices, query_dict, True)
+                self.indices, query_dict, True, collation, session)
 
-    def delete_one(self, query_dict):
+    def delete_one(self, query_dict, collation=None, session=None):
         return FakeDeleteResult(self.target_address, self.stage_name,
-                self.indices, query_dict, False)
+                self.indices, query_dict, False, collation, session)
 
     def find(self, query_dict, filter_dict):
         return FakeCursor(self.target_address, self.stage_name,
