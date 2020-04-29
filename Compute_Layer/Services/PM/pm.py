@@ -15,6 +15,15 @@ import pymongo
 import sys
 from importlib import import_module
 
+from bson import ObjectId
+
+# Taken from https://stackoverflow.com/questions/16586180/typeerror-objectid-is-not-json-serializable
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
 try:
     config_file = open('conf/net/api/webserver.conf')
 except:
@@ -115,7 +124,10 @@ def getCursor():
 def findData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
-  return {'data' : getCursor().next()}
+  cursor = getCursor()
+  data = getCursor().next()
+  resp = JSONEncoder().encode(data)
+  return {'data' : resp}
 
 @post('/data/count')
 def countData():

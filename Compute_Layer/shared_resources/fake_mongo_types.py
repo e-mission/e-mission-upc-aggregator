@@ -11,15 +11,19 @@ def remove_user_id_from_dicts(possible_dict):
         for val in possible_dict.values():
             remove_user_id_from_dicts(val)
 
+
 # Class used to fake a cursor
 class FakeCursor:
 
     def __init__(self, target_address, stage_name, indices, query_dict, filter_dict, is_many):
         self.target_address = target_address
         self.stage_name = stage_name
-        self.indices = remove_user_id_from_dicts(indices)
-        self.query_dict = remove_user_id_from_dicts(query_dict)
-        self.filter_dict = remove_user_id_from_dict(filter_dict)
+        remove_user_id_from_dicts(indices)
+        self.indices = indices
+        remove_user_id_from_dicts(query_dict)
+        self.query_dict = query_dict
+        remove_user_id_from_dict(filter_dict)
+        self.filter_dict = filter_dict
         self.is_many = is_many
         self.limit = 0
         self.skip = 0
@@ -181,8 +185,8 @@ class FakeCursor:
 class FakeInsertOneResult:
 
     def __init__(self, target_address, stage_name, indices, data_dict):
-        indices = remove_user_id_from_dicts(indices)
-        data_dict = remove_user_id_from_dicts(data_dict)
+        remove_user_id_from_dicts(indices)
+        remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
@@ -211,8 +215,8 @@ class FakeInsertOneResult:
 class FakeInsertManyResult:
 
     def __init__(self, target_address, stage_name, indices, data_dict):
-        indices = remove_user_id_from_dicts(indices)
-        data_dict = remove_user_id_from_dicts(data_dict)
+        remove_user_id_from_dicts(indices)
+        remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
@@ -242,9 +246,9 @@ class FakeInsertManyResult:
 class FakeUpdateResult:
 
     def __init__(self, target_address, stage_name, indices, query_dict, data_dict, is_many):
-        indices = remove_user_id_from_dicts(indices)
-        query_dict = remove_user_id_from_dicts(query_dict)
-        data_dict = remove_user_id_from_dicts(data_dict)
+        remove_user_id_from_dicts(indices)
+        remove_user_id_from_dicts(query_dict)
+        remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
@@ -277,8 +281,8 @@ class FakeUpdateResult:
 class FakeDeleteResult:
 
     def __init__(self, target_address, stage_name, indices, query_dict, is_many):
-        indices = remove_user_id_from_dicts(indices)
-        query_dict = remove_user_id_from_dicts(query_dict)
+        remove_user_id_from_dicts(indices)
+        remove_user_id_from_dicts(query_dict)
 
         # Setup the json
         json_entries = dict()
