@@ -163,12 +163,12 @@ def insertData():
   db = get_collection(stage_name, indices)
   result_dict = dict()
   if is_many:
-    result = db.insert(data)
-    result_dict['inserted_ids'] = result.inserted_ids
+    result = db.insert_many(data)
+    result_dict['ids'] = result
   else:
     result = db.insert_one(data)
     result_dict['inserted_id'] = result.inserted_id
-  result_dict['acknowledged'] = result.acknowledged
+    result_dict['acknowledged'] = result.acknowledged
   return JSONEncoder().encode(result_dict)
 
 # TODO Handle optional parameters

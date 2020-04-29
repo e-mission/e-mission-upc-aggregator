@@ -93,7 +93,7 @@ class FakeUser:
         ### END OF TEST
         db = clsrfmt.UsercacheData(self._config['upload_url'])
         resp = db.insert(data)
-        print(resp.acknowledged)
+        print(resp)
 
     def load_data_from_server(self):
         query = {"metadata.type": "document"}
