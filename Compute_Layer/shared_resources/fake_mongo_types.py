@@ -124,7 +124,7 @@ class FakeCursor:
                     # Save old cursor values for next calls
                     old_skip = self._skip
 
-                    # Set the skip and batch_size to return only 1 value
+                    # Set the skip 
                     self._skip = old_skip + index
                     self.has_many = False
 
