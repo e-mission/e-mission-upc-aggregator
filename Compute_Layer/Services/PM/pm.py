@@ -160,14 +160,13 @@ def insertData():
   # Get the database
   db = get_collection(stage_name, indices)
   bypass_document_validation = request.json['bypass_document_validation']
-  session = request.json['session']
   result_dict = dict()
   if is_many:
     ordered = request.json['ordered']
-    result = db.insert_many(data, ordered, bypass_document_validation, session)
+    result = db.insert_many(data, ordered, bypass_document_validation)
     result_dict['inserted_ids'] = result.inserted_ids
   else:
-    result = db.insert_one(data, bypass_document_validation, session)
+    result = db.insert_one(data, bypass_document_validation)
     result_dict['inserted_id'] = result.inserted_id
   result_dict['acknowledged'] = result.acknowledged
   return JSONEncoder().encode(result_dict)
@@ -189,20 +188,16 @@ def updateData():
   upsert = request.json['upsert']
   bypass_document_validation = request.json['bypass_document_validation']
   collation = request.json['collation']
-  json_entries['array_filters'] = array_filters
-  session = request.json['session']
   # Get the database
   db = get_collection(stage_name, indices)
   if is_many:
     result = db.update_many(query, data, upsert=upsert, 
-                array_filters=array_filters,
                 bypass_document_validation=bypass_document_validation,
-                collation=collation, session=session)
+                collation=collation)
   else:
     result = db.update_one(query, data,upsert=upsert, 
-                array_filters=array_filters,
                 bypass_document_validation=bypass_document_validation,
-                collation=collation, session=session)
+                collation=collation)
   result_dict = dict()
   result_dict['acknowledged'] = result.acknowledged
   result_dict['matched_count'] = result.matched_count
@@ -226,11 +221,10 @@ def deleteData():
   # Get the database
   db = get_collection(stage_name, indices)
   collation = request.json['collation']
-  session = request.json['session']
   if is_many:
-    result = db.delete_many(query, collation, session)
+    result = db.delete_many(query, collation)
   else:
-    result = db.delete_one(query, collation, session)
+    result = db.delete_one(query, collation)
   result_dict = dict()
   result_dict['acknowledged'] = result.acknowledged
   result_dict['deleted_count'] = result.deleted_count
