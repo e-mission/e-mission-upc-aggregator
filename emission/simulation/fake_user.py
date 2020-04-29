@@ -100,7 +100,7 @@ class FakeUser:
         filters = {"_id": False}
         sort_vals = {'metadata.write_ts': True}
         db = clsrfmt.UsercacheData(self._config['download_url'])
-        cursor = db.find(query, filters).sort(sort_vals)
+        cursor = db.find(query, filters).sort(sort_vals).batch_size(1)
         for elem in cursor:
             print(elem)
         return list(cursor)

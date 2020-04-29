@@ -25,11 +25,11 @@ class FakeCursor:
         remove_user_id_from_dicts(filter_dict)
         self.filter_dict = filter_dict
         self.is_many = is_many
-        self.limit = 0
-        self.skip = 0
-        self.batch_size = 0
-        self.sort_fields = None
-        self.sort_direction = None
+        self._limit = 0
+        self._skip = 0
+        self._batch_size = 0
+        self._sort_fields = None
+        self._sort_direction = None
 
     # Methods to make the fake cursor an iterable
     def __iter__(self):
@@ -37,14 +37,14 @@ class FakeCursor:
         return self
 
     def __next__(self):
-        if self.limit != 0 and self.iter_counter > self.limit:
+        if self._limit != 0 and self.iter_counter > self._limit:
             raise StopIteration
         else:
             # Save old cursor values for next calls
-            old_skip = self.skip
+            old_skip = self._skip
 
             # Set the skip and batch_size to return only 1 value
-            self.skip = old_skip + self.iter_counter
+            self._skip = old_skip + self.iter_counter
 
             # db read
             result = self.load_data()
@@ -54,7 +54,7 @@ class FakeCursor:
                 raise StopIteration
             else:
                 self.iter_counter += len(result)
-                self.skip = old_skip
+                self._skip = old_skip
                 return result
 
             
@@ -75,21 +75,21 @@ class FakeCursor:
             if end is None:
                 self.limit = 0
             else:
-                self.limit = end - skip
+                self._limit = end - skip
             return self
 
         elif isinstance(index, int):
-            if (self.limit != 0 and index >= self.limit) or (not self.is_many and index > 1):
+            if (self._limit != 0 and index >= self._limit) or (not self.is_many and index > 1):
                 raise IndexError
             else:
-                modified_start = self.skip
+                modified_start = self._skip
                 # Save old cursor values for next calls
                 old_skip = self.skip
-                old_batch_size = self.batch_size
+                old_batch_size = self._batch_size
 
                 # Set the skip and batch_size to return only 1 value
-                self.skip = old_skip + index
-                self.batch_size = 1 
+                self._skip = old_skip + index
+                self._batch_size = 1 
 
                 # db read
                 result = self.load_data()
@@ -97,14 +97,14 @@ class FakeCursor:
                 elem = result[0]
 
                 # restore the cursor value
-                self.skip = old_skip
-                self.batch_size = old_batch_size
+                self._skip = old_skip
+                self._batch_size = old_batch_size
                 return elem
         else:
             raise pymongo.errors.InvalidOperation
 
     def batch_size(self, batch_size):
-        self.batch_size = batch_size
+        self._batch_size = batch_size
         return self
 
     def count(self, with_limit_and_skip=False):
@@ -145,12 +145,12 @@ class FakeCursor:
 
 
     def limit(self, limit):
-        self.limit = limit
+        self._limit = limit
         return self
 
     def sort(self, key_or_list, direction=None):
         self.sort_fields = key_or_list
-        self.direction = direction
+        self.sort_direction = direction
         return self
 
     def get_load_data_entries(self):
@@ -160,15 +160,16 @@ class FakeCursor:
         json_entries['query'] = self.query_dict
         json_entries['filter'] = self.filter_dict
         json_entries['should_sort'] = self.sort_fields is not None
-        json_entries['batch_size'] = self.batch_size
+        json_entries['limit'] = self._batch_size
         json_entries['is_many'] = self.is_many
         if self.sort_fields:
             json_entries['sort_fields'] = self.sort_fields
+            json_entries['sort_direction'] = self.sort_direction
         return json_entries
 
     def load_data(self):
         json_entries = self.get_load_data_entries()
-        json_entries['skip'] = self.skip
+        json_entries['skip'] = self._skip
         error = False
         try:
             r = requests.post(self.target_address + load_endpoint, json=json_entries, timeout=600,

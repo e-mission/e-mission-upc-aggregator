@@ -102,7 +102,7 @@ def getCursor():
   indices = request.json['indices']
   is_many = request.json['is_many']
   should_sort = request.json['should_sort']
-  batch_size = request.json['batch_size']
+  limit = request.json['limit']
   skip = request.json['skip']
 
   db = get_collection(stage_name, indices)
@@ -116,7 +116,7 @@ def getCursor():
     sort_info = request.json['sort']
     cursor.sort(sort_info)
   cursor.skip(skip)
-  cursor.batch_size(batch_size)
+  cursor.limit(limit)
   return cursor
 
 @post('/data/find')
