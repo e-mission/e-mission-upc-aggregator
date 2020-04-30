@@ -5,7 +5,7 @@ import json
 import bson
 
 
-from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint
+from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint
 
 def remove_user_id_from_dicts(possible_dict):
     """
@@ -337,7 +337,7 @@ class FakeInsertManyResult:
 class FakeUpdateResult:
 
     def __init__(self, target_address, stage_name, indices, query_dict, 
-            data_dict, is_many, upsert, bypass_document_validation, 
+            data_dict, is_many, is_update, upsert, bypass_document_validation, 
             collation):
         remove_user_id_from_dicts(indices)
         remove_user_id_from_dicts(query_dict)
@@ -357,8 +357,13 @@ class FakeUpdateResult:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(target_address + update_endpoint, json=json_entries, timeout=600,
-                    verify=certificate_bundle_path)
+            if is_update:
+                r = requests.post(target_address + update_endpoint, json=json_entries, timeout=600,
+                        verify=certificate_bundle_path)
+            else:
+                r = requests.post(target_address + replace_one_endpoint, json=json_entries, timeout=600,
+                        verify=certificate_bundle_path)
+
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -496,14 +501,21 @@ class AbstractCollection:
             array_filters=None, bypass_document_validation=False, 
             collation=None):
         return FakeUpdateResult(self.target_address, self.stage_name,
-                self.indices, query_dict, data_dict, True, upsert=upsert,
+                self.indices, query_dict, data_dict, True, True, upsert=upsert,
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
     
     def update_one(self, query_dict, data_dict, upsert=False,
             bypass_document_validation=False, collation=None):
         return FakeUpdateResult(self.target_address, self.stage_name,
-                self.indices, query_dict, data_dict, False, upsert=upsert,
+                self.indices, query_dict, data_dict, False, True, upsert=upsert,
+                bypass_document_validation=bypass_document_validation,
+                collation=collation)
+
+    def replace_one(self, query_dict, data_dict, upsert=False,
+            bypass_document_validation=False, collation=None):
+        return FakeUpdateResult(self.target_address, self.stage_name,
+                self.indices, query_dict, data_dict, False, False, upsert=upsert,
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
 

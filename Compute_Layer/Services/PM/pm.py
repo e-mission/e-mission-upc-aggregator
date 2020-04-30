@@ -287,6 +287,36 @@ def updateData():
   convert_objectid_to_string(result_dict)
   return result_dict
 
+@post('/data/replace_one')
+def replaceOneData():
+  if enc_key is None:
+      abort (403, "Cannot store data without a key.\n") 
+  stage_name = request.json['stage_name']
+  # query is the filter
+  query = request.json['query']
+  # Data is the data transferred
+  data = request.json['data']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  upsert = request.json['upsert']
+  bypass_document_validation = request.json['bypass_document_validation']
+  collation = request.json['collation']
+  # Get the database
+  db = get_collection(stage_name, indices)
+  result = db.replace_one(query, data, upsert=upsert, 
+                bypass_document_validation=bypass_document_validation,
+                collation=collation)
+
+  result_dict = dict()
+  result_dict['acknowledged'] = result.acknowledged
+  result_dict['matched_count'] = result.matched_count
+  result_dict['modified_count'] = result.modified_count
+  result_dict['raw_result'] = result.raw_result
+  result_dict['upserted_id'] = result.upserted_id
+  convert_objectid_to_string(result_dict)
+  return result_dict
+
 @post('/data/update-deprecated')
 def updateDepricatedData():
   if enc_key is None:

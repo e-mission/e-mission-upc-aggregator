@@ -20,6 +20,7 @@
     "find_one_endpoint" : "/data/find_one",
     "delete_endpoint" : "/data/delete",
     "update_endpoint" : "/data/update",
+    "replace_one_endpoint" : "/data/replace_one",
     "update_deprecated_endpoint" : "/data/update-deprecated",
     "count_endpoint" : "/data/count",
     "distinct_endpoint" : "/data/distinct",
