@@ -118,7 +118,8 @@ class RC(Query):
 
 @post('/receive_query')
 def receive_query():
-    print("reached")
+    stage_name = request.json['stage_name']
+    indices = request.json['indices']
     pm_addr = request.json['pm_address']
     query = request.json['query']
     # TODO: pass in user_cloud_addr.
@@ -132,20 +133,15 @@ def receive_query():
     if not legal_query:
         print("Failure 1")
         return {'query_result': ''}
-    search_fields = [{"data_ts": {"$lt": query['end_ts'], "$gt": query['start_ts']}}, {"_id": "False"}]
-    json_data, failure  = clsrfmt.load_usercache_data(pm_addr, search_fields)
-    if failure:
-        print("Failure 2")
-        return {'query_result': ''}
-    return receive_user_data(json_data, query_object)
+    filter = {"data_ts": {"$lt": query['end_ts'], "$gt": query['start_ts']}}
+    partition = {"_id": "False"}
+    db  = clsrfmt.AbstractCollection(pm_addr, stage_name, indices)
+    data = List(db.find(filter, partition))
+    return receive_user_data(data, query_object)
 
-def receive_user_data(json_data, query_object):
-    # Assume the response has list of ts_entries
-    # curr_data_list = resp.json['phone_data']
-    curr_data_list = json_data['data']
-
+def receive_user_data(data, query_object):
     # Get the query result by running the query on the data.
-    query_result = query_object.run_query(curr_data_list)
+    query_result = query_object.run_query(data)
     query_object.update_current_query_result(query_result)
     print(query_object.get_current_query_result())
     return {'query_result': query_object.get_current_query_result()}

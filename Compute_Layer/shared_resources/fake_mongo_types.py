@@ -268,6 +268,25 @@ class FakeCursor:
             convert_string_to_objectid(data_json)
             return data_json['data']
 
+    def deduct_budget(self, privacy_cost):
+        json_entries = dict()
+        json_entries['privacy_cost'] = privacy_cost
+        error = False
+        try:
+            r = requests.post(self.target_address + privacy_budget_endpoint, json=json_entries, timeout=600,
+                    verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+        if error:
+            assert(not error)
+        else:
+            data_json = r.json()
+            return data_json['success']
+
+
 # Classes used to fake results from insert, update, and delete
 
 class FakeInsertOneResult:
