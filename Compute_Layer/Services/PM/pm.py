@@ -99,14 +99,7 @@ def getPrivacyBudget():
         logging.debug("PB load is {}".format(datalist[0]))
         return datalist[0]["privacy_budget"]
 
-def getCursor():
-  stage_name = request.json['stage_name']
-  # Indices is a json dict mapping keys to [data_type, is_sparse]
-  # Each index is of the form itemA.itemB.....itemZ,
-  indices = request.json['indices']
-  
-
-  db = get_collection(stage_name, indices)
+def getCursor(find_method):
   
   # find arguments
   filter = request.json['filter']
@@ -131,39 +124,38 @@ def getCursor():
   show_record_id = request.json['show_record_id']
   snapshot = request.json['snapshot']
   comment = request.json['comment']
+  return find_method(filter, projection, skip, limit, no_cursor_timeout, 
+          cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
+          batch_size, manipulate, collation, hint, max_scan, max_time_ms,
+          max, min, return_key, show_record_id, snapshot, comment)
 
-  is_many = request.json['is_many']
-
-  if is_many:
-    cursor = db.find(filter, projection, skip, limit, no_cursor_timeout,
-        cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
-        batch_size, manipulate, collation, hint, max_scan, max_time_ms,
-        max, min, return_key, show_record_id, snapshot, comment)
-  else:
-    cursor = db.find_one(filter, projection, skip, limit, no_cursor_timeout,
-        cursor_type, sort, allow_partial_results, oplog_replay, modifiers,
-        batch_size, manipulate, collation, hint, max_scan, max_time_ms,
-        max, min, return_key, show_record_id, snapshot, comment)
-
-  return cursor
-
-@post('/data/validate-find')
-def validateFind():
+@post('/data/find_one')
+def findOneData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
-  cursor = getCursor()
-  return {'data' : cursor is not None}
+  stage_name = request.json['stage_name']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+  
+
+  db = get_collection(stage_name, indices)
+  cursor = getCursor(db.find_one)
+  return {'data' : cursor }
 
 @post('/data/find')
 def findData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
-  cursor = getCursor()
-  is_many = request.json['is_many']
-  if is_many:
-    data = list(cursor)
-  else:
-    data = cursor
+  stage_name = request.json['stage_name']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+
+  db = get_collection(stage_name, indices)
+
+  cursor = getCursor(db.find)
+  data = list(cursor)
   result_dict = {'data' : data}
   convert_objectid_to_string(result_dict)
   return result_dict

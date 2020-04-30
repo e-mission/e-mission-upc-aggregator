@@ -16,8 +16,8 @@ for key, value in machines_dict.items ():
     machines_list.append ((key, float (value)))
 
 register_user_endpoint = config_data["register_user_endpoint"]
-load_endpoint = config_data["load_endpoint"]
-validate_find_endpoint = config_data["validate_find_endpoint"]
+find_endpoint = config_data["find_endpoint"]
+find_one_endpoint = config_data["find_one_endpoint"]
 delete_endpoint = config_data["delete_endpoint"]
 count_endpoint = config_data["count_endpoint"]
 distinct_endpoint = config_data["distinct_endpoint"]

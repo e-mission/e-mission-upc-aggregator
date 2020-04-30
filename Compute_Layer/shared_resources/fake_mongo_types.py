@@ -5,7 +5,7 @@ import json
 import bson
 
 
-from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, validate_find_endpoint
+from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint
 
 def remove_user_id_from_dicts(possible_dict):
     """
@@ -36,7 +36,7 @@ def convert_objectid_to_string(dict_or_list_or_item):
 # Class used to fake a cursor
 class FakeCursor:
 
-    def __init__(self, target_address, stage_name, indices, is_many, 
+    def __init__(self, target_address, stage_name, indices, 
             filter=None, projection=None, skip=0, limit=0, 
             no_cursor_timeout=False, 
             cursor_type=pymongo.cursor.CursorType.NON_TAILABLE, sort=None, 
@@ -50,7 +50,6 @@ class FakeCursor:
         self.stage_name = stage_name
         remove_user_id_from_dicts(indices)
         self.indices = indices
-        self.is_many = is_many
 
 
         # Optional args
@@ -104,16 +103,12 @@ class FakeCursor:
                 # db read
                 self.array_offset += len(self._stored_data)
                 array_index -= len(self._stored_data)
-                if self.is_many:
-                    self._stored_data = self.load_data()
-                else:
-                    self._stored_data = [self.load_data()]
+                self._stored_data = self.load_data()
                 if len(self._stored_data) == 0:
                     raise StopIteration
                 else:
                     self._skip = old_skip
             self.iter_counter += 1
-            print(self._stored_data[array_index])
             return self._stored_data[array_index] 
 
             
@@ -148,12 +143,9 @@ class FakeCursor:
 
                     # Set the skip 
                     self._skip = old_skip + index
-                    self.has_many = False
 
                     # db read
                     result = self.load_data()
-                    if not self.many:
-                        result = [result]
                     new_offset = self._skip
                     # restore the cursor value
                     self._skip = old_skip
@@ -161,7 +153,7 @@ class FakeCursor:
                     if len(result) == 0:
                         raise IndexError
                     else:
-                        self._store_data = [result]
+                        self._store_data = result
                         self.array_offset = self._skip
                         return result[0]
         else:
@@ -170,25 +162,6 @@ class FakeCursor:
     def batch_size(self, batch_size):
         self._batch_size = batch_size
         return self
-
-    def validate_find(self):
-        json_entries = self.get_load_data_entries()
-        convert_objectid_to_string(json_entries)
-        error = False
-        try:
-            r = requests.post(self.target_address + validate_find_endpoint, json=json_entries, timeout=600,
-                    verify=certificate_bundle_path)
-        except (socket.timeout) as e:
-            error = True
-        #Check if sucessful
-        if not r.ok or error:
-            error = True
-        if error:
-            assert(not error)
-        else:
-            data_json = r.json()
-            print(data_json)
-            return data_json['data']
 
     def count(self, with_limit_and_skip=False):
         # db read
@@ -246,7 +219,6 @@ class FakeCursor:
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
         json_entries['indices'] = self.indices
-        json_entries['is_many'] = self.is_many
         
         # Optional args
         json_entries['filter'] = self._filter
@@ -279,7 +251,7 @@ class FakeCursor:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(self.target_address + load_endpoint, json=json_entries, timeout=600,
+            r = requests.post(self.target_address + find_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
         except (socket.timeout) as e:
             error = True
@@ -544,20 +516,61 @@ class AbstractCollection:
                 self.indices, query_dict, False, collation)
 
     def find(self, filter=None, *args, **kwargs):
-        find_cursor = FakeCursor(self.target_address, self.stage_name,
+        return FakeCursor(self.target_address, self.stage_name,
                 self.indices, True, filter, *args, **kwargs)
-        if find_cursor.validate_find():
-            return find_cursor
-        else:
-            return None
 
-    def find_one(self, filter=None, *args, **kwargs):
-        find_cursor = FakeCursor(self.target_address, self.stage_name,
-                self.indices, False, filter, *args, **kwargs)
-        if find_cursor.validate_find():
-            return find_cursor
+    def find_one(self, filter=None, projection=None, 
+            skip=0, limit=0, no_cursor_timeout=False, 
+            cursor_type=pymongo.cursor.CursorType.NON_TAILABLE, sort=None, 
+            allow_partial_results=False, oplog_replay=False, modifiers=None, 
+            batch_size=0, manipulate=True, collation=None, hint=None, 
+            max_scan=None, max_time_ms=None, max=None, min=None, 
+            return_key=False, show_record_id=False, snapshot=False, 
+            comment=None):
+
+        json_entires = dict()
+        json_entries['stage_name'] = self.stage_name
+        json_entries['indices'] = self.indices
+        
+        # Optional args
+        json_entries['filter'] = filter
+        json_entries['projection'] = projection
+        json_entries['skip'] = skip
+        json_entries['limit'] = limit
+        json_entries['no_cursor_timeout'] = no_cursor_timeout
+        json_entries['cursor_type'] = cursor_type
+        json_entries['sort'] = sort
+        json_entries['allow_partial_results'] = allow_partial_results
+        json_entries['oplog_replay'] = oplog_replay
+        json_entries['modifiers'] = modifiers
+        json_entries['batch_size'] = batch_size
+        json_entries['manipulate'] = manipulate
+        json_entries['collation'] = collation
+        json_entries['hint'] = hint
+        json_entries['max_scan'] = max_scan
+        json_entries['max_time_ms'] = max_time_ms
+        json_entries['max'] = max
+        json_entries['min'] = min
+        json_entries['return_key'] = return_key
+        json_entries['show_record_id'] = show_record_id
+        json_entries['snapshot'] = snapshot
+        json_entries['comment'] = comment
+
+        convert_objectid_to_string(json_entries)
+        error = False
+        try:
+            r = requests.post(self.target_address + find_one_endpoint, json=json_entries, timeout=600,
+                    verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+        if error:
+            assert(not error)
         else:
-            return None
+            data_json = r.json()
+            return data_json['data']
 
 class AnalysisTimeseriesCollection(AbstractCollection):
 
