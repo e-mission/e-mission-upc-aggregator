@@ -173,6 +173,7 @@ class FakeCursor:
         json_entries = self.get_load_data_entries()
         json_entries['with_limit_and_skip'] = with_limit_and_skip
         convert_objectid_to_string(json_entries)
+        error = False
         try:
             r = requests.post(self.target_address + count_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
@@ -192,6 +193,7 @@ class FakeCursor:
         json_entries = self.get_load_data_entries()
         json_entries['distinct_key'] = key
         convert_objectid_to_string(json_entries)
+        error = False
         try:
             r = requests.post(self.target_address + distinct_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
