@@ -9,14 +9,6 @@ urllib3.disable_warnings(urllib3.exceptions.SecurityWarning)
 
 from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, controller_ip, controller_port, service_endpoint, privacy_budget_endpoint
 
-def remove_user_id_from_dicts(possible_dict):
-    """
-    if isinstance(possible_dict, dict):
-        if "user_id" in possible_dict:
-            del possible_dict["user_id"]
-        for val in possible_dict.values():
-            remove_user_id_from_dicts(val)
-    """
 
 def convert_string_to_objectid(dict_or_list_or_item):
     if isinstance(dict_or_list_or_item, dict):
@@ -60,14 +52,11 @@ class FakeCursor:
 
         self.target_address = target_address
         self.stage_name = stage_name
-        remove_user_id_from_dicts(indices)
         self.indices = indices
 
 
         # Optional args
-        remove_user_id_from_dicts(filter)
         self._filter = filter
-        remove_user_id_from_dicts(projection)
         self._projection = projection
         self._skip = skip
         self._limit = limit
@@ -283,8 +272,6 @@ class FakeInsertOneResult:
 
     def __init__(self, target_address, stage_name, indices, data_dict,
             bypass_document_validation):
-        remove_user_id_from_dicts(indices)
-        remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
@@ -310,14 +297,12 @@ class FakeInsertOneResult:
             data_json = r.json()
             # Fill in with the results of the db call
             self.acknowledged = data_json['acknowledged']
-            self.inserted_id = data_json['inserted_id']
+            self.inserted_id = bson.ObjectId(data_json['inserted_id'])
 
 class FakeInsertManyResult:
 
     def __init__(self, target_address, stage_name, indices, data_dict, ordered,
             bypass_document_validation):
-        remove_user_id_from_dicts(indices)
-        remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
@@ -344,7 +329,7 @@ class FakeInsertManyResult:
             data_json = r.json()
             # Fill in with the results of the db call
             self.acknowledged = data_json['acknowledged']
-            self.inserted_ids = data_json['inserted_ids']
+            self.inserted_ids = [bson.ObjectId(_id) for _id in data_json['inserted_ids']]
 
 
 class FakeUpdateResult:
@@ -352,9 +337,6 @@ class FakeUpdateResult:
     def __init__(self, target_address, stage_name, indices, query_dict, 
             data_dict, is_many, is_update, upsert, bypass_document_validation, 
             collation):
-        remove_user_id_from_dicts(indices)
-        remove_user_id_from_dicts(query_dict)
-        remove_user_id_from_dicts(data_dict)
 
         # Setup the json
         json_entries = dict()
@@ -392,13 +374,14 @@ class FakeUpdateResult:
             self.matched_count = data_json['matched_count']
             self.modified_count = data_json['modified_count']
             self.raw_result = data_json['raw_result']
-            self.upserted_id = data_json['upserted_id']
+            upserted_id = data_json['upserted_id']
+            if upserted_id is not None:
+                upserted_id = bson.ObjectId(upserted_id)
+            self.upserted_id = upserted_id
 
 class FakeDeleteResult:
 
     def __init__(self, target_address, stage_name, indices, query_dict, is_many, collation):
-        remove_user_id_from_dicts(indices)
-        remove_user_id_from_dicts(query_dict)
 
         # Setup the json
         json_entries = dict()
@@ -439,7 +422,6 @@ class AbstractCollection:
             continue_on_error=False, **kwargs):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
-        remove_user_id_from_dicts(self.indices)
         json_entries['indices'] = self.indices
 
         json_entries['doc_or_docs'] = doc_or_docs
@@ -465,7 +447,12 @@ class AbstractCollection:
             assert(not error)
         else:
             data_json = r.json()
-            convert_string_to_objectid(data_json)
+            result = data_json['resp']
+            if ininstance(result, list):
+                if result[0] is not None:
+                    result = [bson.ObjectId(_id) for _id in result]
+            else:
+                result = bson.ObjectId(result)
             return data_json['resp']
 
 
@@ -484,7 +471,6 @@ class AbstractCollection:
             multi=False, check_keys=True, **kwargs):
         json_entries = dict()
         json_entries['stage_name'] = self.stage_name
-        remove_user_id_from_dicts(self.indices)
         json_entries['indices'] = self.indices
 
         json_entries['spec'] = spec

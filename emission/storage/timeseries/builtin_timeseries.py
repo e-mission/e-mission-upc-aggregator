@@ -170,11 +170,7 @@ class BuiltinTimeSeries(esta.TimeSeries):
         return self.get_entry_from_id(key, row['_id'])
 
     def get_entry_from_id(self, key, entry_id):
-        # Replace with load one
-        print(entry_id)
-        print(key)
         entry_doc = self.get_timeseries_db(key).find_one({"_id": entry_id})
-        print(entry_doc)
         if entry_doc is None:
             return None
         else:
