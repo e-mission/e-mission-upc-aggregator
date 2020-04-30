@@ -20,7 +20,9 @@ import bson
 def convert_string_to_objectid(dict_or_list_or_item):
     if isinstance(dict_or_list_or_item, dict):
         for key, value in dict_or_list_or_item.copy().items():
-            if key == '_id':
+            # Agressively assume anything that can be an ObjectId is
+            # This may cause us problems later
+            if bson.ObjectId.is_valid(value):
                 dict_or_list_or_item[key] = bson.ObjectId(value)
             else:
                 convert_string_to_objectid(value)

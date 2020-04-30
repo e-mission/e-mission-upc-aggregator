@@ -852,12 +852,7 @@ def _fill_section(old_section, new_section, stop_map):
     if old_section.data.start_stop is not None:
         section_data.start_stop = stop_map[old_section.data.start_stop].get_id()
     if old_section.data.end_stop is not None:
-        try:
-            section_data.end_stop = stop_map[old_section.data.end_stop].get_id()
-        except KeyError:
-            print (stop_map.keys())
-            print (old_section.data.end_stop)
-            raise KeyError
+        section_data.end_stop = stop_map[old_section.data.end_stop].get_id()
     new_section["data"] = section_data
     return new_section
 
