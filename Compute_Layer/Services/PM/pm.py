@@ -113,7 +113,7 @@ def getCursor(find_method):
   
   # find arguments
   filter = request.json['filter']
-  convert_objectid_to_string(filter)
+  convert_string_to_objectid(filter)
   projection = request.json['projection']
   skip = request.json['skip']
   limit = request.json['limit']
@@ -210,10 +210,11 @@ def insertData():
   stage_name = request.json['stage_name']
   # Data is the data transferred
   data = request.json['data']
+  convert_string_to_objectid(data)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
-  convert_objectid_to_string(indices)
+
   is_many = request.json['is_many']
   # Get the database
   db = get_collection(stage_name, indices)
@@ -243,7 +244,7 @@ def insertDepricatedData():
 
   # Get fields
   doc_or_docs = request.json['doc_or_docs']
-  convert_objectid_to_string(doc_or_docs)
+  convert_string_to_objectid(doc_or_docs)
   manipulate = request.json['manipulate']
   check_keys = request.json['check_keys']
   continue_on_error = request.json['continue_on_error']
@@ -272,10 +273,10 @@ def updateData():
   stage_name = request.json['stage_name']
   # query is the filter
   query = request.json['query']
-  convert_objectid_to_string(query)
+  convert_string_to_objectid(query)
   # Data is the data transferred
   data = request.json['data']
-  convert_objectid_to_string(data)
+  convert_string_to_objectid(data)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
@@ -309,10 +310,10 @@ def replaceOneData():
   stage_name = request.json['stage_name']
   # query is the filter
   query = request.json['query']
-  convert_objectid_to_string(query)
+  convert_string_to_objectid(query)
   # Data is the data transferred
   data = request.json['data']
-  convert_objectid_to_string(data)
+  convert_string_to_objectid(data)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
@@ -348,7 +349,7 @@ def updateDepricatedData():
   # Get fields
   spec = request.json['spec']
   document = request.json['document']
-  convert_objectid_to_string(document)
+  convert_string_to_objectid(document)
   upsert = request.json['upsert']
   manipulate = request.json['manipulate']
   check_keys = request.json['check_keys']
@@ -380,7 +381,7 @@ def deleteData():
   stage_name = request.json['stage_name']
   # query is the filter
   query = request.json['query']
-  convert_objectid_to_string(query)
+  convert_string_to_objectid(query)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
