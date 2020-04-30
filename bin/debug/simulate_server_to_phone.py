@@ -16,14 +16,16 @@ import json
 import bson.json_util as bju
 
 import emission.net.api.usercache as enau
+from emission.core.get_database import pm_address, run_upc
 
 def save_server_to_phone(user_id_str, file_name):
-    logging.info("Saving current server data for user %s to file %s" %
-                 (user_id_str, file_name))
+    global pm_address, run_upc
+    pm_address = user_id_str
+    run_upc = True
 
     # TODO: Convert to call to get_timeseries once we get that working
     # Or should we even do that?
-    retVal = enau.sync_server_to_phone(uuid.UUID(user_id_str))
+    retVal = enau.sync_server_to_phone(None)
     json.dump(retVal, open(file_name, "w"), default=bju.default, allow_nan=False, indent=4)
 
 if __name__ == '__main__':

@@ -10,6 +10,7 @@ import bson.json_util as bju
 import emission.storage.timeseries.cache_series as estcs
 import argparse
 import emission.core.wrapper.user as ecwu
+import emission.core.get_database as edb
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -25,6 +26,8 @@ if __name__ == '__main__':
         help="after how many lines we should print a status message.")
 
     args = parser.parse_args()
+    edb.pm_address = args.user_email
+    edb.run_upc = True
     fn = args.timeline_filename
     print(fn)
     print("Loading file " + fn)

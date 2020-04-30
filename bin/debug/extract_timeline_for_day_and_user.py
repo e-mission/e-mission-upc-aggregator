@@ -16,17 +16,19 @@ import json
 import bson.json_util as bju
 
 import emission.core.get_database as edb
+from emission.core.get_database import pm_address, run_upc
 
 def export_timeline(user_id_str, day_str, file_name):
-    logging.info("Extracting timeline for user %s day %s and saving to file %s" %
-                 (user_id_str, day_str, file_name))
+    global pm_address, run_upc
+    pm_address = user_id_str
+    run_upc = True
 
     # day_dt = pydt.datetime.strptime(day_str, "%Y-%m-%d").date()
     day_dt = pydt.datetime.strptime(day_str, "%Y-%m-%d")
     logging.debug("day_dt is %s" % day_dt)
     # TODO: Convert to call to get_timeseries once we get that working
     # Or should we even do that?
-    user_query = {'user_id': uuid.UUID(user_id_str)}
+    user_query = {'user_id': None}
     date_query = {'metadata.write_local_dt.year': day_dt.year,
 	'metadata.write_local_dt.month': day_dt.month,
 	'metadata.write_local_dt.day': day_dt.day}

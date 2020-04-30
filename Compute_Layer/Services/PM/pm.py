@@ -14,15 +14,23 @@ from pymongo import MongoClient
 import pymongo
 import sys
 from importlib import import_module
+import bson
 
-from bson import ObjectId
+# Inspired by https://stackoverflow.com/questions/16586180/typeerror-objectid-is-not-json-serializable
+def convert_objectid_to_string(dict_or_list_or_item):
+    if isinstance(dict_or_list_or_item, dict):
+        for key, value in dict_or_list_or_item.copy().items():
+            if isinstance(value, bson.ObjectId):
+                dict_or_list_or_item[key] = str(value)
+            else:
+                convert_objectid_to_string(value)
 
-# Taken from https://stackoverflow.com/questions/16586180/typeerror-objectid-is-not-json-serializable
-class JSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, ObjectId):
-            return str(o)
-        return json.JSONEncoder.default(self, o)
+    elif isinstance(dict_or_list_or_item, list):
+        for i, value in enumerate(dict_or_list_or_item.copy()):
+            if isinstance(value, bson.ObjectId):
+                dict_or_list_or_item[i] = str(value)
+            else:
+                convert_objectid_to_string(value)
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -146,7 +154,8 @@ def findData():
   cursor = getCursor()
   data = list(getCursor())
   result_dict = {'data' : data}
-  return JSONEncoder().encode(result_dict)
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 @post('/data/count')
 def countData():
@@ -187,7 +196,8 @@ def insertData():
     result = db.insert_one(data, bypass_document_validation)
     result_dict['inserted_id'] = result.inserted_id
   result_dict['acknowledged'] = result.acknowledged
-  return JSONEncoder().encode(result_dict)
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 @post('/data/insert-deprecated')
 def insertDepricatedData():
@@ -220,8 +230,8 @@ def insertDepricatedData():
           continue_on_error, **kwargs_dict)
 
   result_dict = {'resp': result}
-
-  return JSONEncoder().encode(result_dict)
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 @post('/data/update')
 def updateData():
@@ -255,7 +265,8 @@ def updateData():
   result_dict['modified_count'] = result.modified_count
   result_dict['raw_result'] = result.raw_result
   result_dict['upserted_id'] = result.upserted_id
-  return JSONEncoder().encode(result_dict)
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 @post('/data/update-deprecated')
 def updateDepricatedData():
@@ -292,7 +303,8 @@ def updateDepricatedData():
 
   result_dict = {'resp': result}
 
-  return JSONEncoder().encode(result_dict)
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 @post('/data/delete')
 def deleteData():
@@ -316,7 +328,8 @@ def deleteData():
   result_dict['acknowledged'] = result.acknowledged
   result_dict['deleted_count'] = result.deleted_count
   result_dict['raw_result'] = result.raw_result
-  return JSONEncoder().encode(result_dict)
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 # Function used to deduct from the privacy budget. Returns
 # whether or not it was possible to reduce the privacy budget.

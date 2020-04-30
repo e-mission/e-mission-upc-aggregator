@@ -5,8 +5,8 @@
     "upc-port" : "8000",
     "querier-port" : "443",
     "tick-period" : "60",
-    "pause-ticks" : "30",
-    "kill-ticks" : "15",
+    "pause-ticks" : "3000000",
+    "kill-ticks" : "1500000",
     "swarm-port" : "54321",
     "machines" :
         {

@@ -24,6 +24,7 @@ def get_ts_enum_map():
         ts_enum_map = {
             esta.EntryType.DATA_TYPE: edb.get_timeseries_db(),
             esta.EntryType.ANALYSIS_TYPE: edb.get_analysis_timeseries_db()
+        }
     return ts_enum_map
 
 INVALID_QUERY = {'metadata.key': 'invalid'}

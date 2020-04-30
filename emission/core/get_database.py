@@ -170,7 +170,7 @@ def get_usercache_db():
 def get_timeseries_db():
     #current_db = MongoClient().Stage_database
     if run_upc:
-        return clsrfmt.TimeSeriesCollection(pm_address)
+        return clsrfmt.TimeseriesCollection(pm_address)
     else:
         TimeSeries = _get_current_db().Stage_timeseries
         TimeSeries.create_index([("user_id", pymongo.HASHED)])
@@ -193,7 +193,7 @@ def get_analysis_timeseries_db():
     """
     #current_db = MongoClient().Stage_database
     if run_upc:
-        return clsrfmt.AnalysisTimeSeriesCollection(pm_address)
+        return clsrfmt.AnalysisTimeseriesCollection(pm_address)
     else:
         AnalysisTimeSeries = _get_current_db().Stage_analysis_timeseries
         AnalysisTimeSeries.create_index([("user_id", pymongo.HASHED)])

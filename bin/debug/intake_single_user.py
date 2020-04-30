@@ -14,6 +14,7 @@ import uuid
 
 import emission.pipeline.intake_stage as epi
 import emission.core.wrapper.user as ecwu
+import Compute_Layer.Services.emission_pipeline.run_pipeline as clseprp
 
 if __name__ == '__main__':
     np.random.seed(61297777)
@@ -25,9 +26,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    if args.user_uuid:
-        sel_uuid = uuid.UUID(args.user_uuid)
-    else:
-        sel_uuid = ecwu.User.fromEmail(args.user_email).uuid
-
-    epi.run_intake_pipeline("single", [sel_uuid])
+    clseprp.run_pipeline(args.user_email)

@@ -1,6 +1,9 @@
 import pymongo
 import requests
 import socket
+import json
+import bson
+
 
 from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint
 
@@ -10,6 +13,22 @@ def remove_user_id_from_dicts(possible_dict):
             del possible_dict["user_id"]
         for val in possible_dict.values():
             remove_user_id_from_dicts(val)
+
+
+def convert_objectid_to_string(dict_or_list_or_item):
+    if isinstance(dict_or_list_or_item, dict):
+        for key, value in dict_or_list_or_item.copy().items():
+            if isinstance(value, bson.ObjectId):
+                dict_or_list_or_item[key] = str(value)
+            else:
+                convert_objectid_to_string(value)
+
+    elif isinstance(dict_or_list_or_item, list):
+        for i, value in enumerate(dict_or_list_or_item.copy()):
+            if isinstance(value, bson.ObjectId):
+                dict_or_list_or_item[i] = str(value)
+            else:
+                convert_objectid_to_string(value)
 
 
 # Class used to fake a cursor
@@ -153,6 +172,7 @@ class FakeCursor:
         # db read
         json_entries = self.get_load_data_entries()
         json_entries['with_limit_and_skip'] = with_limit_and_skip
+        convert_objectid_to_string(json_entries)
         try:
             r = requests.post(self.target_address + count_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
@@ -171,6 +191,7 @@ class FakeCursor:
         # db read
         json_entries = self.get_load_data_entries()
         json_entries['distinct_key'] = key
+        convert_objectid_to_string(json_entries)
         try:
             r = requests.post(self.target_address + distinct_endpoint, json=json_entries, timeout=600,
                     verify=certificate_bundle_path)
@@ -231,6 +252,7 @@ class FakeCursor:
 
     def load_data(self):
         json_entries = self.get_load_data_entries()
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(self.target_address + load_endpoint, json=json_entries, timeout=600,
@@ -263,6 +285,7 @@ class FakeInsertOneResult:
         json_entries['is_many'] = False
         json_entries['bypass_document_validation'] = bypass_document_validation
         # Make the call to db insert one
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600,
@@ -296,6 +319,7 @@ class FakeInsertManyResult:
         json_entries['ordered'] = ordered
         json_entries['bypass_document_validation'] = bypass_document_validation
         # Make the call to db insert one
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600,
@@ -334,6 +358,7 @@ class FakeUpdateResult:
         json_entries['bypass_document_validation'] = bypass_document_validation
         json_entries['collation'] = collation
         # Make the call to db insert one
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(target_address + update_endpoint, json=json_entries, timeout=600,
@@ -368,6 +393,7 @@ class FakeDeleteResult:
         json_entries['is_many'] = is_many
         json_entries['collation'] = collation
         # Make the call to db insert one
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(target_address + delete_endpoint, json=json_entries, timeout=600,
@@ -409,6 +435,7 @@ class AbstractCollection:
             if arg in kwargs:
                 json_entries[arg] = kwargs[arg]
 
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(self.target_address + insert_deprecated_endpoint, json=json_entries, timeout=600,
@@ -432,10 +459,9 @@ class AbstractCollection:
                 self.indices, data_dict_list, ordered,
                 bypass_document_validation)
 
-    def insert_one(self, data_dict, bypass_document_validation=False,
-            session=None):
+    def insert_one(self, data_dict, bypass_document_validation=False):
         return FakeInsertOneResult(self.target_address, self.stage_name,
-                self.indices, data_dict, bypass_document_validation, session)
+                self.indices, data_dict, bypass_document_validation)
 
     def update(self, spec, document, upsert=False, manipulate=False,
             multi=False, check_keys=True, **kwargs):
@@ -454,6 +480,7 @@ class AbstractCollection:
             if arg in kwargs:
                 json_entries[arg] = kwargs[arg]
 
+        convert_objectid_to_string(json_entries)
         error = False
         try:
             r = requests.post(self.target_address + update_deprecated_endpoint, json=json_entries, timeout=600,
