@@ -35,9 +35,9 @@ print("Finished configuring logging for %s" % logging.getLogger())
 app = app()
 
 def get_last_event_from_server(upload_address, date):
-    day_start = date.isoformat() # FIXME
+    day_start = date.isoformat()
     day_end = (date + datetime.timedelta(days=1)).replace(hour=0, minute=0, 
-            second=0, microsecond=0).isoformat() #FIXME
+            second=0, microsecond=0).isoformat()
     query = {"data.end_time": {"$lt": day_end, "$gt": day_start}}
     filters = {"_id": False}
     sort_list = {'data.end_time': False}
