@@ -159,7 +159,11 @@ def findData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
   cursor = getCursor()
-  data = list(cursor)
+  is_many = request.json['is_many']
+  if is_many:
+    data = list(cursor)
+  else:
+    data = cursor.next()
   result_dict = {'data' : data}
   convert_objectid_to_string(result_dict)
   return result_dict

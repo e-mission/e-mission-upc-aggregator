@@ -5,7 +5,7 @@ import json
 import bson
 
 
-from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint
+from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, validate_find_endpoint
 
 def remove_user_id_from_dicts(possible_dict):
     """
@@ -107,12 +107,12 @@ class FakeCursor:
                 self._stored_data = self.load_data()
                 if not self.is_many:
                     self._stored_data = [self._stored_data]
-                print(len(self._stored_data))
                 if len(self._stored_data) == 0:
                     raise StopIteration
                 else:
                     self._skip = old_skip
             self.iter_counter += 1
+            print(self._stored_data[array_index])
             return self._stored_data[array_index] 
 
             
@@ -186,6 +186,7 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
+            print(data_json)
             return data_json['data']
 
     def count(self, with_limit_and_skip=False):
@@ -288,7 +289,6 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
-            print(data_json)
             return data_json['data']
 
 # Classes used to fake results from insert, update, and delete
