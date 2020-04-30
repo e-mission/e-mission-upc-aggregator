@@ -517,7 +517,7 @@ class AbstractCollection:
 
     def find(self, filter=None, *args, **kwargs):
         return FakeCursor(self.target_address, self.stage_name,
-                self.indices, True, filter, *args, **kwargs)
+                self.indices, filter, *args, **kwargs)
 
     def find_one(self, filter=None, projection=None, 
             skip=0, limit=0, no_cursor_timeout=False, 

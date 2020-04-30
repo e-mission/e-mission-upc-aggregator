@@ -6,7 +6,7 @@ import requests
 from time import sleep
 import numpy as np
 import datetime
-from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, load_endpoint, service_endpoint
+from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
 import Compute_Layer.shared_resources.stream_data as clsrsd
 from Compute_Layer.shared_resources.ical import calendarTimeZone 
@@ -24,7 +24,6 @@ def main (usercount, tripcount):
     client_config = {
         'emission_server_base_url': controller_addr,
         'register_user_endpoint': register_user_endpoint,
-        'load_endpoint': load_endpoint,
         'service_endpoint': service_endpoint
     }
 

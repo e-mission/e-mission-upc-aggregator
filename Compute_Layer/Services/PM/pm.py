@@ -164,7 +164,14 @@ def findData():
 def countData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n")
-  cursor = getCursor()
+  stage_name = request.json['stage_name']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+
+  db = get_collection(stage_name, indices)
+
+  cursor = getCursor(db.find)
   with_limit_and_skip = request.json['with_limit_and_skip']
   return {'count' : cursor.count(with_limit_and_skip)}
 
@@ -172,7 +179,14 @@ def countData():
 def distinctData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n")
-  cursor = getCursor()
+  stage_name = request.json['stage_name']
+  # Indices is a json dict mapping keys to [data_type, is_sparse]
+  # Each index is of the form itemA.itemB.....itemZ,
+  indices = request.json['indices']
+
+  db = get_collection(stage_name, indices)
+
+  cursor = getCursor(db.find)
   distinct_key = request.json['distinct_key']
   return {'distinct' : cursor.distinct(distinct_key)}
 
