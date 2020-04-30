@@ -16,14 +16,13 @@ import json
 import bson.json_util as bju
 
 import emission.net.api.usercache as enau
-from emission.core.get_database import pm_address, run_upc
+import emission.core.get_database as edb
 
 dummy_id = 23
 
 def save_server_to_phone(user_id_str, file_name):
-    global pm_address, run_upc
-    pm_address = user_id_str
-    run_upc = True
+    edb.pm_address = user_id_str
+    edb.run_upc = True
 
     # TODO: Convert to call to get_timeseries once we get that working
     # Or should we even do that?
