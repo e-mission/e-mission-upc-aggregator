@@ -148,6 +148,7 @@ def getCursor():
   return cursor
 
 @post('/data/validate-find')
+def validateFind():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
   cursor = getCursor()
