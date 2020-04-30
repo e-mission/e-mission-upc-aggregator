@@ -528,7 +528,7 @@ class AbstractCollection:
             return_key=False, show_record_id=False, snapshot=False, 
             comment=None):
 
-        json_entires = dict()
+        json_entries = dict()
         json_entries['stage_name'] = self.stage_name
         json_entries['indices'] = self.indices
         

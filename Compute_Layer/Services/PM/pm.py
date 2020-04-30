@@ -140,8 +140,10 @@ def findOneData():
   
 
   db = get_collection(stage_name, indices)
-  cursor = getCursor(db.find_one)
-  return {'data' : cursor }
+  data = getCursor(db.find_one)
+  result_dict = {'data' : data}
+  convert_objectid_to_string(result_dict)
+  return result_dict
 
 @post('/data/find')
 def findData():
