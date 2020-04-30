@@ -163,7 +163,7 @@ def findData():
   if is_many:
     data = list(cursor)
   else:
-    data = cursor.next()
+    data = cursor
   result_dict = {'data' : data}
   convert_objectid_to_string(result_dict)
   return result_dict

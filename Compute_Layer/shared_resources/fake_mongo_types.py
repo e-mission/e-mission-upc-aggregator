@@ -104,9 +104,10 @@ class FakeCursor:
                 # db read
                 self.array_offset += len(self._stored_data)
                 array_index -= len(self._stored_data)
-                self._stored_data = self.load_data()
-                if not self.is_many:
-                    self._stored_data = [self._stored_data]
+                if self.is_many:
+                    self._stored_data = self.load_data()
+                else:
+                    self._stored_data = [self.load_data()]
                 if len(self._stored_data) == 0:
                     raise StopIteration
                 else:
@@ -160,7 +161,7 @@ class FakeCursor:
                     if len(result) == 0:
                         raise IndexError
                     else:
-                        self._store_data = result
+                        self._store_data = [result]
                         self.array_offset = self._skip
                         return result[0]
         else:
