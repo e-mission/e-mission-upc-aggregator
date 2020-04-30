@@ -17,6 +17,17 @@ from importlib import import_module
 import bson
 
 # Inspired by https://stackoverflow.com/questions/16586180/typeerror-objectid-is-not-json-serializable
+def convert_string_to_objectid(dict_or_list_or_item):
+    if isinstance(dict_or_list_or_item, dict):
+        for key, value in dict_or_list_or_item.copy().items():
+            if key == '_id':
+                dict_or_list_or_item[key] = bson.ObjectId(value)
+            else:
+                convert_string_to_objectid(value)
+    elif isinstance(dict_or_list_or_item, list):
+        for item in dict_or_list_or_item:
+            convert_string_to_objectid(item)
+
 def convert_objectid_to_string(dict_or_list_or_item):
     if isinstance(dict_or_list_or_item, dict):
         for key, value in dict_or_list_or_item.copy().items():
@@ -89,9 +100,8 @@ def setPrivacyBudget(budget):
 
 def getPrivacyBudget():
     table = get_collection("privacyBudget")
-    search_fields = {"entrytype": "privacy_budget"}
     filtered = {"_id": False}
-    retrievedData = table.find_one(search_fields, filtered)
+    retrievedData = table.find_one({}, filtered)
     datalist = list(retrievedData)
     if len(datalist) == 0:
         return None
@@ -103,6 +113,7 @@ def getCursor(find_method):
   
   # find arguments
   filter = request.json['filter']
+  convert_objectid_to_string(filter)
   projection = request.json['projection']
   skip = request.json['skip']
   limit = request.json['limit']
@@ -202,6 +213,7 @@ def insertData():
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
+  convert_objectid_to_string(indices)
   is_many = request.json['is_many']
   # Get the database
   db = get_collection(stage_name, indices)
@@ -231,6 +243,7 @@ def insertDepricatedData():
 
   # Get fields
   doc_or_docs = request.json['doc_or_docs']
+  convert_objectid_to_string(doc_or_docs)
   manipulate = request.json['manipulate']
   check_keys = request.json['check_keys']
   continue_on_error = request.json['continue_on_error']
@@ -259,8 +272,10 @@ def updateData():
   stage_name = request.json['stage_name']
   # query is the filter
   query = request.json['query']
+  convert_objectid_to_string(query)
   # Data is the data transferred
   data = request.json['data']
+  convert_objectid_to_string(data)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
@@ -294,8 +309,10 @@ def replaceOneData():
   stage_name = request.json['stage_name']
   # query is the filter
   query = request.json['query']
+  convert_objectid_to_string(query)
   # Data is the data transferred
   data = request.json['data']
+  convert_objectid_to_string(data)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
@@ -331,6 +348,7 @@ def updateDepricatedData():
   # Get fields
   spec = request.json['spec']
   document = request.json['document']
+  convert_objectid_to_string(document)
   upsert = request.json['upsert']
   manipulate = request.json['manipulate']
   check_keys = request.json['check_keys']
@@ -362,6 +380,7 @@ def deleteData():
   stage_name = request.json['stage_name']
   # query is the filter
   query = request.json['query']
+  convert_objectid_to_string(query)
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']

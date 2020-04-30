@@ -8,7 +8,7 @@ import numpy as np
 import datetime
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
-import Compute_Layer.shared_resources.stream_data as clsrsd
+import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 from Compute_Layer.shared_resources.ical import calendarTimeZone 
 from emission.net.int_service.machine_configs import certificate_bundle_path
 from dateutil.parser import parse
@@ -309,7 +309,7 @@ def load_calendar_data(user):
     return user.load_calendar_from_server()
 
 def get_arrival_time(user, date):
-    addresses = clsrsd.request_service({'user': user._config['email']}, 'calendar')
+    addresses = clsrfmt.request_service({'user': user._config['email']}, 'calendar')
     json_dict = dict()
     json_dict['pm_address'] = addresses[0]
     json_dict['date'] = date.isoformat()
@@ -344,7 +344,7 @@ def launch_rc_query(user, start_ts, end_ts, alpha, r_start, r_end):
     return launch_query(user, query)
 
 def launch_query(user, query):
-    addresses = clsrsd.request_service({'user': user._config['email']}, 'query')
+    addresses = clsrfmt.request_service({'user': user._config['email']}, 'query')
     json_dict = dict()
     json_dict['pm_address'] = addresses[0]
     json_dict['query'] = query

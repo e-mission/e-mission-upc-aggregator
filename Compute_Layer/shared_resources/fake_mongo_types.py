@@ -7,7 +7,7 @@ import bson
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.SecurityWarning)
 
-from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint
+from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, controller_ip, controller_port, service_endpoint, privacy_budget_endpoint
 
 def remove_user_id_from_dicts(possible_dict):
     """
@@ -18,13 +18,16 @@ def remove_user_id_from_dicts(possible_dict):
             remove_user_id_from_dicts(val)
     """
 
-def convert_string_to_objectid(dict_or_item):
-    if isinstance(dict_or_item, dict):
-        for key, value in dict_or_item.copy().items():
+def convert_string_to_objectid(dict_or_list_or_item):
+    if isinstance(dict_or_list_or_item, dict):
+        for key, value in dict_or_list_or_item.copy().items():
             if key == '_id':
-                dict_or_item[key] = bson.ObjectId(value)
+                dict_or_list_or_item[key] = bson.ObjectId(value)
             else:
                 convert_string_to_objectid(value)
+    elif isinstance(dict_or_list_or_item, list):
+        for item in dict_or_list_or_item:
+            convert_string_to_objectid(item)
 
 def convert_objectid_to_string(dict_or_list_or_item):
     if isinstance(dict_or_list_or_item, dict):
@@ -661,4 +664,31 @@ class UsercacheCollection(AbstractCollection):
         indices_dict['data.ts'] = [[pymongo.DESCENDING], True]
         super().__init__(target_address, "Stage_usercache", indices_dict)
 
+class CalendarCollection(AbstractCollection):
+
+    def __init__(self, target_address):
+        indices_dict = dict()
+        index1 = ["data.attendees", "data.start_time", "data.end_time", "data.ts", "data.geo"]
+        index_one = "metadata.type"
+        for elem in index1:
+            index_one += "\n" + elem
+        indices_dict[index_one] =[[pymongo.ASCENDING, pymongo.ASCENDING, 
+            pymongo.ASCENDING, pymongo.ASCENDING, pymongo.ASCENDING, 
+            pymongo.GEOSPHERE], False]
+        super().__init__(target_address, "Stage_calendar", indices_dict)
+
+
 ### End of classes
+
+def request_service(username, service_name):
+    controller_addr = controller_ip + ":" + str(controller_port)
+    json_values = dict()
+    json_values['user'] = username
+    json_values['service'] = service_name
+    r = requests.post (controller_addr + service_endpoint, json=json_values, verify=certificate_bundle_path)
+    json_values = r.json()
+    return json_values['addresses']
+
+def deduct_privacy(target_address, cost):
+    r = requests.post (target_address + privacy_budget_endpoint, json={'cost': cost}, verify=certificate_bundle_path)
+    return r.json()

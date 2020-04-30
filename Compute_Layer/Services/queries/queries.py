@@ -10,7 +10,7 @@ import numpy as np
 import sys
 import requests
 from emission.net.int_service.machine_configs import controller_ip, controller_port, service_endpoint, certificate_bundle_path, upc_port
-import Compute_Layer.shared_resources.stream_data as clsrsd
+import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 
 def privacy_budget_pass(query):
   alpha = query['alpha']
@@ -126,14 +126,14 @@ def receive_query():
     query_object = query_type_mapping[query['query_type']]
     budget_cost = query_object.generate_diff_priv_cost(float(query['offset']), float(query['alpha']))
     # Add check
-    budget_deduction_results = clsrsd.deduct_privacy(pm_addr, budget_cost)
+    budget_deduction_results = clsrfmt.deduct_privacy(pm_addr, budget_cost)
     print(budget_deduction_results)
     legal_query = budget_deduction_results['success']
     if not legal_query:
         print("Failure 1")
         return {'query_result': ''}
     search_fields = [{"data_ts": {"$lt": query['end_ts'], "$gt": query['start_ts']}}, {"_id": "False"}]
-    json_data, failure  = clsrsd.load_usercache_data(pm_addr, search_fields)
+    json_data, failure  = clsrfmt.load_usercache_data(pm_addr, search_fields)
     if failure:
         print("Failure 2")
         return {'query_result': ''}

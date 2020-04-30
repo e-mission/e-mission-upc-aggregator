@@ -6,7 +6,7 @@
 import requests
 from emission.net.int_service.machine_configs import register_user_endpoint, service_endpoint, cloud_key_endpoint, certificate_bundle_path
 import emission.simulation.profile_json as profile_json
-from Compute_Layer.shared_resources.stream_data import request_service 
+from Compute_Layer.shared_resources.fake_mongo_types import request_service 
 
 class UserCloud:
 

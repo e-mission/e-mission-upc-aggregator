@@ -9,7 +9,6 @@ import socket
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
 from emission.net.int_service.machine_configs import certificate_bundle_path
-import Compute_Layer.shared_resources.stream_data as clsrsd
 import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 import Compute_Layer.shared_resources.ical as clsri
 
@@ -145,18 +144,21 @@ class FakeUser:
 
     def sync_calendar_to_server(self, calendar_file):
         data = clsri.readCalendarAsEventList(calendar_file)
-        error = clsrsd.store_calendar_data(self._config['upload_url'], 
-                data)
+        db = clsrfmt.CalendarCollection(self._config['upload_url'])
+        resp = db.insert(data)
+        print(resp)
 
 
     def load_calendar_from_server(self):
         #search_fields = [{"metadata.type": "calendar"}, {"_id": "False"}]
-        search_fields = [{"data.start_time": {"$lt": "2020-03-15T12:00:00"}}, {"_id": "False"}]
-        should_sort = True
-        sort = {'data.end_time': "True"}
-        data, error = clsrsd.load_calendar_data(self._config['download_url'], 
-                search_fields, should_sort, sort)
-        return data
+        query = {"data.start_time": {"$lt": "2020-03-15T12:00:00"}}
+        filters = {"_id": False}
+        sort_list = {'data.end_time': True}
+        db = clsrfmt.CalendarCollection(self._config['download_url'])
+        cursor = db.find(query, filters).sort(sort_list, 1)
+        for elem in cursor:
+            print(elem)
+        return list(cursor)
 
     def run_pipeline (self):
         # Make a call 

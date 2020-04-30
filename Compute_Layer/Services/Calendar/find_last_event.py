@@ -10,6 +10,7 @@ import socket
 import logging
 import logging.config
 
+import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 import requests
 
 try:
@@ -37,18 +38,15 @@ def get_last_event_from_server(upload_address, date):
     day_start = date.isoformat()
     day_end = (date + datetime.timedelta(days=1)).replace(hour=0, minute=0, 
             second=0, microsecond=0).isoformat()
-    search_fields = [{"data.end_time": {"$lt": day_end, "$gt": day_start}}, {"_id": "False"}]
-    should_sort = True
-    sort = {'data.end_time': "False"}
-    data, error = clsrsd.load_calendar_data(upload_address, search_fields, should_sort, sort)
-    if error:
+    query = {"data.end_time": {"$lt": day_end, "$gt": day_start}}
+    filters = {"_id": False}
+    sort_list = {'data.end_time': False}
+    db = clsrfmt.CalendarCollection(self._config['download_url'])
+    data = list(db.find(query, filters).sort(sort_list))
+    if len(data) == 0:
         return None
     else:
-        data_values = data['data']
-        if not data_values:
-            return None
-        else:
-            return data_values[0]
+        return data[0]
 
 @post("/get_last_event")
 def get_arrival_time():
