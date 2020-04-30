@@ -4,6 +4,8 @@ import socket
 import json
 import bson
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.SecurityWarning)
 
 from emission.net.int_service.machine_configs import certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint
 
@@ -15,7 +17,14 @@ def remove_user_id_from_dicts(possible_dict):
         for val in possible_dict.values():
             remove_user_id_from_dicts(val)
     """
-    
+
+def convert_string_to_objectid(dict_or_item):
+    if isinstance(dict_or_item, dict):
+        for key, value in dict_or_item.copy().items():
+            if key == '_id':
+                dict_or_item[key] = bson.ObjectId(value)
+            else:
+                convert_string_to_objectid(value)
 
 def convert_objectid_to_string(dict_or_list_or_item):
     if isinstance(dict_or_list_or_item, dict):
@@ -262,6 +271,7 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
+            convert_string_to_objectid(data_json)
             return data_json['data']
 
 # Classes used to fake results from insert, update, and delete
@@ -373,6 +383,7 @@ class FakeUpdateResult:
             assert(not error)
         else:
             data_json = r.json()
+            convert_string_to_objectid(data_json)
             # Fill in with the results of the db call
             self.acknowledged = data_json['acknowledged']
             self.matched_count = data_json['matched_count']
@@ -409,6 +420,7 @@ class FakeDeleteResult:
         else:
             data_json = r.json()
             # Fill in with the results of the db call
+            convert_string_to_objectid(data_json)
             self.acknowledged = data_json['acknowledged']
             self.deleted_count = data_json['deleted_count']
             self.raw_result = data_json['raw_result']
@@ -450,6 +462,7 @@ class AbstractCollection:
             assert(not error)
         else:
             data_json = r.json()
+            convert_string_to_objectid(data_json)
             return data_json['resp']
 
 
@@ -495,6 +508,7 @@ class AbstractCollection:
             assert(not error)
         else:
             data_json = r.json()
+            convert_string_to_objectid(data_json)
             return data_json['resp']
 
     def update_many(self, query_dict, data_dict, upsert=False, 
@@ -582,6 +596,7 @@ class AbstractCollection:
             assert(not error)
         else:
             data_json = r.json()
+            convert_string_to_objectid(data_json)
             return data_json['data']
 
 class AnalysisTimeseriesCollection(AbstractCollection):

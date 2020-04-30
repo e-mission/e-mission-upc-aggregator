@@ -162,7 +162,6 @@ class BuiltinTimeSeries(esta.TimeSeries):
                 del ret_val[ld_key]
         ret_val["_id"] = entry["_id"]
         ret_val['user_id'] = entry['user_id']
-        #ret_val['user_id'] = None
         ret_val["metadata_write_ts"] = entry["metadata"]["write_ts"]
         # logging.debug("ret_val = %s " % ret_val)
         return ret_val

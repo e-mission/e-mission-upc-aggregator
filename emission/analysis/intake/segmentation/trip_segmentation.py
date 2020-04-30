@@ -99,6 +99,7 @@ def segment_current_trips(user_id):
                                                                filters_in_df,
                                                                filter_methods)
     # Create and store trips and places based on the segmentation points
+    print(segmentation_points)
     if segmentation_points is None:
         epq.mark_segmentation_failed(user_id)
     elif len(segmentation_points) == 0:

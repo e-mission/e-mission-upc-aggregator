@@ -3,6 +3,9 @@ import sys
 import requests
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, certificate_bundle_path
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.SecurityWarning)
+
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
