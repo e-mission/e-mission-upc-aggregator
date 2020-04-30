@@ -12,6 +12,8 @@ import argparse
 import emission.core.wrapper.user as ecwu
 import emission.core.get_database as edb
 
+fake_uuid = 23
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("timeline_filename",
@@ -31,8 +33,8 @@ if __name__ == '__main__':
     fn = args.timeline_filename
     print(fn)
     print("Loading file " + fn)
-    user = ecwu.User.register(args.user_email)
-    override_uuid = user.uuid
+    #user = ecwu.User.register(args.user_email)
+    override_uuid = fake_uuid
     print("After registration, %s -> %s" % (args.user_email, override_uuid))
     entries = json.load(open(fn), object_hook = bju.object_hook)
     munged_entries = []

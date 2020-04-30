@@ -8,12 +8,14 @@ import bson
 from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint
 
 def remove_user_id_from_dicts(possible_dict):
+    """
     if isinstance(possible_dict, dict):
         if "user_id" in possible_dict:
             del possible_dict["user_id"]
         for val in possible_dict.values():
             remove_user_id_from_dicts(val)
-
+    """
+    
 
 def convert_objectid_to_string(dict_or_list_or_item):
     if isinstance(dict_or_list_or_item, dict):
@@ -168,6 +170,24 @@ class FakeCursor:
         self._batch_size = batch_size
         return self
 
+    def validate_find(self):
+        json_entries = self.get_load_data_entries()
+        convert_objectid_to_string(json_entries)
+        error = False
+        try:
+            r = requests.post(self.target_address + validate_find_endpoint, json=json_entries, timeout=600,
+                    verify=certificate_bundle_path)
+        except (socket.timeout) as e:
+            error = True
+        #Check if sucessful
+        if not r.ok or error:
+            error = True
+        if error:
+            assert(not error)
+        else:
+            data_json = r.json()
+            return data_json['data']
+
     def count(self, with_limit_and_skip=False):
         # db read
         json_entries = self.get_load_data_entries()
@@ -268,6 +288,7 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
+            print(data_json)
             return data_json['data']
 
 # Classes used to fake results from insert, update, and delete
@@ -522,12 +543,20 @@ class AbstractCollection:
                 self.indices, query_dict, False, collation)
 
     def find(self, filter=None, *args, **kwargs):
-        return FakeCursor(self.target_address, self.stage_name,
+        find_cursor = FakeCursor(self.target_address, self.stage_name,
                 self.indices, True, filter, *args, **kwargs)
+        if find_cursor.validate_find():
+            return find_cursor
+        else:
+            return None
 
     def find_one(self, filter=None, *args, **kwargs):
-        return FakeCursor(self.target_address, self.stage_name,
+        find_cursor = FakeCursor(self.target_address, self.stage_name,
                 self.indices, False, filter, *args, **kwargs)
+        if find_cursor.validate_find():
+            return find_cursor
+        else:
+            return None
 
 class AnalysisTimeseriesCollection(AbstractCollection):
 

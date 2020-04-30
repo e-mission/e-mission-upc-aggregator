@@ -17,6 +17,7 @@
     "insert_endpoint" : "/data/insert",
     "insert_deprecated_endpoint" : "/data/insert-deprecated",
     "load_endpoint" : "/data/find",
+    "validate_find_endpoint" : "/data/validate-find",
     "delete_endpoint" : "/data/delete",
     "update_endpoint" : "/data/update",
     "update_deprecated_endpoint" : "/data/update-deprecated",

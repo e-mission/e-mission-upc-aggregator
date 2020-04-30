@@ -35,6 +35,7 @@ import emission.net.ext_service.habitica.executor as autocheck
 import emission.storage.decorations.stats_queries as esds
 
 
+dummy_id = 23
 
 """
     Steps to change:
@@ -48,7 +49,7 @@ def run_pipeline(pm_addr):
     edb.pm_address = pm_addr
     edb.run_upc = True
     # uuid is never needed
-    uuid = None
+    uuid = dummy_id
     uh = euah.UserCacheHandler.getUserCacheHandler(uuid)
 
     with ect.Timer() as uct:

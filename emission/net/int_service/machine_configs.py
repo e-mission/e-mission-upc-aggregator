@@ -17,6 +17,7 @@ for key, value in machines_dict.items ():
 
 register_user_endpoint = config_data["register_user_endpoint"]
 load_endpoint = config_data["load_endpoint"]
+validate_find_endpoint = config_data["validate_find_endpoint"]
 delete_endpoint = config_data["delete_endpoint"]
 count_endpoint = config_data["count_endpoint"]
 distinct_endpoint = config_data["distinct_endpoint"]

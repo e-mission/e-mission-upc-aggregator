@@ -147,15 +147,18 @@ def getCursor():
 
   return cursor
 
+@post('/data/validate-find')
+  if enc_key is None:
+      abort (403, "Cannot load data without a key.\n") 
+  cursor = getCursor()
+  return {'data' : cursor is not None}
+
 @post('/data/find')
 def findData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
   cursor = getCursor()
-  if cursor is None:
-      data = [None]
-  else:
-    data = list(cursor)
+  data = list(cursor)
   result_dict = {'data' : data}
   convert_objectid_to_string(result_dict)
   return result_dict
