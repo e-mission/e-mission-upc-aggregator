@@ -183,7 +183,6 @@ def create_places_and_trips(user_id, segmentation_points, segmentation_method_na
     for (start_loc_doc, end_loc_doc) in segmentation_points:
         logging.debug("start_loc_doc = %s, end_loc_doc = %s" % (start_loc_doc, end_loc_doc))
         get_loc_for_row = lambda row: ts.df_row_to_entry("background/filtered_location", row).data
-        print(start_loc_doc)
         start_loc = get_loc_for_row(start_loc_doc)
         end_loc = get_loc_for_row(end_loc_doc)
         logging.debug("start_loc = %s, end_loc = %s" % (start_loc, end_loc))
