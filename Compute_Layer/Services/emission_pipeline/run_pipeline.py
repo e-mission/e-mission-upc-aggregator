@@ -39,6 +39,7 @@ import emission.analysis.classification.inference.mode.pipeline as eacimp
 import emission.net.ext_service.habitica.executor as autocheck
 
 import emission.storage.decorations.stats_queries as esds
+from emission.net.int_service.machine_configs import upc_port
 
 
 dummy_id = 23

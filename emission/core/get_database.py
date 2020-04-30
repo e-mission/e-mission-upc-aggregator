@@ -222,11 +222,7 @@ def _create_local_dt_indices(time_series, key_prefix):
 
 def get_pipeline_state_db():
     #current_db = MongoClient().Stage_database
-    if run_upc:
-        return clsrfmt.AbstractCollection(pm_address, "Stage_database", dict())
-    else:
-        PipelineState = _get_current_db().Stage_pipeline_state
-        return PipelineState
+    return clsrfmt.AbstractCollection(pm_address, "Stage_database", dict())
 
 def get_push_token_mapping_db():
     PushTokenMapping = _get_current_db().Stage_push_token_mapping

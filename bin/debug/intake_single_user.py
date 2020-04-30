@@ -12,6 +12,8 @@ import argparse
 import numpy as np
 import uuid
 
+import requests
+
 import emission.pipeline.intake_stage as epi
 import emission.core.wrapper.user as ecwu
 import Compute_Layer.Services.emission_pipeline.run_pipeline as clseprp

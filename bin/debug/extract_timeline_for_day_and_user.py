@@ -16,12 +16,8 @@ import json
 import bson.json_util as bju
 
 import emission.core.get_database as edb
-from emission.core.get_database import pm_address, run_upc
 
 def export_timeline(user_id_str, day_str, file_name):
-    global pm_address, run_upc
-    pm_address = user_id_str
-    run_upc = True
 
     # day_dt = pydt.datetime.strptime(day_str, "%Y-%m-%d").date()
     day_dt = pydt.datetime.strptime(day_str, "%Y-%m-%d")

@@ -1,6 +1,6 @@
 import datetime
 import Compute_Layer.shared_resources.stream_data as clsrsd
-from emission.net.int_service.machine_configs import certificate_bundle_path, load_endpoint, upc_port
+from emission.net.int_service.machine_configs import certificate_bundle_path, upc_port
 import json
 from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 from emission.core.get_database import url
