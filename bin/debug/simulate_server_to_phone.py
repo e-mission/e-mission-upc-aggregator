@@ -22,7 +22,6 @@ dummy_id = 23
 
 def save_server_to_phone(user_id_str, file_name):
     edb.pm_address = user_id_str
-    edb.run_upc = True
 
     # TODO: Convert to call to get_timeseries once we get that working
     # Or should we even do that?

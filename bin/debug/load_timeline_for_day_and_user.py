@@ -29,7 +29,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     edb.pm_address = args.user_email
-    edb.run_upc = True
     fn = args.timeline_filename
     print(fn)
     print("Loading file " + fn)

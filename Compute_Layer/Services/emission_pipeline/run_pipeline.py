@@ -13,8 +13,14 @@ import arrow
 from uuid import UUID
 import time
 
+from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
+from emission.core.get_database import url
+from dateutil.parser import parse
+# To support dynamic loading of client-specific libraries
+import socket
+import logging.config
+
 import emission.core.get_database as edb
-from emission.core.get_database import pm_address, run_upc
 import emission.core.timer as ect
 
 import emission.core.wrapper.pipelinestate as ecwp
@@ -45,9 +51,9 @@ dummy_id = 23
         4. Integrate db fetches with that process as well
         5. Filter uuid
 """
-def run_pipeline(pm_addr):
-    edb.pm_address = pm_addr
-    edb.run_upc = True
+@post("/run_pipeline")
+def run_pipeline():
+    edb.pm_address = request.json['pm_address']
     # uuid is never needed
     uuid = dummy_id
     uh = euah.UserCacheHandler.getUserCacheHandler(uuid)
@@ -132,3 +138,40 @@ def run_pipeline(pm_addr):
 
     esds.store_pipeline_time(uuid, ecwp.PipelineStages.OUTPUT_GEN.name,
                              time.time(), ogt.elapsed)
+
+if __name__ == '__main__':
+    try:
+        webserver_log_config = json.load(open("conf/log/webserver.conf", "r"))
+    except:
+        webserver_log_config = json.load(open("conf/log/webserver.conf.sample", "r"))
+
+    logging.config.dictConfig(webserver_log_config)
+    logging.debug("This should go to the log file")
+    
+    # To avoid config file for tests
+    server_host = socket.gethostbyname(socket.gethostname())
+
+
+    # The selection of SSL versus non-SSL should really be done through a config
+    # option and not through editing source code, so let's make this keyed off the
+    # port number
+    if upc_port == 8000:
+      # We support SSL and want to use it
+      try:
+        key_file = open('conf/net/keys.json')
+      except:
+        logging.debug("certificates not configured, falling back to sample, default certificates")
+        key_file = open('conf/net/keys.json.sample')
+      key_data = json.load(key_file)
+      host_cert = key_data["host_certificate"]
+      chain_cert = key_data["chain_certificate"]
+      private_key = key_data["private_key"]
+
+      run(host=server_host, port=upc_port, server='cheroot', debug=True,
+          certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
+    else:
+      # Non SSL option for testing on localhost
+      print("Running with HTTPS turned OFF - use a reverse proxy on production")
+      run(host=server_host, port=upc_port, server='cheroot', debug=True)
+
+    # run(host="0.0.0.0", port=server_port, server='cherrypy', debug=True)
