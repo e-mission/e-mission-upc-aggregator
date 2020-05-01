@@ -97,8 +97,11 @@ def setInitPrivacyBudget():
 
 def setPrivacyBudget(budget):
     table = get_collection("privacyBudget")
+    # We simply want to update everything so we make the query parameter empty
+    query = dict()
     budget_dict = {"privacy_budget" : budget}
-    result = table.insert_one(budget)
+    # Use update one because there should ever only be one document
+    result = table.update_one(query, budget_dict, upsert=True)
 
 def getPrivacyBudget():
     table = get_collection("privacyBudget")
