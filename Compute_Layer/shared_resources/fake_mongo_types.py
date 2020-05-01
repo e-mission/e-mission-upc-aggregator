@@ -284,6 +284,7 @@ class FakeCursor:
             assert(not error)
         else:
             data_json = r.json()
+            print("New budget: {}".format(data_json['budget']))
             return data_json['success']
 
 
@@ -469,7 +470,7 @@ class AbstractCollection:
         else:
             data_json = r.json()
             result = data_json['resp']
-            if ininstance(result, list):
+            if isinstance(result, list):
                 if result[0] is not None:
                     result = [bson.ObjectId(_id) for _id in result]
             else:

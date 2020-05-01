@@ -1,4 +1,5 @@
 import abc
+import numpy as np
 
 class Query(abc.ABC):
     """

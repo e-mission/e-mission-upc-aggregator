@@ -318,11 +318,11 @@ def launch_sum_query(user, start_ts, end_ts, alpha, offset):
     # Create the query instance
     query = clsrq.Sum()
     # Create the collection
-    db  = clsrfmt.UsercacheCollection(pm_addr)
+    db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
     filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
     partition = {"_id": False}
     cursor = db.find(filter, partition)
-    data = List(cursor)
+    data = list(cursor)
     
     # Compute the result
     query.update_current_query_result(data)
@@ -339,11 +339,11 @@ def launch_ae_query(user, start_ts, end_ts, alpha, offset):
     # Create the query instance
     query = clsrq.AE()
     # Create the collection
-    db  = clsrfmt.UsercacheCollection(pm_addr)
+    db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
     filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
     partition = {"_id": False}
     cursor = db.find(filter, partition)
-    data = List(cursor)
+    data = list(cursor)
     
     # Compute the result
     query.update_current_query_result(data)
@@ -356,15 +356,15 @@ def launch_ae_query(user, start_ts, end_ts, alpha, offset):
     # Calculate the data
     return query.get_current_query_result()
 
-def launch_rc_query(pm_addr, start_ts, end_ts, alpha, r_start, r_end):
+def launch_rc_query(user, start_ts, end_ts, alpha, r_start, r_end):
     # Create the query instance
     query = clsrq.RC()
     # Create the collection
-    db  = clsrfmt.UsercacheCollection(pm_addr)
+    db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
     filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
     partition = {"_id": False}
     cursor = db.find(filter, partition)
-    data = List(cursor)
+    data = list(cursor)
     
     # Compute the result
     query.update_current_query_result(data)
