@@ -8,12 +8,12 @@ import numpy as np
 import datetime
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
-import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 from Compute_Layer.shared_resources.ical import calendarTimeZone 
 from emission.net.int_service.machine_configs import certificate_bundle_path
 from dateutil.parser import parse
 import geojson
-from Compute_Layer.Services.queries.queries import receive_query
+import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
+import Compute_Layer.shared_resources.queries as clsrq
 
 controller_addr = "{}:{}".format (controller_ip, controller_port)
 
@@ -93,7 +93,6 @@ def create_and_sync_data (userlist, numTrips):
     pool.close ()
     [result.wait () for result in results]
     pool.join ()
-    """
     """
     pool = Pool (len (userlist) + 1)
     results = []
@@ -185,7 +184,6 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
     """
-    """
     # Example test calendar
     test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
 
@@ -215,6 +213,7 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
+    """
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
@@ -268,7 +267,6 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
-    """
 
 def create_user_data (user, numTrips):
     for _ in range (numTrips):
@@ -317,39 +315,68 @@ def get_arrival_time(user, date):
     return r.json()
 
 def launch_sum_query(user, start_ts, end_ts, alpha, offset):
-    query = dict()
-    query['query_type'] = "sum"
-    query['start_ts'] = start_ts
-    query['end_ts'] = end_ts
-    query['alpha'] = alpha
-    query['offset'] = offset
-    return launch_query(user, query)
+    # Create the query instance
+    query = clsrq.Sum()
+    # Create the collection
+    db  = clsrfmt.UsercacheCollection(pm_addr)
+    filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
+    partition = {"_id": False}
+    cursor = db.find(filter, partition)
+    data = List(cursor)
+    
+    # Compute the result
+    query.update_current_query_result(data)
+
+    # Deduct from the budget
+    privacy_cost = query.generate_diff_priv_cost(offset, alpha)
+    success = cursor.deduct_budget(privacy_cost)
+    if not success:
+        return None
+    # Calculate the data
+    return query.get_current_query_result()
 
 def launch_ae_query(user, start_ts, end_ts, alpha, offset):
-    query = dict()
-    query['query_type'] = "ae"
-    query['start_ts'] = start_ts
-    query['end_ts'] = end_ts
-    query['alpha'] = alpha
-    query['offset'] = offset
-    return launch_query(user, query)
+    # Create the query instance
+    query = clsrq.AE()
+    # Create the collection
+    db  = clsrfmt.UsercacheCollection(pm_addr)
+    filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
+    partition = {"_id": False}
+    cursor = db.find(filter, partition)
+    data = List(cursor)
+    
+    # Compute the result
+    query.update_current_query_result(data)
 
-def launch_rc_query(user, start_ts, end_ts, alpha, r_start, r_end): 
-    query = dict()
-    query['query_type'] = "rc"
-    query['start_ts'] = start_ts
-    query['end_ts'] = end_ts
-    query['alpha'] = alpha
-    query['offset'] = (r_end - r_start) / 2
-    return launch_query(user, query)
+    # Deduct from the budget
+    privacy_cost = query.generate_diff_priv_cost(offset, alpha)
+    success = cursor.deduct_budget(privacy_cost)
+    if not success:
+        return None
+    # Calculate the data
+    return query.get_current_query_result()
 
-def launch_query(user, query):
-    addresses = clsrfmt.request_service({'user': user._config['email']}, 'query')
-    json_dict = dict()
-    json_dict['pm_address'] = addresses[0]
-    json_dict['query'] = query
-    r = requests.post (addresses[1] + "/receive_query", json=json_dict, verify=certificate_bundle_path)
-    return r.json()
+def launch_rc_query(pm_addr, start_ts, end_ts, alpha, r_start, r_end):
+    # Create the query instance
+    query = clsrq.RC()
+    # Create the collection
+    db  = clsrfmt.UsercacheCollection(pm_addr)
+    filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
+    partition = {"_id": False}
+    cursor = db.find(filter, partition)
+    data = List(cursor)
+    
+    # Compute the result
+    query.update_current_query_result(data)
+
+    # Deduct from the budget
+    privacy_cost = query.generate_diff_priv_cost(r_start, r_end, alpha)
+    success = cursor.deduct_budget(privacy_cost)
+    if not success:
+        return None
+    # Calculate the data
+    return query.get_current_query_result()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser (description="Script to generate a number of fake users and sync their data to their respective user clouds")
