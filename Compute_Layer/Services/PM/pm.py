@@ -110,7 +110,7 @@ def getPrivacyBudget():
     if storedBudget is None:
         return setInitPrivacyBudget()
     else:
-        return storedBudget
+        return storedBudget["privacy_budget"]
 
 def getCursor(find_method):
   
