@@ -103,13 +103,11 @@ def setPrivacyBudget(budget):
 def getPrivacyBudget():
     table = get_collection("privacyBudget")
     filtered = {"_id": False}
-    retrievedData = table.find_one({}, filtered)
-    datalist = list(retrievedData)
-    if len(datalist) == 0:
-        return None
+    storedBudget = table.find_one({}, filtered)
+    if storedBudget is None:
+        return setInitPrivacyBudget()
     else:
-        logging.debug("PB load is {}".format(datalist[0]))
-        return datalist[0]["privacy_budget"]
+        return storedBudget
 
 def getCursor(find_method):
   
@@ -407,18 +405,14 @@ def deleteData():
 @post ("/privacy_budget")
 def reduce_privacy_budget():
     budget = getPrivacyBudget()
-    if budget is None:
-        privacy_budget = setInitPrivacyBudget()
-    else:
-        privacy_budget = float(budget)
     cost = float(request.json['privacy_cost'])
     # Remove returning the budget after testing
-    if privacy_budget - cost < 0:
+    if budget - cost < 0:
         return {"success": False, "budget" : ""}
     else:
-        privacy_budget -= cost
-        setPrivacyBudget(privacy_budget)
-        return {"success": True, "budget" : privacy_budget}
+        budget -= cost
+        setPrivacyBudget(budget)
+        return {"success": True, "budget" : budget}
 
 
 @post ("/cloud/key")
