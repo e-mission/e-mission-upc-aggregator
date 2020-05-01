@@ -84,7 +84,8 @@ class RC(Query):
         return self.query_value
 
     def generate_diff_priv_cost(self, r_start, r_end, alpha):
-        return -1 * np.log(alpha) / ((r_end - r_start) / 2.0)
+        offset = (r_end - r_start) / 2.0
+        return -1 * np.log(alpha) / offset
 
     def __repr__(self):
         return "ae"
