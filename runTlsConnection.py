@@ -20,7 +20,7 @@ def main ():
             requests.post (controller_addr + "/setup_networks", verify=certificate_bundle_path)
             ret = subprocess.Popen (["./e-mission-py.bash", "emission/simulation/simulate_fake_users.py", str(curr_num_users), str(curr_num_trips)], cwd="./")
             ret.wait ()
-            requests.post (controller_addr + "/clear_containers", verify=certificate_bundle_path)
+#            requests.post (controller_addr + "/clear_containers", verify=certificate_bundle_path)
 
 
 if __name__ == "__main__":

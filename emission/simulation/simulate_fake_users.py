@@ -213,25 +213,6 @@ def create_and_sync_data (userlist, numTrips):
     pool.join ()
     print ([result.get () for result in results])
 
-    """
-    pool = Pool (len (userlist) + 1)
-    results = []
-    for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, [userlist[i], 1501592400, 1564664400, .01, 10]))
-    pool.close ()
-    [result.wait () for result in results]
-    pool.join ()
-    print ([result.get () for result in results])
-
-    pool = Pool (len (userlist) + 1)
-    results = []
-    for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_sum_query, [userlist[i], 1601592400, 1664664400, .01, 10]))
-    pool.close ()
-    [result.wait () for result in results]
-    pool.join ()
-    print ([result.get () for result in results])
-
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
@@ -249,24 +230,7 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
-    
-    pool = Pool (len (userlist) + 1)
-    results = []
-    for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_rc_query, [userlist[i], 1501592400, 1564664400, .01, 10, 30]))
-    pool.close ()
-    [result.wait () for result in results]
-    pool.join ()
-    print ([result.get () for result in results])
-
-    pool = Pool (len (userlist) + 1)
-    results = []
-    for i in range (len (userlist)):
-        results.append (pool.apply_async (launch_rc_query, [userlist[i], 1601592400, 1664664400, .01, 10, 30]))
-    pool.close ()
-    [result.wait () for result in results]
-    pool.join ()
-    print ([result.get () for result in results])
+    """
 
 def create_user_data (user, numTrips):
     for _ in range (numTrips):
@@ -314,68 +278,23 @@ def get_arrival_time(user, date):
     r = requests.post (addresses[1] + "/get_last_event", json=json_dict, verify=certificate_bundle_path)
     return r.json()
 
-def launch_sum_query(user, start_ts, end_ts, alpha, offset):
-    # Create the query instance
-    query = clsrq.Sum()
-    # Create the collection
-    db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
-    filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
-    partition = {"_id": False}
-    cursor = db.find(filter, partition)
-    data = list(cursor)
-    
-    # Compute the result
-    query.update_current_query_result(data)
-
-    # Deduct from the budget
-    privacy_cost = query.generate_diff_priv_cost(offset, alpha)
-    success = cursor.deduct_budget(privacy_cost)
-    if not success:
-        return None
-    # Calculate the data
-    return query.get_current_query_result()
-
 def launch_ae_query(user, start_ts, end_ts, alpha, offset):
     # Create the query instance
-    query = clsrq.AE()
-    # Create the collection
-    db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
-    filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
-    partition = {"_id": False}
-    cursor = db.find(filter, partition)
-    data = list(cursor)
-    
-    # Compute the result
-    query.update_current_query_result(data)
-
-    # Deduct from the budget
-    privacy_cost = query.generate_diff_priv_cost(offset, alpha)
-    success = cursor.deduct_budget(privacy_cost)
-    if not success:
+    query = clsrq.AE(1)
+    success = clsrfmt.deduct_budget(user._config['upload_url'], query.generate_diff_priv_cost(alpha, offset))
+    if success:
+        # Create the collection
+        db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
+        filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
+        partition = {"_id": False}
+        cursor = db.find(filter, partition)
+        data = list(cursor)
+        if len(data) > 0:
+            return 1
+        else:
+            return 0
+    else:
         return None
-    # Calculate the data
-    return query.get_current_query_result()
-
-def launch_rc_query(user, start_ts, end_ts, alpha, r_start, r_end):
-    # Create the query instance
-    query = clsrq.RC()
-    # Create the collection
-    db  = clsrfmt.UsercacheCollection(user._config['upload_url'])
-    filter = {"data_ts": {"$lt": end_ts, "$gt": start_ts}}
-    partition = {"_id": False}
-    cursor = db.find(filter, partition)
-    data = list(cursor)
-    
-    # Compute the result
-    query.update_current_query_result(data)
-
-    # Deduct from the budget
-    privacy_cost = query.generate_diff_priv_cost(r_start, r_end, alpha)
-    success = cursor.deduct_budget(privacy_cost)
-    if not success:
-        return None
-    # Calculate the data
-    return query.get_current_query_result()
 
 
 if __name__ == "__main__":
