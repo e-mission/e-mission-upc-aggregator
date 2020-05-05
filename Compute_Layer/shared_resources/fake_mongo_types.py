@@ -676,7 +676,7 @@ def request_service(username, service_name):
         assert(not error)
     else:
         data_json = r.json()
-        return data_json['addresses']
+        return data_json['address']
 
 def deduct_budget(pm_address, privacy_cost):
     json_entries = dict()

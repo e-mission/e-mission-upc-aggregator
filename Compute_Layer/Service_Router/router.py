@@ -93,20 +93,6 @@ def launch_service ():
     else:
         raise HTTPError(403, "Request made for an unknown service")
 
-    pm_container_name = None
-    pm_address = None
-    
-    # Treat the PM as a special service and always launch it
-    if service_name != pm_name:
-        services_dict = services[pm_name]
-        pm_service_file = services_dict['service_file']
-        pm_pod_file = None
-        if 'pod_file' in services_dict:
-            pm_pod_file = services_dict['pod_file'] 
-        pm_container_name, pm_address = clsrl.spawnServiceInstance (user_uuid, False,
-                pm_name, pm_service_file, pm_pod_file)
-
-
     # Launch the actual container
     container_name, address = clsrl.spawnServiceInstance (user_uuid, False, 
             service_name, service_file, pod_file)
@@ -121,9 +107,8 @@ def launch_service ():
     if pm_address:
        address_list.append(pm_address)
     address_list.append(address)
-    # Need a better way to wait
-    time.sleep (9)
-    return {'addresses': address_list}
+    # Need a better way to wait place it in the swarm portion
+    return {'address': address}
 
 @post('/get_user_addrs')
 def return_container_addrs ():

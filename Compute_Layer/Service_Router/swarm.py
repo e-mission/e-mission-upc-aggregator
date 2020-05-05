@@ -36,8 +36,6 @@ def spawn_service():
         upc_pod_config = read_config_json(upc_pod_file)
         container_name, container_port = launch_unique_service(upc_service_config, 
                 upc_pod_config)
-        # Need a better way to wait
-        time.sleep (10)
         return container_name +"\n" + str(container_port)
     else:
         docker_file = request.json["service_file"]
@@ -161,7 +159,7 @@ def launch_unique_service(service_config_json, pod_config_json):
                         # Fix to actually catch errors
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])
-                        time.sleep(15)
+                        # Replace this with a check for if the external address changes
                         print("escaped")
                         return service_name, new_port
                     except:
