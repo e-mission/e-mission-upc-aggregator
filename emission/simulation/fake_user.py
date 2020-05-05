@@ -8,7 +8,6 @@ import socket
 #emission imports
 import emission.core.wrapper.user as ecwu
 from emission.net.ext_service.otp.otp import OTP, PathNotFoundException
-from emission.net.int_service.machine_configs import certificate_bundle_path
 import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 import Compute_Layer.shared_resources.ical as clsri
 

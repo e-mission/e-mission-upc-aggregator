@@ -6,7 +6,7 @@
 
 import requests
 import numpy as np
-from emission.net.int_service.machine_configs import swarm_port, machines_list, certificate_bundle_path
+from emission.net.int_service.machine_configs import swarm_port, machines_list
 
 randlist = []
 
@@ -24,7 +24,7 @@ class Machine ():
         json_dict = {'uuid':uuid, 'use_kubernetes': use_kubernetes, 'service_name': service_name,
                 'service_file' : service_file, 'pod_file': pod_file}
         resp = requests.post ("{}:{}/spawn_service".format (self.baseaddr, self.serverPort), 
-                json=json_dict, verify=certificate_bundle_path)
+                json=json_dict)
         print(resp.text)
         components = resp.text.split()
         container_name = components[0]
@@ -35,7 +35,7 @@ class Machine ():
 
     def killContainer (self, name):
         if name in self.containers:
-            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'name':name}, verify=certificate_bundle_path)
+            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'name':name})
             print (resp)
             self.containers.remove (name)
             Machine.total -= 1
@@ -44,11 +44,11 @@ class Machine ():
 
     def clearContainers (self):
         Machine.total -= len (self.containers)
-        resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort), verify=certificate_bundle_path)
+        resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort))
         self.containers = []
 
     def setupNetwork (self):
-        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort), verify=certificate_bundle_path)
+        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort))
         
 
 # Takes in a list of machine tuples, where the first element is the IP_ADDR

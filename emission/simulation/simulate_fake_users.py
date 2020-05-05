@@ -9,7 +9,6 @@ import datetime
 from emission.net.int_service.machine_configs import controller_ip, controller_port, register_user_endpoint, service_endpoint
 from multiprocessing.dummy import Pool
 from Compute_Layer.shared_resources.ical import calendarTimeZone 
-from emission.net.int_service.machine_configs import certificate_bundle_path
 from dateutil.parser import parse
 import geojson
 import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
@@ -275,7 +274,7 @@ def get_arrival_time(user, date):
     json_dict = dict()
     json_dict['pm_address'] = addresses[0]
     json_dict['date'] = date.isoformat()
-    r = requests.post (addresses[1] + "/get_last_event", json=json_dict, verify=certificate_bundle_path)
+    r = requests.post (addresses[1] + "/get_last_event", json=json_dict)
     return r.json()
 
 def launch_ae_query(user, start_ts, end_ts, alpha, offset):

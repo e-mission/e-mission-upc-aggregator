@@ -2,7 +2,6 @@ import requests
 import json
 import sys
 import Compute_Layer.Services.emission_metrics.metrics as clsemm
-from emission.net.int_service.machine_configs import certificate_bundle_path
 
 def query_metrics(pm_address):
     timetype = "local_date"
@@ -30,7 +29,7 @@ def query_metrics(pm_address):
     json_dict['offset_list'] = offset_list
     alpha_list = [.05, .10, .15]
     json_dict['alpha_list'] = alpha_list
-    r = requests.post("https://127.0.1.1:8000/metrics/local_date", json=json_dict, verify=certificate_bundle_path)
+    r = requests.post("https://127.0.1.1:8000/metrics/local_date")
     results = r.json()
     print(results)
 

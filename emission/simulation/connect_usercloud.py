@@ -4,7 +4,7 @@
 
 # Inspired by https://stackoverflow.com/questions/34417279/sending-a-json-string-as-a-post-request/34418733
 import requests
-from emission.net.int_service.machine_configs import register_user_endpoint, service_endpoint, cloud_key_endpoint, certificate_bundle_path
+from emission.net.int_service.machine_configs import register_user_endpoint, service_endpoint, cloud_key_endpoint
 import emission.simulation.profile_json as profile_json
 from Compute_Layer.shared_resources.fake_mongo_types import request_service 
 
@@ -18,7 +18,7 @@ class UserCloud:
 
     def send_contents (self, addr):
         print(addr)
-        print (requests.post (addr + cloud_key_endpoint, json=self.key, verify=certificate_bundle_path).text)
+        print (requests.post (addr + cloud_key_endpoint, json=self.key).text)
 
 
     # Method used to get the address from speaking to the KAL
@@ -28,7 +28,7 @@ class UserCloud:
     # Registers the user to controller
     def register_with_controller (self, controller_addr):
         print (controller_addr)
-        print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}, verify=certificate_bundle_path))
+        print (requests.post (controller_addr + register_user_endpoint, json={'user':self.username}))
 
     def init_usercloud (self, username, controller_addr):
         self.username = username
@@ -37,4 +37,4 @@ class UserCloud:
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):
-        return requests.post (self.address + addr_extension, json=contents, verify=certificate_bundle_path)
+        return requests.post (self.address + addr_extension, json=contents)

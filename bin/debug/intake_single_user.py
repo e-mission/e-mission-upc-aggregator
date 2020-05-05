@@ -18,7 +18,6 @@ import emission.pipeline.intake_stage as epi
 import emission.core.wrapper.user as ecwu
 import Compute_Layer.Services.emission_pipeline.run_pipeline as clseprp
 
-from emission.net.int_service.machine_configs import certificate_bundle_path 
 
 if __name__ == '__main__':
     np.random.seed(61297777)
@@ -33,4 +32,4 @@ if __name__ == '__main__':
     json_entries['pm_address'] = args.user_email
 
     r = requests.post("https://127.0.1.1:8000/run_pipeline", json=json_entries, 
-            timeout=6000, verify=certificate_bundle_path)
+            timeout=600000)

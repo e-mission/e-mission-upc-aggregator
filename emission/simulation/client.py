@@ -4,7 +4,6 @@ from emission.simulation.error import AddressNotFoundError
 from emission.simulation.rand_helpers import gen_random_key
 import emission.simulation.gen_profile as gp
 import emission.simulation.connect_usercloud as escu
-from emission.net.int_service.machine_configs import certificate_bundle_path
 import requests
 
 class Client(ABC):
