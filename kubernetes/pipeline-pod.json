@@ -1,0 +1,26 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "pipeline",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "pipeline"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "pipeline",
+        "image": "emission/test-pipeline:1.0",
+        "ports": [
+          {
+            "containerPort": 80
+          }
+        ],
+        "resources": {}
+      }
+    ]
+  },
+  "status": {}
+}

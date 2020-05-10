@@ -1,0 +1,26 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "calendar",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "calendar"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "calendar",
+        "image": "emission/test-calendar:1.0",
+        "ports": [
+          {
+            "containerPort": 80
+          }
+        ],
+        "resources": {}
+      }
+    ]
+  },
+  "status": {}
+}

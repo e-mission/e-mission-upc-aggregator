@@ -1,6 +1,4 @@
 import json
-from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
-from emission.core.get_database import url
 # To support dynamic loading of client-specific libraries
 import socket
 import logging
@@ -8,13 +6,14 @@ import logging.config
 
 import requests
 
-# Nick's additional import for managing servers
-from emission.net.int_service.machine_configs import upc_port
 from pymongo import MongoClient
 import pymongo
 import sys
 from importlib import import_module
 import bson
+
+from Compute_Layer.shared_resources.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
+
 
 # Inspired by https://stackoverflow.com/questions/16586180/typeerror-objectid-is-not-json-serializable
 def convert_string_to_objectid(dict_or_list_or_item):
@@ -45,25 +44,9 @@ def convert_objectid_to_string(dict_or_list_or_item):
             else:
                 convert_objectid_to_string(value)
 
-try:
-    config_file = open('conf/net/api/webserver.conf')
-except:
-    logging.debug("webserver not configured, falling back to sample, default configuration")
-    config_file = open('conf/net/api/webserver.conf.sample')
-
-config_data = json.load(config_file)
-static_path = config_data["paths"]["static_path"]
-python_path = config_data["paths"]["python_path"]
-server_host = config_data["server"]["host"]
-server_port = config_data["server"]["port"]
-socket_timeout = config_data["server"]["timeout"]
-log_base_dir = config_data["paths"]["log_base_dir"]
-auth_method = config_data["server"]["auth"]
 
 BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 # to accomodate large section sizes
-
-print("Finished configuring logging for %s" % logging.getLogger())
 app = app()
 
 enc_key = None
@@ -73,6 +56,7 @@ _current_db = None
 def _get_current_db():
     global _current_db
     if _current_db is None:
+        url = "localhost"
         print("Connecting to database URL "+url)
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
     return _current_db
@@ -444,11 +428,12 @@ if __name__ == '__main__':
     # To avoid config file for tests
     server_host = socket.gethostbyname(socket.gethostname())
 
+    upc_port = 80
 
     # The selection of SSL versus non-SSL should really be done through a config
     # option and not through editing source code, so let's make this keyed off the
     # port number
-    if server_port == "443":
+    if upc_port == "443":
       # We support SSL and want to use it
       try:
         key_file = open('conf/net/keys.json')

@@ -9,25 +9,11 @@
     }
   },
   "spec": {
-    "volumes": [
-      {
-        "name": "mongo-data-raw",
-        "persistentVolumeClaim": {
-          "claimName": "mongo-data-raw"
-        }
-      }
-    ],
     "containers": [
       {
-        "name": "db",
+        "name": "dummy-db",
         "image": "emission/mongo-custom:1.0",
         "resources": {},
-        "volumeMounts": [
-          {
-            "name": "mongo-data-raw",
-            "mountPath": "/raw"
-          }
-        ],
         "securityContext": {
           "privileged": true
         }
