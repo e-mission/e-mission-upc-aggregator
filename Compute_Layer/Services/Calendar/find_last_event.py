@@ -1,9 +1,6 @@
 import datetime
-import Compute_Layer.shared_resources.stream_data as clsrsd
-from emission.net.int_service.machine_configs import upc_port
 import json
-from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
-from emission.core.get_database import url
+from Compute_Layer.shared_resources.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 from dateutil.parser import parse
 # To support dynamic loading of client-specific libraries
 import socket
@@ -73,11 +70,12 @@ if __name__ == '__main__':
     # To avoid config file for tests
     server_host = socket.gethostbyname(socket.gethostname())
 
+    upc_port = 80
 
     # The selection of SSL versus non-SSL should really be done through a config
     # option and not through editing source code, so let's make this keyed off the
     # port number
-    if upc_port == 8000:
+    if upc_port == 443:
       # We support SSL and want to use it
       try:
         key_file = open('conf/net/keys.json')
