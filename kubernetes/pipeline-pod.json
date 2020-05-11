@@ -18,7 +18,8 @@
             "containerPort": 80
           }
         ],
-        "resources": {}
+        "resources": {},
+        "imagePullPolicy": "Always"
       }
     ]
   },
