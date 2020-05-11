@@ -23,13 +23,13 @@ if __name__ == '__main__':
     np.random.seed(61297777)
 
     parser = argparse.ArgumentParser(prog="intake_single_user")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument("-e", "--user_email")
-    group.add_argument("-u", "--user_uuid")
+    parser.add_argument("pm_addr", type=str)
+    parser.add_argument("pipeline_addr", type=str)
 
     args = parser.parse_args()
     json_entries = dict()
-    json_entries['pm_address'] = args.user_email
+    json_entries['pm_address'] = args.pm_addr
 
-    r = requests.post("https://127.0.1.1:8000/run_pipeline", json=json_entries, 
+    print(args.pipeline_addr)
+    r = requests.post("{}/run_pipeline".format(args.pipeline_addr), json=json_entries, 
             timeout=600000)

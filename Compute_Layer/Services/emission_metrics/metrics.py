@@ -11,7 +11,6 @@ import Compute_Layer.shared_resources.queries as clsrq
 import Compute_Layer.shared_resources.fake_mongo_types as clsrfmt
 import datetime
 import pytz
-from emission.net.int_service.machine_configs import upc_port
 
 # Dictionary that holds the static delta f multipler values for each result type
 # We assume the options are count (in trips), distance (in meters), and
@@ -135,11 +134,12 @@ if __name__ == '__main__':
     # To avoid config file for tests
     server_host = socket.gethostbyname(socket.gethostname())
 
+    upc_port = 80
 
     # The selection of SSL versus non-SSL should really be done through a config
     # option and not through editing source code, so let's make this keyed off the
     # port number
-    if upc_port == 8000:
+    if upc_port == 443:
       # We support SSL and want to use it
       try:
         key_file = open('conf/net/keys.json')

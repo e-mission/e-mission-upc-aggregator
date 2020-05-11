@@ -93,6 +93,7 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     """
+    """
     pool = Pool (len (userlist) + 1)
     results = []
     for i in range (len (userlist)):
@@ -182,6 +183,8 @@ def create_and_sync_data (userlist, numTrips):
     [result.wait () for result in results]
     pool.join ()
     print ([result.get () for result in results])
+    """
+
     """
     # Example test calendar
     test_calendar = "Compute_Layer/Services/Calendar/example_cal.txt"
