@@ -439,6 +439,7 @@ class AbstractCollection:
         if not r.ok or error:
             error = True
         if error:
+            print(r.text)
             assert(not error)
         else:
             data_json = r.json()
@@ -647,13 +648,12 @@ class CalendarCollection(AbstractCollection):
 
     def __init__(self, target_address):
         indices_dict = dict()
-        index1 = ["data.attendees", "data.start_time", "data.end_time", "data.ts", "data.geo"]
+        index1 = ["data.start_time", "data.end_time"]
         index_one = "metadata.type"
         for elem in index1:
             index_one += "\n" + elem
         indices_dict[index_one] =[[pymongo.ASCENDING, pymongo.ASCENDING, 
-            pymongo.ASCENDING, pymongo.ASCENDING, pymongo.ASCENDING, 
-            pymongo.GEOSPHERE], False]
+            pymongo.ASCENDING], False]
         super().__init__(target_address, "Stage_calendar", indices_dict)
 
 

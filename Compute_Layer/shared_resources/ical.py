@@ -2,6 +2,7 @@ import datetime
 import icalendar
 import pytz
 import sys
+from geojson import Point
 
 calendarTimeZone = pytz.timezone("US/Pacific")
 
@@ -99,7 +100,7 @@ def findAttendees(event):
     return attendees_strs
 
 def findGeo(event):
-    return icalendar.vGeo.from_ical(event['geo'].to_ical())
+    return Point(icalendar.vGeo.from_ical(event['geo'].to_ical()))
 
 
 def sortEventsByEndTime(calendar):

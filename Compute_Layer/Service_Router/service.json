@@ -1,6 +1,22 @@
-{"PM": 
-    {"service_file": "docker/docker-compose.yml"}, 
-"query": 
-    {"service_file": "docker/docker-compose-query.yml"},
-"calendar":
-    {"service_file": "docker/docker-compose-calendar.yml"}}
+{
+    "PM":
+        { 
+            {"service_file": "kubernetes/web-server-service.json"},
+            {"pod_file": "kubernetes/web-server-pod.json"}
+        },
+    "Pipeline": 
+        {
+            {"service_file": "kubernetes/pipeline-service.json"},
+            {"pod_file": "kubernetes/pipeline-pod.json"}
+        }, 
+    "Metrics": 
+        {
+            {"service_file": "kubernetes/metrics-service.json"},
+            {"pod_file": "kubernetes/metrics-pod.json"}
+        }, 
+    "Calendar":
+        { 
+            {"service_file": "kubernetes/calendar-service.json"},
+            {"pod_file": "kubernetes/calendar-pod.json"}
+        } 
+}

@@ -1,0 +1,29 @@
+{
+  "kind": "Service",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "db",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "db"
+    },
+    "annotations": {
+      "kompose.cmd": "kompose convert -f docker-compose.yml -j",
+      "kompose.version": "1.16.0 (0c01309)"
+    }
+  },
+  "spec": {
+    "type": "NodePort",
+    "ports": [
+      {
+        "name": "default-port",
+        "nodePort": 30005,
+        "port": 30005,
+        "targetPort" : 80 
+      }
+    ],
+    "selector": {
+      "io.kompose.service": "db"
+    }
+  }
+}

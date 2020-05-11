@@ -38,7 +38,7 @@ def get_last_event_from_server(upload_address, date):
     query = {"data.end_time": {"$lt": day_end, "$gt": day_start}}
     filters = {"_id": False}
     sort_list = {'data.end_time': False}
-    db = clsrfmt.CalendarCollection(self._config['download_url'])
+    db = clsrfmt.CalendarCollection(upload_address)
     data = list(db.find(query, filters).sort(sort_list))
     if len(data) == 0:
         return None
