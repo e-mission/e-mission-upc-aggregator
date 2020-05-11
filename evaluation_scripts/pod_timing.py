@@ -22,15 +22,15 @@ def pipeline_test():
 def pod_tests(pod_name):
     trials = dict()
     trials[0] = pod_test(pod_name, 0)
-    trials[25] = pod_test(pod_name, 25)
-    trials[50] = pod_test(pod_name, 50)
+    trials[10] = pod_test(pod_name, 10)
+    trials[20] = pod_test(pod_name, 20)
     return trials
 
 def pod_test(pod_name, num_other_pods):
     # Fill in other pods
     fake_names = generate_dummy_pods(num_other_pods)
     
-    num_trials = 15
+    num_trials = 20
     times = []
     for i in range(num_trials):
         address, time_val = time_pod_startup(pod_name)
