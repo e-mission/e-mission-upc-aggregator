@@ -30,8 +30,7 @@ def pod_test(pod_name, num_other_pods):
     # Fill in other pods
     fake_names = generate_dummy_pods(num_other_pods)
     
-    # Switch num_trials to 50
-    num_trials = 2
+    num_trials = 15
     times = []
     for i in range(num_trials):
         address, time_val = time_pod_startup(pod_name)

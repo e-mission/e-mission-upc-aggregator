@@ -10,11 +10,7 @@ tick_period = float (config_data["tick-period"])
 pause_ticks = int (config_data["pause-ticks"])
 kill_ticks = int (config_data["kill-ticks"])
 swarm_port = int (config_data["swarm-port"])
-machines_dict = config_data["machines"]
-machines_list = []
-for key, value in machines_dict.items ():
-    machines_list.append ((key, float (value)))
-
+machines_list = config_data["machines"]
 register_user_endpoint = config_data["register_user_endpoint"]
 find_endpoint = config_data["find_endpoint"]
 find_one_endpoint = config_data["find_one_endpoint"]

@@ -23,7 +23,7 @@ class UserCloud:
 
     # Method used to get the address from speaking to the KAL
     def getaddress (self):
-        self.address = request_service(self.username, 'PM')[0]
+        self.address = request_service('PM')
 
     # Registers the user to controller
     def register_with_controller (self, controller_addr):
@@ -32,9 +32,8 @@ class UserCloud:
 
     def init_usercloud (self, username, controller_addr):
         self.username = username
-        #self.register_with_controller (controller_addr)
-        #self.getaddress ()
-        self.address = "http://192.168.99.100:30000"
+        self.register_with_controller (controller_addr)
+        self.getaddress ()
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):

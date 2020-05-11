@@ -12,7 +12,7 @@
     "containers": [
       {
         "name": "web-server",
-        "image": "emission/test-server:1.0",
+        "image": "gcr.io/upc-masters/test-server:1.0",
         "ports": [
           {
             "containerPort": 80
@@ -32,7 +32,7 @@
       },
       {
         "name": "database",
-        "image": "emission/mongo-custom:1.0",
+        "image": "gcr.io/upc-masters/mongo-custom:1.0",
         "ports": [
           {
             "containerPort": 27017

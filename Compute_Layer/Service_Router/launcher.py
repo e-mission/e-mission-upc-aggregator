@@ -11,7 +11,7 @@ import Compute_Layer.Service_Router.swarm as clsrs
 
 class Machine ():
     total = 0
-    def __init__ (self):
+    def __init__ (self, baseaddr):
         self.baseaddr = baseaddr
 
     def spawnService (self, service_file, pod_file):

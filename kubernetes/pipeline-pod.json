@@ -12,7 +12,7 @@
     "containers": [
       {
         "name": "pipeline",
-        "image": "emission/test-pipeline:1.0",
+        "image": "gcr.io/upc-masters/test-pipeline:1.0",
         "ports": [
           {
             "containerPort": 80

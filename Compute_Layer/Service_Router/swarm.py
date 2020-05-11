@@ -25,9 +25,9 @@ cloudVarName = "PORTMAP"
 
 def spawn_service(service_file, pod_file):
     # Add section to load data
-    upc_service_file = request.json["service_file"]
+    upc_service_file = service_file
     upc_service_config = read_config_json(upc_service_file)
-    upc_pod_file = request.json["pod_file"]
+    upc_pod_file = pod_file
     upc_pod_config = read_config_json(upc_pod_file)
     container_name, container_port = launch_unique_service(upc_service_config, 
             upc_pod_config)
@@ -80,6 +80,9 @@ def modify_name(config_json, new_name):
 def modify_label(config_json, new_label):
     config_json['metadata']['labels']['io.kompose.service'] = new_label
 
+def modify_selector(config_json, new_label):
+    config_json['spec']['selector']['io.kompose.service'] = new_label
+
 # Helper function to convert the name produced by temporary files to one accepted by
 # kubectl. Also returns the path name for the file
 def convert_temp_name(old_name):
@@ -103,9 +106,11 @@ def launch_unique_service(service_config_json, pod_config_json):
                 # Change the service name
                 modify_name(service_config_json, service_name)
                 # Change the pod name
-                modify_name(pod_config_json, pod_name)
+                modify_name(pod_config_json, service_name)
                 # Modify the service label
                 modify_label(service_config_json, service_name)
+                # Modify the service selector
+                modify_selector(service_config_json, service_name)
                 # Modify the pod label
                 modify_label(pod_config_json, service_name)
                 # Dump pod file

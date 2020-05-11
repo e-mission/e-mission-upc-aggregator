@@ -12,7 +12,7 @@
     "containers": [
       {
         "name": "calendar",
-        "image": "emission/test-calendar:1.0",
+        "image": "gcr.io/upc-masters/test-calendar:1.0",
         "ports": [
           {
             "containerPort": 80

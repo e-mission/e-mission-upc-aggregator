@@ -681,6 +681,7 @@ def delete_service(address):
     controller_addr = controller_ip + ":" + str(controller_port)
     json_entries = dict()
     json_entries['address'] = address
+    error = False
     try:
         r = requests.post(controller_addr + delete_service_endpoint, json=json_entries, timeout=600)
     except (socket.timeout) as e:
@@ -696,6 +697,7 @@ def delete_service(address):
 
 def delete_all_services():
     controller_addr = controller_ip + ":" + str(controller_port)
+    error = False
     try:
         r = requests.post(controller_addr + delete_all_services_endpoint, timeout=600)
     except (socket.timeout) as e:
