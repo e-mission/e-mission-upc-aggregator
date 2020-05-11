@@ -43,7 +43,7 @@ def pod_test(pod_name, num_other_pods):
     return times
     
 def generate_dummy_pods(num_pods):
-    dummy_name = "fake-db"
+    dummy_name = "db"
     addresses = []
     for i in range(num_pods):
         addresses.append(clsrfmt.request_service(dummy_name))

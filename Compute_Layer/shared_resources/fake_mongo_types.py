@@ -682,7 +682,7 @@ def delete_service(address):
     json_entries = dict()
     json_entries['address'] = address
     try:
-        r = requests.post(controller_addr + delete_service_endpoint, json=json_entries timeout=600)
+        r = requests.post(controller_addr + delete_service_endpoint, json=json_entries, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful

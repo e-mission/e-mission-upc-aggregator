@@ -1,22 +1,27 @@
 {
     "PM":
         { 
-            {"service_file": "kubernetes/web-server-service.json"},
-            {"pod_file": "kubernetes/web-server-pod.json"}
+            "service_file": "kubernetes/web-server-service.json",
+            "pod_file": "kubernetes/web-server-pod.json"
         },
     "Pipeline": 
         {
-            {"service_file": "kubernetes/pipeline-service.json"},
-            {"pod_file": "kubernetes/pipeline-pod.json"}
+            "service_file": "kubernetes/pipeline-service.json",
+            "pod_file": "kubernetes/pipeline-pod.json"
         }, 
     "Metrics": 
         {
-            {"service_file": "kubernetes/metrics-service.json"},
-            {"pod_file": "kubernetes/metrics-pod.json"}
+            "service_file": "kubernetes/metrics-service.json",
+            "pod_file": "kubernetes/metrics-pod.json"
         }, 
     "Calendar":
         { 
-            {"service_file": "kubernetes/calendar-service.json"},
-            {"pod_file": "kubernetes/calendar-pod.json"}
+            "service_file": "kubernetes/calendar-service.json",
+            "pod_file": "kubernetes/calendar-pod.json"
+        },
+    "db":
+        { 
+            "service_file": "kubernetes/db-service.json",
+            "pod_file": "kubernetes/db-pod.json"
         } 
 }

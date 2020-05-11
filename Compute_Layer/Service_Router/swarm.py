@@ -7,7 +7,6 @@
 # This is designed to be both low effort and light weight and is NOT
 # robust.
 
-from Compute_Layer.shared_resources.bottle import route, run, get, post, request
 import json
 import socket
 import subprocess
@@ -24,58 +23,27 @@ from emission.net.int_service.machine_configs import upc_port, querier_port
 cloudVarName = "PORTMAP"
 
 
-@post('/spawn_service')
-def spawn_service():
+def spawn_service(service_file, pod_file):
     # Add section to load data
-    use_kubernetes = bool(request.json['use_kubernetes'])
-    service_name = request.json['service_name']
-    if use_kubernetes:
-        upc_service_file = request.json["service_file"]
-        upc_service_config = read_config_json(upc_service_file)
-        upc_pod_file = request.json["pod_file"]
-        upc_pod_config = read_config_json(upc_pod_file)
-        container_name, container_port = launch_unique_service(upc_service_config, 
-                upc_pod_config)
-        return container_name +"\n" + str(container_port)
-    else:
-        docker_file = request.json["service_file"]
-        # Add an error check to confirm the docker_file exists
-        uuid = request.json['uuid'].replace ("-", "")
-        not_spawn = True
-        while (not_spawn):
-            # select a random port and hope it works
-            exposedPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-            service_name = uuid + service_name 
-            print(service_name)
-            envVars = {cloudVarName: "{}:{}".format (exposedPort, upc_port), "ctr": gen_random_key_string ()}
-            res = subprocess.run (['docker-compose', '-p', '{}'.format (service_name), '-f', '{}'.format(docker_file), 'up', '-d'], env=envVars)
-            if res.returncode == 0:
-                not_spawn = False
-        return service_name + "\n" + str (exposedPort)
+    upc_service_file = request.json["service_file"]
+    upc_service_config = read_config_json(upc_service_file)
+    upc_pod_file = request.json["pod_file"]
+    upc_pod_config = read_config_json(upc_pod_file)
+    container_name, container_port = launch_unique_service(upc_service_config, 
+            upc_pod_config)
+    return container_name, str(container_port)
 
 
-
-@post('/kill')
-def kill():
-    name = request.json['name']
+def kill(name):
     subprocess.run(["kubectl", "delete", "service", name ,"--namespace=default"])
     subprocess.run(["kubectl", "delete", "pod", name ,"--namespace=default"])
 
-@post('/clear_all')
 def clear_all():
     subprocess.run(["kubectl", "delete", "--all", "services" ,"--namespace=default"])
     subprocess.run(["kubectl", "delete", "--all", "pods" ,"--namespace=default"])
 
-@post('/create_network')
 def create_network():
-    ret = subprocess.run (["docker", "network", "create", "emission"], cwd="./")
-
-# Container Helper functions
-def get_container_names (name):
-    process = subprocess.Popen (['./bin/deploy/container_id.sh', name], stdout=subprocess.PIPE)
-    process.wait ()
-    (result, error) = process.communicate ()
-    return result.decode ('utf-8').split ('\n')
+    subprocess.run (["docker", "network", "create", "emission"], cwd="./")
 
 ### Helper functions used in the kubernetes implementation. ###
 
@@ -164,14 +132,3 @@ def launch_unique_service(service_config_json, pod_config_json):
                         pass
 
 ### End of kubernetes helper functions ### 
-
-if __name__ == "__main__":
-    # Run this with TLS
-    key_file = open('conf/net/keys.json')
-    key_data = json.load(key_file)
-    host_cert = key_data["host_certificate"]
-    chain_cert = key_data["chain_certificate"]
-    private_key = key_data["private_key"]
-
-    run(host=socket.gethostbyname(socket.gethostname()), port=swarm_port, server='cheroot', 
-            debug=True, certfile=host_cert, chainfile=chain_cert, keyfile=private_key)

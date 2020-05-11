@@ -1,5 +1,5 @@
 {
-    "controller-ip" : "https://127.0.1.1",
+    "controller-ip" : "http://127.0.1.1",
     "_controller_comment": "The controller-ip is the IP address hosting the controller",
     "controller-port" : "4430",
     "upc-port" : "8123",
@@ -9,9 +9,9 @@
     "kill-ticks" : "1500000",
     "swarm-port" : "54321",
     "machines" :
-        {
-            "http://192.168.99.100" : "1"
-        },
+        [
+            "http://192.168.99.100"
+        ],
     "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second)",
     "register_user_endpoint" : "/profile/create",
     "insert_endpoint" : "/data/insert",

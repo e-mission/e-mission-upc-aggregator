@@ -73,19 +73,17 @@ def createUserProfile():
       abort(403, e.message)
 
 @post ("/service_request")
+def request_service():
     service_name = request.json["service"]
     if service_name in services:
         services_dict = services[service_name]
         service_file = services_dict['service_file']
-        pod_file = None
-        if 'pod_file' in services_dict:
-            pod_file = services_dict['pod_file'] 
+        pod_file = services_dict['pod_file'] 
     else:
         raise HTTPError(403, "Request made for an unknown service")
 
     # Launch the actual container
-    container_name, address = clsrl.spawnServiceInstance (user_uuid, True, 
-            service_name, service_file, pod_file)
+    container_name, address = clsrl.spawnServiceInstance (service_file, pod_file)
     pods[address] = container_name
     return {'address': address}
 
@@ -143,7 +141,7 @@ if __name__ == "__main__":
 
     # Place holder for SSL that will be replaced with 443 when run in a container.
     # Not controller port is set to be an integer by an earlier code segment
-    if  controller_port == 4430:
+    if  controller_port == 443:
       # We support SSL and want to use it
       key_file = open('conf/net/keys.json')
       key_data = json.load(key_file)

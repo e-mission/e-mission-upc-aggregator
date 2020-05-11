@@ -7,48 +7,25 @@
 import requests
 import numpy as np
 from emission.net.int_service.machine_configs import swarm_port, machines_list
-
-randlist = []
+import Compute_Layer.Service_Router.swarm as clsrs
 
 class Machine ():
     total = 0
-    def __init__ (self, baseaddr, serverPort, weight):
+    def __init__ (self):
         self.baseaddr = baseaddr
-        self.serverPort = serverPort
-        self.weight = weight
-        self.containers = []
 
-    def spawnService (self, uuid, use_kubernetes, service_name, service_file, pod_file=None):
-        if self.weight == 0.0:
-            return
-        json_dict = {'uuid':uuid, 'use_kubernetes': use_kubernetes, 'service_name': service_name,
-                'service_file' : service_file, 'pod_file': pod_file}
-        resp = requests.post ("{}:{}/spawn_service".format (self.baseaddr, self.serverPort), 
-                json=json_dict)
-        print(resp.text)
-        components = resp.text.split()
-        container_name = components[0]
-        container_port = components[1]
-        self.containers.append (container_name)
-        Machine.total += 1
+    def spawnService (self, service_file, pod_file):
+        container_name, container_port = clsrs.spawn_service(service_file, pod_file)
         return (container_name, "{}:{}".format (self.baseaddr, container_port))
 
     def killContainer (self, name):
-        if name in self.containers:
-            resp = requests.post ("{}:{}/kill".format (self.baseaddr, self.serverPort), json={'name':name})
-            print (resp)
-            self.containers.remove (name)
-            Machine.total -= 1
-            return True 
-        return False
+        clsrs.kill(name)
 
     def clearContainers (self):
-        Machine.total -= len (self.containers)
-        resp = requests.post ("{}:{}/clear_all".format (self.baseaddr, self.serverPort))
-        self.containers = []
+        clsrs.clear_all()
 
     def setupNetwork (self):
-        resp = requests.post ("{}:{}/create_network".format (self.baseaddr, self.serverPort))
+        clsrs.create_network()
         
 
 # Takes in a list of machine tuples, where the first element is the IP_ADDR
@@ -56,14 +33,8 @@ class Machine ():
 # machine objects for each machine with the appropriate weight.
 def setupMachines (machines):
     output = []
-    total = 0.0
-    for _, mem in machines:
-        total += mem
-    total_rand = 0.0
-    for ip, mem in machines:
-        output.append (Machine (ip, swarm_port, mem / total))
-        total_rand += mem / total
-        randlist.append (total_rand)
+    for ip in machines:
+        output.append (Machine (ip))
     return output
 
 # List consisting of the IP addresses any machines in the cluster.
@@ -77,23 +48,19 @@ machines = setupMachines (machines_list)
 # This file should be imported by the controller when not using kubernetes
 
 # Helper function to allocate the Cloud instance
-def spawnServiceInstance (uuid, use_kubernetes, service_name, service_file, pod_file=None):
-    val = np.random.random ()
-    i = 0
-    while val > randlist[i]:
-        i += 1
-    return machines[i].spawnService (uuid, use_kubernetes, service_name, service_file, pod_file)
+def spawnServiceInstance (service_file, pod_file):
+    m = machines[0]
+    return m.spawnService (service_file, pod_file)
 
 
-def killInstance (name):
-    for m in machines:
-        if m.killContainer (name):
-            return
+def killInstance(name):
+    m = machines[0]
+    m.killContainer(name)
 
-def clearContainers ():
-    for m in machines:
-        m.clearContainers ()
+def clearContainers():
+    m = machines[0]
+    m.clearContainers()
 
-def setupNetworks ():
-    for m in machines:
-        m.setupNetwork ()
+def setupNetworks():
+    m = machines[0]
+    m.setupNetwork()
