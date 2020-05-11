@@ -659,10 +659,9 @@ class CalendarCollection(AbstractCollection):
 
 ### End of classes
 
-def request_service(username, service_name):
+def request_service(service_name):
     controller_addr = controller_ip + ":" + str(controller_port)
     json_values = dict()
-    json_values['user'] = username
     json_values['service'] = service_name
     error = False
     try:
@@ -679,6 +678,7 @@ def request_service(username, service_name):
         return data_json['address']
 
 def delete_service(address):
+    controller_addr = controller_ip + ":" + str(controller_port)
     json_entries = dict()
     json_entries['address'] = address
     try:
@@ -695,6 +695,7 @@ def delete_service(address):
         return True
 
 def delete_all_services():
+    controller_addr = controller_ip + ":" + str(controller_port)
     try:
         r = requests.post(controller_addr + delete_all_services_endpoint, timeout=600)
     except (socket.timeout) as e:

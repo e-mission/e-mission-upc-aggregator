@@ -73,15 +73,7 @@ def createUserProfile():
       abort(403, e.message)
 
 @post ("/service_request")
-def launch_service ():
-    if 'user' in request.json:
-       uuid = getUUID(request)
-    else:
-        print("ERROR\n\n\n\n\n\n\n")
-        raise HTTPError(403, "Unable to create a uuid")
-    user_uuid = str (uuid)
     service_name = request.json["service"]
-
     if service_name in services:
         services_dict = services[service_name]
         service_file = services_dict['service_file']
