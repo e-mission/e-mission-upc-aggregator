@@ -57,16 +57,14 @@ def spawn_service():
 
 @post('/kill')
 def kill():
-    name = request.json['name'].replace ("-", "")
-    containers = get_container_names (name)
-    for name in containers:
-        if name:
-            res = subprocess.run (['docker', 'container', 'stop', name])
-            res = subprocess.run (['docker', 'container', 'rm', name])
+    name = request.json['name']
+    subprocess.run(["kubectl", "delete", "service", name ,"--namespace=default"])
+    subprocess.run(["kubectl", "delete", "pod", name ,"--namespace=default"])
 
 @post('/clear_all')
 def clear_all():
-    res = subprocess.run (['./teardown_docker.sh'])
+    subprocess.run(["kubectl", "delete", "--all", "services" ,"--namespace=default"])
+    subprocess.run(["kubectl", "delete", "--all", "pods" ,"--namespace=default"])
 
 @post('/create_network')
 def create_network():

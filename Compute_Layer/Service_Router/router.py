@@ -28,7 +28,7 @@ import bson.json_util
 import emission.net.auth.auth as enaa
 from emission.core.wrapper.user import User
 import Compute_Layer.Service_Router.launcher as clsrl
-from emission.net.int_service.machine_configs import controller_port, tick_period, kill_ticks
+from emission.net.int_service.machine_configs import controller_port
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -54,11 +54,9 @@ app = app()
 # List of all supported services
 services = None
 
-users = dict()
+pods = dict()
 
 pm_name = 'PM'
-
-ticks = 0
 
 @post('/profile/create')
 def createUserProfile():
@@ -94,48 +92,22 @@ def launch_service ():
         raise HTTPError(403, "Request made for an unknown service")
 
     # Launch the actual container
-    container_name, address = clsrl.spawnServiceInstance (user_uuid, False, 
+    container_name, address = clsrl.spawnServiceInstance (user_uuid, True, 
             service_name, service_file, pod_file)
-    # This value should be used to match a container contents against a user's expectations
-    #request.json["hash"]
-    if user_uuid not in users:
-        users[user_uuid] = {}
-    if [pm_container_name]:
-        users[user_uuid][pm_container_name] = ticks
-    users[user_uuid][container_name] = ticks
-    address_list = []
-    if pm_address:
-       address_list.append(pm_address)
-    address_list.append(address)
-    # Need a better way to wait place it in the swarm portion
+    pods[address] = container_name
     return {'address': address}
 
-@post('/get_user_addrs')
-def return_container_addrs ():
-    # This functionality will later be replaced with user applications and the PM.
-    user_max = int (request.json['count'])
-    name_list = np.array ([user for user in list (users.keys ())])
-    np.random.shuffle (name_list)
-    name_list = list (name_list)
-    limit = min (len (name_list), user_max)
-    addr_list = []
-    for i in range (limit):
-        name = name_list[i]
-        user_instances = users[name]
-        # Hardcode 1 instance per user for the experiment
-        addr = list(user_instances.keys())[0]
-        addr_list.append(addr)
-        user_instances[addr] = ticks
-    ret_dict = dict ()
-    for i, addr in enumerate(addr_list):
-        ret_dict[i] = addr
-    return json.dumps (ret_dict)
+@post('/kill')
+def kill_service_and_pod():
+    address = request.json["address"]
+    clsrl.killInstance(pods[address])
+    del pods[address]
 
 @post('/clear_containers')
 def clear_containers ():
-    global users
+    global pods
     clsrl.clearContainers ()
-    users = dict()
+    pods = dict()
 
 @post('/setup_networks')
 def setup_networks ():
@@ -150,28 +122,6 @@ def get_container_names (contents):
 
     return addr 
     
-
-def tick_incr (unused1, unused2):
-    global ticks
-    print ("Ticking the timer")
-    ticks += 1
-    check_timer (users, tick_limit=kill_ticks)
-    launch_timer ()
-
-
-# General functions to handle timer check for running services
-def check_timer (users_dict, tick_limit):
-    for user in list(users_dict.values()):
-        for name, starttime in user.copy().items():
-            if ticks - starttime >= tick_limit:
-                kill_instance (name, user)
-
-def kill_instance (name, user_dict):
-    clsrl.killInstance (name)
-    del user_dict[name]
-
-def launch_timer ():
-    signal.setitimer (signal.ITIMER_REAL, tick_period)
 
 # Auth helpers BEGIN
 # This should only be used by createUserProfile since we may not have a UUID
@@ -191,8 +141,6 @@ def getUUID(request, inHeader=False):
 # Auth helpers END
 
 if __name__ == "__main__":
-    signal.signal (signal.SIGALRM, tick_incr)
-    launch_timer ()
     if len(sys.argv) != 1:
       sys.stderr.write ("Error too many arguments to launch known access location.\n")
       sys.exit(1)

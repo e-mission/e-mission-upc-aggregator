@@ -10,7 +10,7 @@
     "swarm-port" : "54321",
     "machines" :
         {
-            "https://127.0.1.1" : "1"
+            "http://192.168.99.100" : "1"
         },
     "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second)",
     "register_user_endpoint" : "/profile/create",
@@ -30,5 +30,7 @@
     "query_endpoint" : "/receive_query",
     "privacy_budget_endpoint" : "/privacy_budget",
     "_certificate_bundle_comment" : "path provided to were trusted certificates are located on a machine",
-    "certificate_bundle": "conf/net/certificates/public-certs.pem"
+    "certificate_bundle" : "conf/net/certificates/public-certs.pem",
+    "delete_service_endpoint" : "/kill",
+    "delete_all_services_endpoint" : "/clear_containers"
 }

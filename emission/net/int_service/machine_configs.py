@@ -33,4 +33,7 @@ query_endpoint = config_data["query_endpoint"]
 privacy_budget_endpoint = config_data["privacy_budget_endpoint"]
 certificate_bundle_path = config_data["certificate_bundle"]
 
+delete_all_services_endpoint = config_data["delete_all_services_endpoint"]
+delete_service_endpoint = config_data["delete_service_endpoint"]
+
 config_file.close ()

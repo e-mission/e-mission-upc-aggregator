@@ -7,7 +7,7 @@ import bson
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.SecurityWarning)
 
-from emission.net.int_service.machine_configs import find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, controller_ip, controller_port, service_endpoint, privacy_budget_endpoint
+from emission.net.int_service.machine_configs import find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, controller_ip, controller_port, service_endpoint, privacy_budget_endpoint, delete_service_endpoint, delete_all_services_endpoint
 
 
 def convert_string_to_objectid(dict_or_list_or_item):
@@ -677,6 +677,36 @@ def request_service(username, service_name):
     else:
         data_json = r.json()
         return data_json['address']
+
+def delete_service(address):
+    json_entries = dict()
+    json_entries['address'] = address
+    try:
+        r = requests.post(controller_addr + delete_service_endpoint, json=json_entries timeout=600)
+    except (socket.timeout) as e:
+        error = True
+    #Check if sucessful
+    if not r.ok or error:
+        error = True
+    if error:
+        assert(not error)
+    else:
+        # Success
+        return True
+
+def delete_all_services():
+    try:
+        r = requests.post(controller_addr + delete_all_services_endpoint, timeout=600)
+    except (socket.timeout) as e:
+        error = True
+    #Check if sucessful
+    if not r.ok or error:
+        error = True
+    if error:
+        assert(not error)
+    else:
+        # Success
+        return True
 
 def deduct_budget(pm_address, privacy_cost):
     json_entries = dict()
