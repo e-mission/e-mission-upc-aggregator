@@ -2,13 +2,13 @@
   "kind": "Service",
   "apiVersion": "v1",
   "metadata": {
-    "name": "querier",
+    "name": "calendar",
     "creationTimestamp": null,
     "labels": {
-      "io.kompose.service": "querier"
+      "io.kompose.service": "calendar"
     },
     "annotations": {
-      "kompose.cmd": "kompose convert -f docker-compose-test-querier.yml -j",
+      "kompose.cmd": "kompose convert -f docker-compose.yml -j",
       "kompose.version": "1.16.0 (0c01309)"
     }
   },
@@ -17,16 +17,13 @@
     "ports": [
       {
         "name": "default-port",
-        "port": 30000,
-        "nodePort": 30000,
-        "targetPort": 443
+        "nodePort": 30001,
+        "port": 30001,
+        "targetPort": 80
       }
     ],
     "selector": {
-      "io.kompose.service": "querier"
+      "io.kompose.service": "calendar"
     }
-  },
-  "status": {
-    "loadBalancer": {}
   }
 }

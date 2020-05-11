@@ -1,9 +1,6 @@
 import json
 # To support dynamic loading of client-specific libraries
 import socket
-import logging
-import logging.config
-
 import requests
 
 from pymongo import MongoClient
@@ -12,7 +9,7 @@ import sys
 from importlib import import_module
 import bson
 
-from Compute_Layer.shared_resources.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
+from bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 
 
 # Inspired by https://stackoverflow.com/questions/16586180/typeerror-objectid-is-not-json-serializable
@@ -52,11 +49,11 @@ app = app()
 enc_key = None
 mongoHostPort = 27017
 _current_db = None
+url = "localhost"
 
 def _get_current_db():
     global _current_db
     if _current_db is None:
-        url = "localhost"
         print("Connecting to database URL "+url)
         _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
     return _current_db
@@ -417,14 +414,6 @@ def add_encrypt_key():
 # Future work may also include adding permission checks here.
 
 if __name__ == '__main__':
-    try:
-        webserver_log_config = json.load(open("conf/log/webserver.conf", "r"))
-    except:
-        webserver_log_config = json.load(open("conf/log/webserver.conf.sample", "r"))
-
-    logging.config.dictConfig(webserver_log_config)
-    logging.debug("This should go to the log file")
-    
     # To avoid config file for tests
     server_host = socket.gethostbyname(socket.gethostname())
 
@@ -438,7 +427,6 @@ if __name__ == '__main__':
       try:
         key_file = open('conf/net/keys.json')
       except:
-        logging.debug("certificates not configured, falling back to sample, default certificates")
         key_file = open('conf/net/keys.json.sample')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]

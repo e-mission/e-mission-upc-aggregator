@@ -32,8 +32,9 @@ class UserCloud:
 
     def init_usercloud (self, username, controller_addr):
         self.username = username
-        self.register_with_controller (controller_addr)
-        self.getaddress ()
+        #self.register_with_controller (controller_addr)
+        #self.getaddress ()
+        self.address = "http://192.168.99.100:30000"
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):

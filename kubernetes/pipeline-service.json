@@ -2,10 +2,10 @@
   "kind": "Service",
   "apiVersion": "v1",
   "metadata": {
-    "name": "web-server",
+    "name": "pipeline",
     "creationTimestamp": null,
     "labels": {
-      "io.kompose.service": "web-server"
+      "io.kompose.service": "pipeline"
     },
     "annotations": {
       "kompose.cmd": "kompose convert -f docker-compose.yml -j",
@@ -17,13 +17,13 @@
     "ports": [
       {
         "name": "default-port",
-        "nodePort": 30000,
-        "port": 30000,
+        "nodePort": 30002,
+        "port": 30002,
         "targetPort": 80
       }
     ],
     "selector": {
-      "io.kompose.service": "web-server"
+      "io.kompose.service": "pipeline"
     }
   }
 }

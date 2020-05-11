@@ -30,4 +30,4 @@ source activate emission
 
 # launch the webapp
 #./e-mission-py.bash emission/net/api/cfc_webapp.py
-./e-mission-py.bash Compute_Layer/Services/queries/queries.py
+./e-mission-py.bash Compute_Layer/Services/emission_metrics/metrics.py

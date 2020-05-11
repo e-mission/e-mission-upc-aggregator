@@ -33,6 +33,11 @@
       {
         "name": "database",
         "image": "emission/mongo-custom:1.0",
+        "ports": [
+          {
+            "containerPort": 27017
+          }
+        ],
         "env": [
           {
             "name": "DB_HOST",
