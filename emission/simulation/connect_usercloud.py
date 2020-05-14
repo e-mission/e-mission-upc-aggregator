@@ -7,6 +7,7 @@ import requests
 from emission.net.int_service.machine_configs import register_user_endpoint, service_endpoint, cloud_key_endpoint
 import emission.simulation.profile_json as profile_json
 from Compute_Layer.shared_resources.fake_mongo_types import request_service 
+import time
 
 class UserCloud:
 
@@ -34,6 +35,7 @@ class UserCloud:
         self.username = username
         self.register_with_controller (controller_addr)
         self.getaddress ()
+        time.sleep(10)
         self.send_contents (self.address)
 
     def make_post (self, addr_extension="", contents=None):

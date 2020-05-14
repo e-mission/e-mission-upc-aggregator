@@ -432,6 +432,7 @@ class AbstractCollection:
         convert_objectid_to_string(json_entries)
         error = False
         try:
+            print(len(json.dumps(json_entries).encode("utf-8")))
             r = requests.post(self.target_address + insert_deprecated_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True

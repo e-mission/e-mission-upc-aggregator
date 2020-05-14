@@ -28,8 +28,7 @@
             "value": "localhost"
           }
         ],
-        "resources": {},
-        "imagePullPolicy": "Always"
+        "resources": {}
       },
       {
         "name": "database",
@@ -49,8 +48,7 @@
             "value": "localhost"
           }
         ],
-        "resources": {},
-        "imagePullPolicy": "Always"
+        "resources": {}
       }
     ],
     "restartPolicy": "OnFailure"
