@@ -4,7 +4,7 @@ import socket
 import json
 import bson
 
-from emission.net.int_service.machine_configs import find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, controller_ip, controller_port, service_endpoint, privacy_budget_endpoint, delete_service_endpoint, delete_all_services_endpoint
+from conf.machine_configs import service_router_tls, service_router_addr, machines_use_tls, certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, service_endpoint, privacy_budget_endpoint, delete_service_endpoint, delete_all_services_endpoint
 
 
 def convert_string_to_objectid(dict_or_list_or_item):
@@ -170,7 +170,10 @@ class FakeCursor:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(self.target_address + count_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(self.target_address + count_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(self.target_address + count_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -189,7 +192,10 @@ class FakeCursor:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(self.target_address + distinct_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(self.target_address + distinct_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(self.target_address + distinct_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -249,7 +255,10 @@ class FakeCursor:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(self.target_address + find_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(self.target_address + find_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(self.target_address + find_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -282,7 +291,10 @@ class FakeInsertOneResult:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(target_address + insert_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -313,7 +325,10 @@ class FakeInsertManyResult:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(target_address + insert_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(target_address + insert_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -347,11 +362,15 @@ class FakeUpdateResult:
         # Make the call to db insert one
         convert_objectid_to_string(json_entries)
         error = False
+        if is_update:
+            endpoint = update_endpoint
+        else:
+            endpoint = replace_one_endpoint
         try:
-            if is_update:
-                r = requests.post(target_address + update_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(target_address + endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
             else:
-                r = requests.post(target_address + replace_one_endpoint, json=json_entries, timeout=600)
+                r = requests.post(target_address + endpoint, json=json_entries, timeout=600)
 
         except (socket.timeout) as e:
             error = True
@@ -388,7 +407,10 @@ class FakeDeleteResult:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(target_address + delete_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(target_address + delete_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(target_address + delete_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -429,15 +451,16 @@ class AbstractCollection:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            print(len(json.dumps(json_entries).encode("utf-8")))
-            r = requests.post(self.target_address + insert_deprecated_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(self.target_address + insert_deprecated_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(self.target_address + insert_deprecated_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
         if not r.ok or error:
             error = True
         if error:
-            print(r.text)
             assert(not error)
         else:
             data_json = r.json()
@@ -480,7 +503,10 @@ class AbstractCollection:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(self.target_address + update_deprecated_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(self.target_address + update_deprecated_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(self.target_address + update_deprecated_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -567,7 +593,10 @@ class AbstractCollection:
         convert_objectid_to_string(json_entries)
         error = False
         try:
-            r = requests.post(self.target_address + find_one_endpoint, json=json_entries, timeout=600)
+            if machines_use_tls:
+                r = requests.post(self.target_address + find_one_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+            else:
+                r = requests.post(self.target_address + find_one_endpoint, json=json_entries, timeout=600)
         except (socket.timeout) as e:
             error = True
         #Check if sucessful
@@ -583,12 +612,14 @@ class AbstractCollection:
 
 
 def request_service(service_name):
-    controller_addr = controller_ip + ":" + str(controller_port)
     json_values = dict()
     json_values['service'] = service_name
     error = False
     try:
-        r = requests.post (controller_addr + service_endpoint, json=json_values)
+        if service_router_tls:
+            r = requests.post(service_router_addr + service_endpoint, verify=certificate_bundle_path, timeout=600)
+        else:
+            r = requests.post(service_router_addr + service_endpoint, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -600,13 +631,55 @@ def request_service(service_name):
         data_json = r.json()
         return data_json['address']
 
-def delete_service(address):
-    controller_addr = controller_ip + ":" + str(controller_port)
+def pause_service(address):
     json_entries = dict()
     json_entries['address'] = address
     error = False
     try:
-        r = requests.post(controller_addr + delete_service_endpoint, json=json_entries, timeout=600)
+        if service_router_tls:
+            r = requests.post(service_router_addr + pause_endpoint, verify=certificate_bundle_path, timeout=600)
+        else:
+            r = requests.post(service_router_addr + pause_endpoint, timeout=600)
+    except (socket.timeout) as e:
+        error = True
+    #Check if sucessful
+    if not r.ok or error:
+        error = True
+    if error:
+        assert(not error)
+    else:
+        # Success
+        return True
+
+def resume_service(address):
+    json_entries = dict()
+    json_entries['address'] = address
+    error = False
+    try:
+        if service_router_tls:
+            r = requests.post(service_router_addr + unpause_endpoint, verify=certificate_bundle_path, timeout=600)
+        else:
+            r = requests.post(service_router_addr + unpause_endpoint, timeout=600)
+    except (socket.timeout) as e:
+        error = True
+    #Check if sucessful
+    if not r.ok or error:
+        error = True
+    if error:
+        assert(not error)
+    else:
+        # Success
+        return True
+
+def delete_service(address):
+    json_entries = dict()
+    json_entries['address'] = address
+    error = False
+    try:
+        if service_router_tls:
+            r = requests.post(service_router_addr + delete_service_endpoint, verify=certificate_bundle_path, timeout=600)
+        else:
+            r = requests.post(service_router_addr + delete_service_endpoint, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -619,10 +692,12 @@ def delete_service(address):
         return True
 
 def delete_all_services():
-    controller_addr = controller_ip + ":" + str(controller_port)
     error = False
     try:
-        r = requests.post(controller_addr + delete_all_services_endpoint, timeout=600)
+        if service_router_tls:
+            r = requests.post(service_router_addr + delete_all_services_endpoint, verify=certificate_bundle_path, timeout=600)
+        else:
+            r = requests.post(service_router_addr + delete_all_services_endpoint, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -639,7 +714,11 @@ def deduct_budget(pm_address, privacy_cost):
     json_entries['privacy_cost'] = privacy_cost
     error = False
     try:
-        r = requests.post(pm_address + privacy_budget_endpoint, json=json_entries, timeout=600)
+        if machines_use_tls:
+            r = requests.post(pm_address + privacy_budget_endpoint, verify=certificate_bundle_path, json=json_entries, timeout=600)
+        else:
+            r = requests.post(pm_address + privacy_budget_endpoint, json=json_entries, timeout=600)
+
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -649,5 +728,4 @@ def deduct_budget(pm_address, privacy_cost):
         assert(not error)
     else:
         data_json = r.json()
-        print("New budget: {}".format(data_json['budget']))
         return data_json['success']

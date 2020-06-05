@@ -28,21 +28,6 @@ import bson.json_util
 import service_router.launcher as srl
 from emission.net.int_service.machine_configs import controller_port, upc_mode
 
-try:
-    config_file = open('conf/net/api/webserver.conf')
-except:
-    logging.debug("webserver not configured, falling back to sample, default configuration")
-    config_file = open('conf/net/api/webserver.conf.sample')
-
-config_data = json.load(config_file)
-static_path = config_data["paths"]["static_path"]
-python_path = config_data["paths"]["python_path"]
-server_host = config_data["server"]["host"]
-server_port = config_data["server"]["port"]
-socket_timeout = config_data["server"]["timeout"]
-log_base_dir = config_data["paths"]["log_base_dir"]
-auth_method = config_data["server"]["auth"]
-
 BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 # to accomodate large section sizes
 
