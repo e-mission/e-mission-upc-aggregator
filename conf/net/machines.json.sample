@@ -9,10 +9,10 @@
     "kill-ticks" : "1500000",
     "swarm-port" : "54321",
     "machines" :
-        [
-            "http://34.82.79.148"
-        ],
-    "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second)",
+        {
+            "http://34.82.229.14": 1
+        },
+    "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second). If you are using kubernetes with nodeport the IP should be any IP address. If you are using minikube make sure and use your minikube address. If instead you have a multi machine cluster with just docker you need to specify every machine",
     "register_user_endpoint" : "/profile/create",
     "insert_endpoint" : "/data/insert",
     "insert_deprecated_endpoint" : "/data/insert-deprecated",
@@ -32,5 +32,9 @@
     "_certificate_bundle_comment" : "path provided to were trusted certificates are located on a machine",
     "certificate_bundle" : "conf/net/certificates/public-certs.pem",
     "delete_service_endpoint" : "/kill",
-    "delete_all_services_endpoint" : "/clear_containers"
+    "delete_all_services_endpoint" : "/clear_containers",
+
+
+    "upc_mode" : "kubernetes",
+    "_upc_mode_comment" : "upc_mode gives the endpoint to which the service router so launch machines. The two options are kubernetes and docker. Kubernetes launches containers in a kubernetes cluster and docker launches things directly on docker containers. We cannot use docker swarm due to permissions issues, so each docker machine must run its own server."
 }

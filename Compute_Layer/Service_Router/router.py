@@ -28,7 +28,7 @@ import bson.json_util
 import emission.net.auth.auth as enaa
 from emission.core.wrapper.user import User
 import Compute_Layer.Service_Router.launcher as clsrl
-from emission.net.int_service.machine_configs import controller_port
+from emission.net.int_service.machine_configs import controller_port, upc_mode
 
 try:
     config_file = open('conf/net/api/webserver.conf')
@@ -58,27 +58,19 @@ pods = dict()
 
 pm_name = 'PM'
 
-@post('/profile/create')
-def createUserProfile():
-  try:
-      logging.debug("Called createUserProfile")
-      userEmail = enaa._getEmail(request, auth_method)
-      logging.debug("userEmail = %s" % userEmail)
-      user = User.register(userEmail)
-      logging.debug("Looked up user = %s" % user)
-      logging.debug("Returning result %s" % {'uuid': str(user.uuid)})
-      return {'uuid': str(user.uuid)}
-  except ValueError as e:
-      traceback.print_exc()
-      abort(403, e.message)
-
 @post ("/service_request")
 def request_service():
     service_name = request.json["service"]
     if service_name in services:
         services_dict = services[service_name]
-        service_file = services_dict['service_file']
-        pod_file = services_dict['pod_file'] 
+        if upc_mode == "kubernetes":
+            service_file = services_dict['service_file']
+            pod_file = services_dict['pod_file'] 
+        elif upc_mode == "docker":
+            service_file = services_dict['compose_file']
+            pod_file = None
+        else:
+            raise HTTPError(403, "Unknown UPC mode. Reconfigure router with either kubernetes or docker")
     else:
         raise HTTPError(403, "Request made for an unknown service")
 
@@ -86,6 +78,16 @@ def request_service():
     container_name, address = clsrl.spawnServiceInstance (service_file, pod_file)
     pods[address] = container_name
     return {'address': address}
+
+@post('/pause')
+def pause_pod():
+    address = request.json["address"]
+    clsrl.pauseInstance(pods[address])
+
+@post('/unpause')
+def resume_pod():
+    address = request.json["address"]
+    clsrl.resumeInstance(pods[address])
 
 @post('/kill')
 def kill_service_and_pod():
@@ -111,22 +113,6 @@ def get_container_names (contents):
     return result.decode ('utf-8').split ('\n')
 
     return addr 
-    
-
-# Auth helpers BEGIN
-# This should only be used by createUserProfile since we may not have a UUID
-# yet. All others should use the UUID.
-
-def getUUID(request, inHeader=False):
-    try:
-        retUUID = enaa.getUUID(request, auth_method, inHeader)
-        logging.debug("retUUID = %s" % retUUID)
-        if retUUID is None:
-           raise HTTPError(403, "token is valid, but no account found for user")
-        return retUUID
-    except ValueError as e:
-        traceback.print_exc()
-        abort(401, e.message)
 
 # Auth helpers END
 
@@ -135,13 +121,20 @@ if __name__ == "__main__":
       sys.stderr.write ("Error too many arguments to launch known access location.\n")
       sys.exit(1)
     # Read the services
-    with open("Compute_Layer/Service_Router/service.json", "r") as f:
+    if upc_mode == "kubernetes":
+        service_filename = "Compute_Layer/Service_Router/kubernetes_services.json"
+    elif upc_mode == "docker":
+        service_filename = "Compute_Layer/Service_Router/docker_services.json"
+    else:
+          sys.stderr.write ("Unknown UPC mode. Reconfigure router with either kubernetes or docker.\n")
+          sys.exit(1)
+    with open(service_filename, "r") as f:
         services = json.load(f)
 
 
     # Place holder for SSL that will be replaced with 443 when run in a container.
     # Not controller port is set to be an integer by an earlier code segment
-    if  controller_port == 443:
+    if controller_port == 443:
       # We support SSL and want to use it
       key_file = open('conf/net/keys.json')
       key_data = json.load(key_file)

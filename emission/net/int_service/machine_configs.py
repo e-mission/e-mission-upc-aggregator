@@ -32,4 +32,6 @@ certificate_bundle_path = config_data["certificate_bundle"]
 delete_all_services_endpoint = config_data["delete_all_services_endpoint"]
 delete_service_endpoint = config_data["delete_service_endpoint"]
 
+upc_mode = config_data["upc_mode"]
+
 config_file.close ()
