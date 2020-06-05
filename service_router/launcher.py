@@ -6,7 +6,7 @@
 
 import requests
 import numpy as np
-from emission.net.int_service.machine_configs import swarm_port, machines_list, upc_mode
+from conf.machine_configs import swarm_port, machines_list, upc_mode, machines_use_tls, certificate_bundle_path
 from tempfile import NamedTemporaryFile
 
 class Machine ():
@@ -32,7 +32,11 @@ class Machine ():
         else if upc_mode == "docker":
             json_dict = dict()
             json_dict['compose_file'] = service_file
-            r = requests.post("{}/launch_service".format(self.getSwarmaddr()), json=json_dict)
+            target_address = "{}/launch_service".format(self.getSwarmaddr())
+            if machines_use_tls:
+                r = requests.post(target_address, verify=certificate_bundle_path, json=json_dict)
+            else:
+                r = requests.post(target_address, json=json_dict)
             if r.ok:
                 json_results = r.json()
                 container_name, container_port = json_results['name'], json_results['port']
@@ -51,7 +55,11 @@ class Machine ():
         else if upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
-            r = requests.post("{}/pause".format(self.getSwarmaddr()), json=json_dict)
+            target_address = "{}/pause".format(self.getSwarmaddr())
+            if machines_use_tls:
+                r = requests.post(target_address, verify=certificate_bundle_path, json=json_dict)
+            else:
+                r = requests.post(target_address, json=json_dict)
             if r.ok:
                 json_results = r.json()
                 return json_results['success']
@@ -69,7 +77,11 @@ class Machine ():
         else if upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
-            r = requests.post("{}/unpause".format(self.getSwarmaddr()), json=json_dict)
+            target_address = "{}/unpause".format(self.getSwarmaddr())
+            if machines_use_tls:
+                r = requests.post(target_address, verify=certificate_bundle_path, json=json_dict)
+            else:
+                r = requests.post(target_address, json=json_dict)
             if r.ok:
                 json_results = r.json()
                 return json_results['success']
@@ -86,7 +98,11 @@ class Machine ():
         else if upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
-            r = requests.post("{}/kill".format(self.getSwarmaddr()), json=json_dict)
+            target_address = "{}/kill".format(self.getSwarmaddr())
+            if machines_use_tls:
+                r = requests.post(target_address, verify=certificate_bundle_path, json=json_dict)
+            else:
+                r = requests.post(target_address, json=json_dict)
             if r.ok:
                 json_results = r.json()
                 return json_results['success']
@@ -102,7 +118,11 @@ class Machine ():
         else if upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
-            r = requests.post("{}/clear_all".format(self.getSwarmaddr()), json=json_dict)
+            target_address = "{}/clear_all".format(self.getSwarmaddr())
+            if machines_use_tls:
+                r = requests.post(target_address, verify=certificate_bundle_path, json=json_dict)
+            else:
+                r = requests.post(target_address, json=json_dict)
             if not r.ok:
                 raise HTTPError(403, "Error ecountered while deleting all services. Confirm that all machines have running servers.")
         else:
@@ -115,7 +135,11 @@ class Machine ():
             # we will not throw any exceptions
             pass
         else if upc_mode == "docker":
-            r = requests.post("{}/create_network".format(self.getSwarmaddr()), json=json_dict)
+            target_address = "{}/create_network".format(self.getSwarmaddr())
+            if machines_use_tls:
+                r = requests.post(target_address, verify=certificate_bundle_path)
+            else:
+                r = requests.post(target_address)
             if not r.ok:
                 raise HTTPError(403, "Error ecountered setting up the network. Confirm that all machines have running servers.")
         else:

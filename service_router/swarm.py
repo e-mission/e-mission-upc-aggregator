@@ -4,16 +4,13 @@
 # each machine must be added to the configuration file. This should not be
 # considered an attempt at an optimal coordination between machines.
 
-from emission.net.api.bottle import route, run, get, post, request
+from shared_apis.bottle import route, run, get, post, request
 import json
 import socket
 import subprocess
-import sys
-import requests
 import numpy as np
-from emission.net.int_service.machine_configs import swarm_port
+from conf.machine_configs import swarm_port, machines_use_tls
 from tempfile import NamedTemporaryFile
-from emission.simulation.rand_helpers import gen_random_key_string
 
 cloudVarName = "PORTMAP"
 
@@ -39,8 +36,9 @@ def launch_service():
     not_spawn = True
     while (not_spawn):
         # select a random port and hope it works
+        ctr_val = np.random.randint(low=0, high = (1 << 62), dtype="uint64")
         cloudPort = np.random.randint (low=2000, high = (pow (2, 16) - 1))
-        envVars = {cloudVarName: "{}:{}".format (cloudPort, upc_port), "ctr": gen_random_key_string()}
+        envVars = {cloudVarName: "{}:{}".format (cloudPort, upc_port), "ctr": str(ctr_val)}
         res = subprocess.run (['docker-compose', '-p', '{}'.format (name), '-f', 
             '{}'.format(compose_file), 'up', '-d'], env=envVars)
         if res.returncode == 0:
@@ -94,7 +92,7 @@ def kill():
 
 @post('/clear_all')
 def clear_all():
-    res = subprocess.run (['./teardown_docker.sh'])
+    res = subprocess.run (['./service_router/teardown_docker.sh'])
 
 @post('/create_network')
 def create_network():
@@ -102,15 +100,15 @@ def create_network():
 
 # Container Helper functions
 def get_container_names (name):
-    process = subprocess.Popen (['./bin/deploy/container_id.sh', name], stdout=subprocess.PIPE)
+    process = subprocess.Popen (['./service_router/container_id.sh', name], stdout=subprocess.PIPE)
     process.wait ()
     (result, error) = process.communicate ()
     return result.decode ('utf-8').split ('\n')
 
 if __name__ == "__main__":
-    if swarm_port == 443:
+    if machines_use_tls:
       # Run this with TLS
-      key_file = open('conf/net/keys.json')
+      key_file = open('conf/keys.json')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]
       chain_cert = key_data["chain_certificate"]

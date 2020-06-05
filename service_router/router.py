@@ -1,37 +1,21 @@
 import json
 import numpy as np
-from multiprocessing.dummy import Pool
 from shared_apis.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 import shared_apis.bottle as bt
 # To support dynamic loading of client-specific libraries
-import subprocess
 import sys
-import signal
-import logging
-import logging.config
 
-from datetime import datetime
 import time
-import arrow
-from uuid import UUID
 # So that we can set the socket timeout
 import socket
-# For decoding JWTs using the google decode URL
-import urllib.request, urllib.parse, urllib.error
-import requests
-import traceback
-import xmltodict
-import urllib.request, urllib.error, urllib.parse
-import bson.json_util
 
 
 import service_router.launcher as srl
-from emission.net.int_service.machine_configs import controller_port, upc_mode
+from conf.machine_configs import service_router_ip, service_router_port, service_router_tls, upc_mode
 
 BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 # to accomodate large section sizes
 
-print("Finished configuring logging for %s" % logging.getLogger())
 app = app()
 
 # List of all supported services
@@ -60,6 +44,8 @@ def request_service():
     # Launch the actual container
     container_name, address = srl.spawnServiceInstance (service_file, pod_file)
     pods[address] = container_name
+    # Inelegant solution to wait for pods to be ready
+    time.sleep(10)
     return {'address': address}
 
 @post('/pause')
@@ -88,16 +74,6 @@ def clear_containers ():
 def setup_networks ():
     srl.setupNetworks ()
 
-# Container Helper functions
-def get_container_names (contents):
-    process = subprocess.Popen (['./bin/deploy/container_id.sh', contents], stdout=subprocess.PIPE)
-    process.wait ()
-    (result, error) = process.communicate ()
-    return result.decode ('utf-8').split ('\n')
-
-    return addr 
-
-# Auth helpers END
 
 if __name__ == "__main__":
     if len(sys.argv) != 1:
@@ -117,16 +93,16 @@ if __name__ == "__main__":
 
     # Place holder for SSL that will be replaced with 443 when run in a container.
     # Not controller port is set to be an integer by an earlier code segment
-    if controller_port == 443:
+    if service_router_tls:
       # We support SSL and want to use it
-      key_file = open('conf/net/keys.json')
+      key_file = open('conf/keys.json')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]
       chain_cert = key_data["chain_certificate"]
       private_key = key_data["private_key"]
 
-      run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server='cheroot', debug=True,
+      run(host=service_router_ip, port=service_router_port, server='cheroot', debug=True,
           certfile=host_cert, chainfile=chain_cert, keyfile=private_key)
     else:
       print("Running with HTTPS turned OFF - use a reverse proxy on production")
-      run(host=socket.gethostbyname(socket.gethostname()), port=controller_port, server="cheroot", debug=True)
+      run(host=service_router_ip, port=service_router_port, server="cheroot", debug=True)
