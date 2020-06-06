@@ -5,10 +5,10 @@
         },
     "Pipeline": 
         {
-            "compose_file": "docker/docker-compose-pipeline.yml"
+            "compose_file": "services/pipeline/docker-compose/docker-compose.yml"
         }, 
     "Metrics": 
         {
-            "compose_file": "docker/docker-compose-metrics.yml"
+            "compose_file": "services/metrics/docker-compose/docker-compose.yml"
         }
 }

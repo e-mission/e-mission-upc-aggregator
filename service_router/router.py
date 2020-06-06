@@ -81,9 +81,9 @@ if __name__ == "__main__":
       sys.exit(1)
     # Read the services
     if upc_mode == "kubernetes":
-        service_filename = "Compute_Layer/Service_Router/kubernetes_services.json"
+        service_filename = "service_router/kubernetes_services.json"
     elif upc_mode == "docker":
-        service_filename = "Compute_Layer/Service_Router/docker_services.json"
+        service_filename = "service_router/docker_services.json"
     else:
           sys.stderr.write ("Unknown UPC mode. Reconfigure router with either kubernetes or docker.\n")
           sys.exit(1)

@@ -6,12 +6,12 @@
         },
     "Pipeline": 
         {
-            "service_file": "kubernetes/pipeline-service.json",
-            "pod_file": "kubernetes/pipeline-pod.json"
+            "service_file": "services/pipeline/kubernetes/service.json",
+            "pod_file": "services/pipeline/kubernetes/pod.json"
         }, 
     "Metrics": 
         {
-            "service_file": "kubernetes/metrics-service.json",
-            "pod_file": "kubernetes/metrics-pod.json"
+            "service_file": "services/metrics/kubernetes/service.json",
+            "pod_file": "services/metrics/kubernetes/pod.json"
         }
 }

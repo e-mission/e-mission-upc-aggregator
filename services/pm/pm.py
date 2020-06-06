@@ -421,10 +421,7 @@ if __name__ == '__main__':
     # port number
     if machines_use_tls:
       # We support SSL and want to use it
-      try:
-        key_file = open('conf/net/keys.json')
-      except:
-        key_file = open('conf/net/keys.json.sample')
+      key_file = open('conf/net/keys.json')
       key_data = json.load(key_file)
       host_cert = key_data["host_certificate"]
       chain_cert = key_data["chain_certificate"]
