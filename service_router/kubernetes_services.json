@@ -1,8 +1,8 @@
 {
     "PM":
         { 
-            "service_file": "kubernetes/web-server-service.json",
-            "pod_file": "kubernetes/web-server-pod.json"
+            "service_file": "services/pm/kubernetes/service.json",
+            "pod_file": "services/pm/kubernetes/pod.json"
         },
     "Pipeline": 
         {

@@ -1,7 +1,7 @@
 {
     "PM":
         { 
-            "compose_file": "docker/docker-compose-pm.yml"
+            "compose_file": "services/pm/docker-compose/docker-compose.yml"
         },
     "Pipeline": 
         {
