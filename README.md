@@ -1,28 +1,17 @@
-# E-MISSION NEW ARCHITECTURE
+# E-MISSION User Private Clouds
 
-The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are:
-
-* System Controller
-* User Data Storage
-* Data Simulation
-* Data Aggregation
-* Data Querying
-* Multimachine Communication
-
-Each of these will sections covered in more detail, along with the code added/changed to implement it. Additionally we made changes to produce a variety of new images for containers, 
+This repository contains the implementation of User Private Clouds (UPC) and the relevant services used to operate select e-mission functionality within UPC. A higher level description of UPC is available in my [technical report](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2020/EECS-2020-130.html).
 
 ## Installation
-To get everything to work properly with the current implementation, you need a linux machine with the following installations:
+To get everything to work properly with the current implementation, you need at least one linux machine with the following installations:
 
 * Anaconda Python3
 * Ecryptfs
 * Docker
-* Docker-Compose
+* Either docker-compose or kubernetes
 
 ### Anaconda Python3
 On each machine we need a host process to provision docker instances which means you need access to `Python 3.5` or greater. Depending on the data analysis you wish to run you may need access to additional libraries, most of which should be supported by the `conda env` produced for the base e-mission server. You find the installation instructions [here](https://github.com/e-mission/e-mission-docs/blob/master/docs/install/manual_install.md).
-
-It shouldn't be necessary to have as large an environment as the existing `conda env` provisions, but this sticks with some of the core design decisions we made in working on these changes "don't remove/optimize features until we get a working product." It for this reason that you see huge chunks of the e-mission code copied over (and consequentially creating a need to merge with the main repository) when we could probably succeed with a only including a much smaller subset.
 
 ### Ecryptfs
 
@@ -39,11 +28,46 @@ We opted to use `Ecryptfs` mainly because it was easy to use and its encryption 
 
 Having `docker` is essential to running the modified architecture because every single component runs inside a container except for the component responsible for launching containers. You can find information on how to install `docker` on your platform from their [website](https://docs.docker.com/install/), as well as information on how `docker` works if you are unfamiliar.
 
-### Docker-Compose
+### Docker-Compose or Kubernetes
 
-We additionally rely on `docker-compose` to actually launch our containers with specified input files. You can find the documentation on `docker-compose` also on their [website](https://docs.docker.com/compose/install/).
+Our current implementation supports either using docker-compose with a set of servers we built or kubernetes to launch the UPC services. There are tradeoffs with each selection, which hopefully these will do a good job of summarizing. We cannot use docker-swarm because ecryptfs requires sudo permissions, which are not available with docker-swarm.
 
-Here we have opted to rely on default `docker` rather than a more robust microservices implementation through either `docker swarm` or `kubernetes`. The former was a decision we made after we discovered that `docker swarm` couldn't support functionality we needed for our implementation whereas the latter we simply didn't have time to pursue.
+Docker-Compose Advantages:
+    * Simple to use.
+    * Pausing containers is possible. This is useful if you need many concurrent users.
+    * Each container is very lightweight.
+    
+Docker-Compose Disadvantages:
+    * Not representative of a real system.
+    * No native distributed storage.
+    * Currently no support for recovery upon whole machine failure.
+    * Server upkeep cannot no longer be a cloud task.
+    * Less isolation than Kubernetes offers.
+
+Kubernetes Advantages:
+    * Designed to balance pods across machines.
+    * Easy configuration on cloud machines.
+    * Recovery upon machine failure
+    * Better able to set resource limits.
+    * Overall more development.
+
+Kubernetes Disadvantages:
+    * Pods are a bad fundamental layer and the number of pods that can be spawned at once is very small. You may need to get creative with how you reuse pods.
+    * No support for pausing containers.
+    * Constructing a Kubernetes cluster may be more difficult than just installing docker.
+    * Kubernetes has a harsher learning curve because it has more functionality.
+
+Ultimately I would suggest using Kubernetes. However, if you need many concurrent users for deployment you will need to decide how to allocate users (it will be far too slow to delete pods as needed) and you may need to pick the best way to recycle containers. If this proves too difficult and pausing containers is essential to usable performance, then you may need to settle for the docker-compose based implementation.
+
+#### Installing Docker-Compose
+
+You can find the documentation on `docker-compose` and how to install it on this [website](https://docs.docker.com/compose/install/). 
+
+#### Installing Kubernetes
+
+To run kubernetes there are a few necessary components. First you must install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and its dependencies on at least one machine, whichever machine hosts the service router. Next you will need access to a Kubernetes cluster. For testing purposes you will probably first want to install [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/). Minikube containers can interact with each other so you can test correctness with a single machine. You may also need to configure your docker images to work properly with minikube, either by uploading the images to a remote registry from which minikube will download or by [building the images directly in minikube](https://stackoverflow.com/questions/52310599/what-does-minikube-docker-env-mean). 
+
+While it may be possible to run multi-machine cluster using minikube, I am not familiar with how to do so. Instead I recommend using a cloud provider that has kubernetes support. In my technical report I found the [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine) particularly easy to use and if you are a student you may have free credits. However when transitioning to a cloud kubernetes engine you may have to make additional changes to adhere to requirements of the cloud provider. For example, in my experience I needed to change all of the docker images paths to correspond to Google's [container registry](https://cloud.google.com/container-registry), and I needed to modify the firewall rules to allow external traffic to access the ports the containers would occupy (because we use the NodePort service type).
 
 ## Architecture Code
 

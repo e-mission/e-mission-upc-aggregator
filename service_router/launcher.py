@@ -289,7 +289,7 @@ def launch_unique_service(service_config_json, pod_config_json):
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])
                         # Replace this with a check for if the external address changes
-                        subprocess.run(['/bin/bash', 'kubernetes/pod_wait.sh', '{}'.format(service_name)])
+                        subprocess.run(['/bin/bash', 'service_router/pod_wait.sh', '{}'.format(service_name)])
                         return service_name, new_port
                     except:
                         pass
