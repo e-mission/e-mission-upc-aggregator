@@ -4,7 +4,7 @@ import socket
 import json
 import bson
 
-from conf.machine_configs import service_router_tls, service_router_addr, machines_use_tls, certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, service_endpoint, privacy_budget_endpoint, delete_service_endpoint, delete_all_services_endpoint
+from conf.machine_configs import machines_use_tls, certificate_bundle_path, find_one_endpoint, find_endpoint, count_endpoint, distinct_endpoint, insert_endpoint, delete_endpoint, update_endpoint, insert_deprecated_endpoint, update_deprecated_endpoint, replace_one_endpoint, privacy_budget_endpoint, cloud_key_endpoint
 
 
 def convert_string_to_objectid(dict_or_list_or_item):
@@ -610,105 +610,6 @@ class AbstractCollection:
             return data_json['data']
 
 
-
-def request_service(service_name):
-    json_values = dict()
-    json_values['service'] = service_name
-    error = False
-    try:
-        if service_router_tls:
-            r = requests.post(service_router_addr + service_endpoint, verify=certificate_bundle_path, timeout=600)
-        else:
-            r = requests.post(service_router_addr + service_endpoint, timeout=600)
-    except (socket.timeout) as e:
-        error = True
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        assert(not error)
-    else:
-        data_json = r.json()
-        return data_json['address']
-
-def pause_service(address):
-    json_entries = dict()
-    json_entries['address'] = address
-    error = False
-    try:
-        if service_router_tls:
-            r = requests.post(service_router_addr + pause_endpoint, verify=certificate_bundle_path, timeout=600)
-        else:
-            r = requests.post(service_router_addr + pause_endpoint, timeout=600)
-    except (socket.timeout) as e:
-        error = True
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        assert(not error)
-    else:
-        # Success
-        return True
-
-def resume_service(address):
-    json_entries = dict()
-    json_entries['address'] = address
-    error = False
-    try:
-        if service_router_tls:
-            r = requests.post(service_router_addr + unpause_endpoint, verify=certificate_bundle_path, timeout=600)
-        else:
-            r = requests.post(service_router_addr + unpause_endpoint, timeout=600)
-    except (socket.timeout) as e:
-        error = True
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        assert(not error)
-    else:
-        # Success
-        return True
-
-def delete_service(address):
-    json_entries = dict()
-    json_entries['address'] = address
-    error = False
-    try:
-        if service_router_tls:
-            r = requests.post(service_router_addr + delete_service_endpoint, verify=certificate_bundle_path, timeout=600)
-        else:
-            r = requests.post(service_router_addr + delete_service_endpoint, timeout=600)
-    except (socket.timeout) as e:
-        error = True
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        assert(not error)
-    else:
-        # Success
-        return True
-
-def delete_all_services():
-    error = False
-    try:
-        if service_router_tls:
-            r = requests.post(service_router_addr + delete_all_services_endpoint, verify=certificate_bundle_path, timeout=600)
-        else:
-            r = requests.post(service_router_addr + delete_all_services_endpoint, timeout=600)
-    except (socket.timeout) as e:
-        error = True
-    #Check if sucessful
-    if not r.ok or error:
-        error = True
-    if error:
-        assert(not error)
-    else:
-        # Success
-        return True
-
 def deduct_budget(pm_address, privacy_cost):
     json_entries = dict()
     json_entries['privacy_cost'] = privacy_cost
@@ -729,3 +630,22 @@ def deduct_budget(pm_address, privacy_cost):
     else:
         data_json = r.json()
         return data_json['success']
+
+def upload_secret_key(pm_address, secret_key):
+    json_entries = dict()
+    json_entries['key'] = secret_key
+    error = False
+    address = pm_address + cloud_key_endpoint
+    try:
+        if machines_use_tls:
+            r = requests.post(address, verify=certificate_bundle_path, json=json_entries, timeout=600)
+        else:
+            r = requests.post(address, json=json_entries, timeout=600)
+
+    except (socket.timeout) as e:
+        error = True
+    #Check if sucessful
+    if not r.ok or error:
+        error = True
+    if error:
+        assert(not error)

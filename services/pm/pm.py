@@ -405,7 +405,7 @@ def add_encrypt_key():
     if enc_key:
         abort (403, "Key already given\n")
     else:
-        enc_key = request.json
+        enc_key = request.json['key']
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((url, 27018))
             s.sendall (enc_key.to_bytes (32, byteorder='big'))
@@ -434,4 +434,3 @@ if __name__ == '__main__':
       print("Running with HTTPS turned OFF - use a reverse proxy on production")
       run(host=server_host, port=upc_port, server='cheroot', debug=True)
 
-    # run(host="0.0.0.0", port=server_port, server='cherrypy', debug=True)
