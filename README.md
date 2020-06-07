@@ -75,7 +75,7 @@ This section will give a brief overview of how to code is organized and where yo
 
 ### `conf/`
 
-This folder containers the information necessary for configuring the service router and the user services. The main file that you might need to edit `conf/machines.json.sample`. If you opt to replace this with a different file then you will need to edit `conf/machine\_configs.py` (which you will also need to edit if you add any additional configuration details.
+This folder containers the information necessary for configuring the service router and the user services. The main file that you might need to edit `conf/machines.json.sample`. If you opt to replace this with a different file then you will need to edit `conf/machine_configs.py` (which you will also need to edit if you add any additional configuration details.
 
 Machines.json.sample contains a list of shorthands for api names as well as set of configuration details. At a minimum before you begin you will need to set:
   * **service\_router\_ip** with the IP address of the machine hosting the service router
@@ -86,25 +86,25 @@ There are other fields you may wish to modify, notably the ports upon which each
 
 The most important aspect of your configuration is that it must be consistent across all your machines and services to ensure it works properly.
 
-### `service\_router/`
+### `service_router/`
 This directory contains all the files used to orchestrate spawning various services across your cluster of machines. It contains the following files you may need to use or change:
 
   *  `router.py`: Launches the service router.
   *  `swarm.py`: A server that you will need to launch on each machine if you are running with docker-compose
-  *  `kubernetes\_services.json`: A json file which for each known service contains the location of each pod file, service file, and the name of the container that acts a server within the pod. If you are using kubernetes and add a service you will need to add an entry to this file.
-  *  `docker\_services.json`: A json file which for each known service contains the location of the docker-compose file. If you add a service and use docker-compose you will need to add an entry to this file.
+  *  `kubernetes_services.json`: A json file which for each known service contains the location of each pod file, service file, and the name of the container that acts a server within the pod. If you are using kubernetes and add a service you will need to add an entry to this file.
+  *  `docker_services.json`: A json file which for each known service contains the location of the docker-compose file. If you add a service and use docker-compose you will need to add an entry to this file.
 
 Additionally, if you intended to alter or add functionality to the service router you may need to modify one of the python files.
 
-### `shared\_apis/`
+### `shared_apis/`
 
-This directory contains a set of apis that will likely be shared by clients, aggregators, or services. The biggest reason you may need to modify one of these scripts is if you need to use one of the e-mission database views that are not currently supported then you may want to `index\_classes.py`. If you need to use differential privacy some example queries are provided in `queries.py`. The other files support the APIs for interacting with the pm and the service router.
+This directory contains a set of apis that will likely be shared by clients, aggregators, or services. The biggest reason you may need to modify one of these scripts is if you need to use one of the e-mission database views that are not currently supported then you may want to `index_classes.py`. When using differential privacy, some example queries are provided in `queries.py`. The other files support the APIs for interacting with the pm and the service router.
 
 ### `services/`
 
-### `client\_scripts/`
+### `client_scripts/`
 
-### `aggregator\_scripts/`
+### `aggregator_scripts/`
 
 ## Example Usage
 
