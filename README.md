@@ -33,29 +33,29 @@ Having `docker` is essential to running the modified architecture because every 
 Our current implementation supports either using docker-compose with a set of servers we built or kubernetes to launch the UPC services. There are tradeoffs with each selection, which hopefully these will do a good job of summarizing. We cannot use docker-swarm because ecryptfs requires sudo permissions, which are not available with docker-swarm.
 
 Docker-Compose Advantages:
-    * Simple to use.
-    * Pausing containers is possible. This is useful if you need many concurrent users.
-    * Each container is very lightweight.
+  * Simple to use.
+  * Pausing containers is possible. This is useful if you need many concurrent users.
+  * Each container is very lightweight.
     
 Docker-Compose Disadvantages:
-    * Not representative of a real system.
-    * No native distributed storage.
-    * Currently no support for recovery upon whole machine failure.
-    * Server upkeep cannot no longer be a cloud task.
-    * Less isolation than Kubernetes offers.
+  * Not representative of a real system.
+  * No native distributed storage.
+  * Currently no support for recovery upon whole machine failure.
+  * Server upkeep cannot no longer be a cloud task.
+  * Less isolation than Kubernetes offers.
 
 Kubernetes Advantages:
-    * Designed to balance pods across machines.
-    * Easy configuration on cloud machines.
-    * Recovery upon machine failure
-    * Better able to set resource limits.
-    * Overall more development.
+  * Designed to balance pods across machines.
+  * Easy configuration on cloud machines.
+  * Recovery upon machine failure
+  * Better able to set resource limits.
+  * Overall more development.
 
 Kubernetes Disadvantages:
-    * Pods are a bad fundamental layer and the number of pods that can be spawned at once is very small. You may need to get creative with how you reuse pods.
-    * No support for pausing containers.
-    * Constructing a Kubernetes cluster may be more difficult than just installing docker.
-    * Kubernetes has a harsher learning curve because it has more functionality.
+  * Pods are a bad fundamental layer and the number of pods that can be spawned at once is very small. You may need to get creative with how you reuse pods.
+  * No support for pausing containers.
+  * Constructing a Kubernetes cluster may be more difficult than just installing docker.
+  * Kubernetes has a harsher learning curve because it has more functionality.
 
 Ultimately I would suggest using Kubernetes. However, if you need many concurrent users for deployment you will need to decide how to allocate users (it will be far too slow to delete pods as needed) and you may need to pick the best way to recycle containers. If this proves too difficult and pausing containers is essential to usable performance, then you may need to settle for the docker-compose based implementation.
 
@@ -102,9 +102,19 @@ This directory contains a set of apis that will likely be shared by clients, agg
 
 ### `services/`
 
+The services directory contains a set of sample services that the service router can spawn. Admittedly, each service should probably be included as a submodule if it is included at all. The most important components for each service are the presence of a docker image (which is why for development all of the code is provided) and the configuration files for kubernetes and docker-compose. In our example we have provided 4 service: 
+  * The Permission Manager (PM): The service that is provided a user's storage key.
+  * Pipeline: A service that runs the e-mission intake pipeline.
+  * Metrics: A service that replaces the metrics endpoint in the `cfc_webapp.py` of the e-mission server.
+  * Count: A service that performs example count queries based on location and date.
+
+Both Pipeline and Metrics are derived from the base e-mission server and are unoptimized. If there is a significant reason to do so, I can work on removing the unnecessary files, but this could be a timeconsuming or tedious process. There is also the question of how to update e-mission server components upon which the service relies, which is why I maintain the same code structure, with only two modified files: `emission/net/api/cfc_webapp.py` and `emission/core/get_database.py`.
+
 ### `client_scripts/`
 
-### `aggregator_scripts/`
+This directory contains a series of scripts that simulate the actions performed by a client device. Currently there are only a few examples such as upload and downloading data or launching and running user specified services.
+
+### `aggregator_scripts/
 
 ## Example Usage
 
