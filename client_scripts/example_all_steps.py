@@ -9,20 +9,20 @@ def main(input_file, output_file, secret_key):
     sasra.setup_networks()
 
     # Run the launch PM script
-    res = subprocess.run(["./e-mission-py.bash", "client_scripts/launch_pm", secret_key], capture_output=True, encoding="utf-8")
+    res = subprocess.run(["./e-mission-py.bash", "client_scripts/launch_pm.py", secret_key], capture_output=True, encoding="utf-8")
     pm_address = res.stdout.strip()
 
     # Generate a consistent uuid value
     uuid = 23
 
     # Run the upload script
-    subprocess.run(["./e-mission-py.bash", "client_scripts/upload_data", input_file, uuid, pm_address])
+    subprocess.run(["./e-mission-py.bash", "client_scripts/upload_data.py", input_file, uuid, pm_address])
 
     # Run the pipeline script
-    subprocess.run(["./e-mission-py.bash", "client_scripts/run_pipeline", uuid, pm_address ])
+    subprocess.run(["./e-mission-py.bash", "client_scripts/run_pipeline.py", uuid, pm_address ])
 
     # Run the download script
-    subprocess.run(["./e-mission-py.bash", "client_scripts/download_data", output_file, uuid, pm_address])
+    subprocess.run(["./e-mission-py.bash", "client_scripts/download_data.py", output_file, uuid, pm_address])
 
     # Delete the PM
     sasra.delete_service(pm_address)

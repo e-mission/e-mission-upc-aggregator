@@ -163,7 +163,54 @@ Now you have the service router running and it knows about your cluster. At this
 
 The example client script we will be running will demonstrate multiple client operations. In particular, the script launches a PM, uploads user data from a json file, runs the pipeline, and finally downloads the process data to a user selected json file. To run this example you will need a json file containing user data. If you already have real data you can use that. Alternatively, if you are intended to use many users you can explore fake data generation, which is currently possible to produce using a combination of this [repo](https://github.com/njriasan/e-mission-thesis-fake-data/settings) to generate a population.xml and this [repo](https://github.com/e-mission/em-dataload) to convert it to e-mission collected data. Alternatively if you are testing with a single user you may want to use some of the available data in the main e-mission server found [here](https://github.com/e-mission/e-mission-server/tree/master/emission/tests/data/real_examples).
 
+To run the example client script first make sure your machine is using the emission conda environment and then execute:
+```
+ $ .\e-mission-py.bash example_all_steps.py <input_file> <output_destination> <secret_key>
+```
+
+where your input file is the file containing your data, the output destination is the path to where you want to store the processed data as a json, and secret key is a random value used to encrypt data with ecryptfs. In practice you should ensure to use a random high entropy value for each user, but for testing correctness you can use any value. This will then cause the script to execute the following steps:
+
+  1. If running with docker-compose setup the docker network in which all containers will spawn. If you are using kubernetes this step will do nothing.
+
+  2. Invoke `client_scripts/launch_pm.py`, which will make a request to the service router to launch the PM service. To explain the steps in more detail this process will first make a request to the service router through a post connection using the api in `shared_apis/service_router_api.py`. This will then contact the service router with the name of the service you wish to launch. The service router will then search one of two json files, either `service_router/docker_services.json` or `service_router/kubernetes_services.json` depending on if you are using docker-compose or kubernetes. This will then give the service router a path to the necessary configuration files. Then the service router will attempt to spawn the service using the respective cluster method.
+
+If you are using kubernetes, the service router generates a new random file and copies over the information in the configuration files, swapping the necessary ports, names, and labels. This is because kubernetes defines services using the names given and (to my knowledge) must be presented with a configuration file. It may be possible to do this directly with the python kubernetes api but I am not sure how to do so. The port at which the container is spawned is done dynamically to ensure multiple pods can launch on the same machine.
+
+If you are using docker-compose the service router first randomly selects a machine in the cluster on which to spawn the containers. Then, the service router contacts the machine with the request using our `service_router/swarm.py` servers. This machine then makes a request using docker-compose and a dynamically allocated port and name.
+
+The service router then verifies it can connect to the spawned service within a specified timeout (this is because with the startup script when docker or kubernetes says a container is ready it may not have started the server yet) and once complete returns the client an address and port at which to contact the pm service.
+
+Finally, the client, having the PM address, sends over the secret key that it uses to encrypt its data.
+
+  3. Next the script invokes `client_scripts/upload_data.py` to upload the data from the input file to the PM using the mongo api in `shared_apis/fake_mongo_types.py`.
+
+  4. The script invokes `client_scripts/run_pipeline.py` to request the service router launch an instance of the pipeline service. The service router responds with the service address and the client then sends it the address of the PM so it can run the intake pipeline. Finally, this script then requests the pipeline service is deleted once finished.
+
+  5. The script invokes `client_scripts/download_data.py` to request all download all data processed by the PM to the specified output file.
+
+  6. The script has the service router delete the PM.
+
 ### Aggregator Script Steps
+
+The example aggregator script we will be running will demonstrate running a count query across multiple users with differential privacy. In our example we will not assume any client has already been crated, so instead we will repeat the process of uploading data and running the intake pipeline for each user. This will again require having many data files so refer to the links given in the client script steps.
+
+Additionally, in our example we will be referring to the differential privacy examples given in this [technical report](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2019/EECS-2019-69.html), which allows us to specify budget consumption without relying on directly interpretting an epsilon value. Instead aggregators provide an offset and alpha value.
+
+Note: For this example script we assume budget costs can be calculated before data is collected and that there are always sufficient users. This is because it enables us to process users iteratively, which is more space efficient for our sample implementation. Queries of this nature are then restricted to accuracy known beforehand (say to within a thousand users of the real answer for example). However, you likely will want to either be able and set the value for epsilon after receiving response from users and ensuring you have sufficient users respond. To do so, you will need to extend the PM with a refund budget feature (to avoid race conditions) if a query is aborted. Similarly you will also need to rewrite the given scripts to first attempt and deduct the max amount of budget, determine the number of responses, initiate the count query, and then refund the user any budget not consumed (if any). The current implementation has the count query perform budget deductions but you may wish to have the client directly perform all budget requests instead and then only have the query itself performed by the service.
+
+To run the example script in a terminal with your emission anaconda environment loaded, run:
+
+```
+  $  ./e-mission-py.bash aggregator_scripts/run_count_aggregation.py <data_directory> <query_file>
+```
+
+The data directory is a directory containing each of the files containing user data and no additional files. The query file is a file which provides a set of parameters for the count query. In particular, the file needs to specify the location as a bounded box, the interval of time in which to search in unix time, and the query parameters. An example is shown in `client_scripts/example_count_query.json`.
+
+The script then undergoes the following steps:
+
+1. For each user it invokes `client_scripts/full_count_query.py` with a data file and the query file. This then launches a PM, uploads the data, runs the intake pipeline, launches the count query service, send the count query the query parameters, deducts the budget cost and responds with the result (and if the user participates).
+
+2. The aggregator then takes the results from each user and produces the aggregator. It then produces noise according to the query parameters and explained in the linked technical report.
 
 ## Missing Features and Possible Future Improvements
 This section is a list of shortcomings with the current implementation that could benefit from either further discussion or further development.
