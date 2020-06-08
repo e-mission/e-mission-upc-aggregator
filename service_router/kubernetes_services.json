@@ -16,5 +16,11 @@
             "service_file": "services/metrics/kubernetes/service.json",
             "pod_file": "services/metrics/kubernetes/pod.json",
             "server_container_name"  : "metrics"           
+        },
+    "Count": 
+        {
+            "service_file": "services/count/kubernetes/service.json",
+            "pod_file": "services/count/kubernetes/pod.json",
+            "server_container_name"  : "count"           
         }
 }

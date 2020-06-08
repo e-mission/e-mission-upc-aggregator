@@ -10,5 +10,9 @@
     "Metrics": 
         {
             "compose_file": "services/metrics/docker-compose/docker-compose.yml"
+        },
+    "Count": 
+        {
+            "compose_file": "services/count/docker-compose/docker-compose.yml"
         }
 }
