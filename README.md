@@ -201,7 +201,7 @@ Note: For this example script we assume budget costs can be calculated before da
 To run the example script in a terminal with your emission anaconda environment loaded, run:
 
 ```
-  $  ./e-mission-py.bash aggregator_scripts/run_count_aggregation.py <data_directory> <query_file>
+  $  ./e-mission-py.bash aggregator_scripts/count_aggregation.py <data_directory> <query_file>
 ```
 
 The data directory is a directory containing each of the files containing user data and no additional files. The query file is a file which provides a set of parameters for the count query. In particular, the file needs to specify the location as a bounded box, the interval of time in which to search in unix time, and the query parameters. An example is shown in `client_scripts/example_count_query.json`.

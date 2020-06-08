@@ -1,0 +1,18 @@
+{
+    "offset": 100,
+    "alpha": 0.05,
+    "start_time": {
+                    "year": 2015,
+                    "month": 7,
+                    "day": 22,
+                    "timezone": "America/Los_Angeles"
+                  },
+    "end_time": {
+                    "year": 2015,
+                    "month": 7,
+                    "day": 23,
+                    "timezone": "America/Los_Angeles"
+                  },
+    "freq" : "DAILY",
+    "metric" : "count"
+}
