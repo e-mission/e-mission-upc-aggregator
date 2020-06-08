@@ -18,13 +18,8 @@ def count_query():
     # Dummy id used as a placeholder. It must be consistent for each user but
     # otherwise doesn't matter. An optimization would remove all instance of user_uuid.
     user_uuid = request.json['uuid']
-    query = query['query_type']
-    if query['query_type'] == 'ae':
-        query_obj = saq.AE(delta_f)
-        cost = query_obj.generate_diff_priv_cost(query['alpha'], query['offset'])
-    elif query['query_type'] =='rc':
-        query_obj = saq.RC(delta_f)
-        cost = query_obj.generate_diff_priv_cost(query['alpha'], query['r_end'], query['r_start'])
+    query_obj = saq.AE(1)
+    cost = query_obj.generate_diff_priv_cost(query['alpha'], query['offset'])
 
     # Try and deduce from the privacy budget
     available_budget = safmt.deduct_budget(edb.pm_address, cost)

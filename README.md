@@ -109,7 +109,7 @@ The services directory contains a set of sample services that the service router
   * Metrics: A service that replaces the metrics endpoint in the `cfc_webapp.py` of the e-mission server.
   * Count: A service that performs example count queries based on location and date.
 
-Both Pipeline and Metrics are derived from the base e-mission server and are unoptimized. If there is a significant reason to do so, I can work on removing the unnecessary files, but this could be a timeconsuming or tedious process. There is also the question of how to update e-mission server components upon which the service relies, which is why I maintain the same code structure, with only two modified files: `emission/net/api/cfc_webapp.py` and `emission/core/get_database.py`.
+The Pipeline, Metrics, and Count services are derived from the base e-mission server and are unoptimized. If there is a significant reason to do so, I can work on removing the unnecessary files, but this could be a timeconsuming or tedious process. There is also the question of how to update e-mission server components upon which the service relies, which is why I maintain the same code structure, with only two modified files: `emission/net/api/cfc_webapp.py` and `emission/core/get_database.py`.
 
 ### `client_scripts/`
 
@@ -212,7 +212,7 @@ The script then undergoes the following steps:
 
 2. This first launches a PM, uploads the data, and runs the intake pipeline.
 
-3. It then launches the count query service and sends the count query the query parameters.
+3. It then launches the count query service and sends the count query the query parameters and the PM address.
 
 4. The count query then deducts the necessary budget and responds with the result (including if the user can participate).
 
