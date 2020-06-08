@@ -120,9 +120,47 @@ This directory contains a series of scripts meant to represent the roles of aggr
 
 ## Example Usage
 
-### Client Script
+In this section we will demo scripts that are used to run client scripts or aggregation scripts. These should serve as examples of how to create a new client or aggregator. Additionally, to provide some insights into how the existing code is built the process will include not just the steps for you to run but what is happening with each step.
 
-### Aggregator Script
+Finally, its worth noting that both setups assume no existing users or persistent storage. If you rely on either your steps will likely be much simpler but may require altering the service router to properly associate each user with their longterm storage.
+
+### Shared Setups
+
+Whether you are running an example of a client or aggregator there are a few steps that you will need to be successfully operated.
+
+  1. Make sure each machine in your cluster has the necessary installations.
+
+  2. Modify the configurations in `/conf/machines_sample.json` matches the machines in your cluster. To avoid any issues you should keep this synchronized across all the machines in your cluster.
+
+  3. Make sure you have each docker image. You can rebuild each docker script by running `build_images.sh` in bash. If you find yourself frequently editing a service you will likely find it useful to modify the dockerfile to import your self from a github repository. If you choose to do this you can modify the first step of the `setup_script.sh` found in the respective service directories to pull changes to the repo as an initial runtime step and avoid the time necessary to rebuild the image (which can take some time).
+
+  4. Select a machine on which to run the service router and load the e-mission anaconda environment. If this is your first time then run 
+  ```
+  $ source setup/setup.sh
+  ```
+  In your terminal. If you have already completed this step then run
+  ```
+  $ conda activate emission
+  ```
+  in each terminal.
+
+  If you are running with docker-compose then you will need to repeat this step on each additional cluster.
+
+  5. Configure you cluster to properly interact with the service router. If you are using kubernetes this requires ensuring your `kubectl` is properly configured. If you are using docker-compose you will need to launch a server on each machine, including the machine with the service router if it is part of the cluster, by running:
+  ```
+  $ ./e-mission-py.bash service_router/swarm.py
+  ```
+
+  6. Launch the service router on one of your machines. To do so run:
+  ```
+  $ ./e-mission-py.bash service_router/router.py
+  ```
+
+Now you have the service router running and it knows about your cluster. At this point you can run either the client or aggregator example.
+
+### Client Script Steps
+
+### Aggregator Script Steps
 
 ## Missing Features and Possible Future Improvements
 This section is a list of shortcomings with the current implementation that could benefit from either further discussion or further development.
