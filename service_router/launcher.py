@@ -6,7 +6,7 @@
 
 import requests
 import numpy as np
-from conf.machine_configs import swarm_port, machines_dict, upc_mode, machines_use_tls, certificate_bundle_path
+from conf.machine_configs import upc_port, swarm_port, machines_dict, upc_mode, machines_use_tls, certificate_bundle_path
 from tempfile import NamedTemporaryFile
 
 class Machine ():
@@ -24,11 +24,11 @@ class Machine ():
     # For an implementation in kubernetes we assume that there are two files, a pod file and
     # a service file. If the implementation is running in docker we instead assume a single
     # file, which we will always label as the service file.
-    def spawnService (self, service_file, pod_file):
+    def spawnService (self, service_file, pod_file, server_container_name):
         if upc_mode == "kubernetes":
-            if pod_file is not None:
+            if pod_file is None or server_container_name is None:
                 raise HTTPError(403, "Kubernetes specified but no pod file is present")
-            container_name, container_port = launch_unique_service(service_file, pod_file)
+            container_name, container_port = launch_unique_service(service_file, pod_file, server_container_name)
         elif upc_mode == "docker":
             json_dict = dict()
             json_dict['compose_file'] = service_file
@@ -171,7 +171,7 @@ machines = setupMachines (machines_dict)
 # This file should be imported by the controller when not using kubernetes
 
 # Helper function to allocate the Cloud instance
-def spawnServiceInstance (service_file, pod_file=None):
+def spawnServiceInstance (service_file, pod_file=None, server_container_name=None):
     num = np.random.rand()
     start = 0.0
     machine = machines[0]
@@ -219,15 +219,19 @@ def read_config_json(json_filename):
 def set_service_internal_port(config_json, internal_port):
     config_json['spec']['ports'][0]['targetPort'] = internal_port
 
-def set_pod_internal_port(config_json, internal_port):
-    config_json['spec']['containers'][0]['ports'][0]['containerPort'] = internal_port
+def modfiy_pod_port(config_json, server_container_name, container_port):
+    containers = config_json['spec']['containers']
+    for container in containers:
+        if container['name'] == server_container_name:
+            container['name']['ports'][0]['containerPort'] = container_port
 
 # Takes in a json for a kubernetes configuration and modifies the broadcasted port
 # to become a randomly assigned dynamic port
-def modify_config_port(config_json):
+def modify_config_port(config_json, container_port):
     new_port = np.random.randint (low=30000, high = 32768)
     config_json['spec']['ports'][0]['nodePort'] = new_port
     config_json['spec']['ports'][0]['port'] = new_port
+    config_json['spec']['ports'][0]['targetPort'] = container_port
     return new_port
 
 # Takes in a json for a kubernetes configuration and modifies the name to become the
@@ -258,7 +262,7 @@ def convert_temp_name(old_name):
 # the listening port to ensure it is correct, adds a random configuration port, changes the
 # name and finally launches it as a service using a temporary file. It returns the temporary
 # name and the port.
-def launch_unique_service(service_config_json, pod_config_json):
+def launch_unique_service(service_config_json, pod_config_json, server_container_name):
         with NamedTemporaryFile("w+", dir='.') as new_service_json_file:
             with NamedTemporaryFile("w+", dir='.') as new_pod_json_file:
                 service_path_name, service_name = convert_temp_name(new_service_json_file.name)
@@ -273,13 +277,15 @@ def launch_unique_service(service_config_json, pod_config_json):
                 modify_selector(service_config_json, service_name)
                 # Modify the pod label
                 modify_label(pod_config_json, service_name)
+                # Change the default pod port
+                modfiy_pod_port(pod_config_json, server_container_name, upc_port)
                 # Dump pod file
                 json.dump(pod_config_json, new_pod_json_file)
                 new_pod_json_file.flush()
                 while True:
                     # Port updates need to occur for each failure because they are the
                     # most likely cause
-                    new_port = modify_config_port(service_config_json)
+                    new_port = modify_config_port(service_config_json, upc_port)
                     # Dump service file
                     json.dump(service_config_json, new_service_json_file)
                     new_service_json_file.flush()

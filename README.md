@@ -208,9 +208,17 @@ The data directory is a directory containing each of the files containing user d
 
 The script then undergoes the following steps:
 
-1. For each user it invokes `client_scripts/full_count_query.py` with a data file and the query file. This then launches a PM, uploads the data, runs the intake pipeline, launches the count query service, send the count query the query parameters, deducts the budget cost and responds with the result (and if the user participates).
+1. For each user it invokes `client_scripts/full_count_query.py` with a data file and the query file. 
 
-2. The aggregator then takes the results from each user and produces the aggregator. It then produces noise according to the query parameters and explained in the linked technical report.
+2. This first launches a PM, uploads the data, and runs the intake pipeline.
+
+3. It then launches the count query service and sends the count query the query parameters.
+
+4. The count query then deducts the necessary budget and responds with the result (including if the user can participate).
+
+5. The script then returns the results to the aggregator.
+
+6. The aggregator adds noise to the final result according to the query parameters and explained in the linked technical report.
 
 ## Missing Features and Possible Future Improvements
 This section is a list of shortcomings with the current implementation that could benefit from either further discussion or further development.

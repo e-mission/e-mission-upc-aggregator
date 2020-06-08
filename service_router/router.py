@@ -2,16 +2,16 @@ import json
 import numpy as np
 from shared_apis.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
 import shared_apis.bottle as bt
-# To support dynamic loading of client-specific libraries
 import sys
 
 import time
 # So that we can set the socket timeout
 import socket
 
+import requests
 
 import service_router.launcher as srl
-from conf.machine_configs import service_router_ip, service_router_port, service_router_tls, upc_mode
+from conf.machine_configs import service_router_ip, service_router_port, service_router_tls, upc_mode, machines_use_tls, certificate_validation_path
 
 BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 # to accomodate large section sizes
@@ -33,19 +33,38 @@ def request_service():
         if upc_mode == "kubernetes":
             service_file = services_dict['service_file']
             pod_file = services_dict['pod_file'] 
+            server_container_name = service_dict['server_container_name']
         elif upc_mode == "docker":
             service_file = services_dict['compose_file']
             pod_file = None
+            server_container_name = None
         else:
             raise HTTPError(403, "Unknown UPC mode. Reconfigure router with either kubernetes or docker")
     else:
         raise HTTPError(403, "Request made for an unknown service")
 
     # Launch the actual container
-    container_name, address = srl.spawnServiceInstance (service_file, pod_file)
-    pods[address] = container_name
-    # Inelegant solution to wait for pods to be ready
-    time.sleep(10)
+    container_name, address = srl.spawnServiceInstance (service_file, pod_file, server_container_name)
+    # Solution to wait for pods to be ready. A pod is ready when we can connect.
+    # Although it should reject our connection
+    # To support dynamic loading of client-specific libraries
+    attempt_counter = 45
+    connection_failed = True
+    attempt_to_connect_address = address + "/"
+    while attempt_counter > 0 and connection_failed:
+        try:
+            if machines_use_tls:
+                requests.post(attempt_to_connect_address, verify=certificate_bundle_path)
+            else:
+                requests.post(attempt_to_connect_address)
+            connection_failed = False
+            pods[address] = container_name
+        except requests.exceptions.ConnectionError:
+            attempt_counter -= 1
+            time.sleep(1)
+    if attempt_counter == 0:
+        # We failed to connect to the server in a reasonable number of attempts
+        raise HTTPError(403, "Unable to contact spawned service. Make sure your container didn't crash and connection isn't blocked by a firewall.")
     return {'address': address}
 
 @post('/pause')

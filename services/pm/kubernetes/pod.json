@@ -11,7 +11,7 @@
   "spec": {
     "containers": [
       {
-        "name": "web-server",
+        "name": "pm",
         "image": "e-mission/pm:1.0",
         "ports": [
           {

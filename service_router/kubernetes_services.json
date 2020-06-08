@@ -2,16 +2,19 @@
     "PM":
         { 
             "service_file": "services/pm/kubernetes/service.json",
-            "pod_file": "services/pm/kubernetes/pod.json"
+            "pod_file": "services/pm/kubernetes/pod.json",
+            "server_container_name"  : "pm"           
         },
     "Pipeline": 
         {
             "service_file": "services/pipeline/kubernetes/service.json",
-            "pod_file": "services/pipeline/kubernetes/pod.json"
+            "pod_file": "services/pipeline/kubernetes/pod.json",
+            "server_container_name"  : "pipeline"
         }, 
     "Metrics": 
         {
             "service_file": "services/metrics/kubernetes/service.json",
-            "pod_file": "services/metrics/kubernetes/pod.json"
+            "pod_file": "services/metrics/kubernetes/pod.json",
+            "server_container_name"  : "metrics"           
         }
 }
