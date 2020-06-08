@@ -43,6 +43,7 @@ Docker-Compose Disadvantages:
   * Currently no support for recovery upon whole machine failure.
   * Server upkeep cannot no longer be a cloud task.
   * Less isolation than Kubernetes offers.
+  * You cannot test on one machine unless it has a public IP address.
 
 Kubernetes Advantages:
   * Designed to balance pods across machines.
@@ -159,6 +160,8 @@ Whether you are running an example of a client or aggregator there are a few ste
 Now you have the service router running and it knows about your cluster. At this point you can run either the client or aggregator example.
 
 ### Client Script Steps
+
+The example client script we will be running will demonstrate multiple client operations. In particular, the script launches a PM, uploads user data from a json file, runs the pipeline, and finally downloads the process data to a user selected json file. To run this example you will need a json file containing user data. If you already have real data you can use that. Alternatively, if you are intended to use many users you can explore fake data generation, which is currently possible to produce using a combination of this [repo](https://github.com/njriasan/e-mission-thesis-fake-data/settings) to generate a population.xml and this [repo](https://github.com/e-mission/em-dataload) to convert it to e-mission collected data. Alternatively if you are testing with a single user you may want to use some of the available data in the main e-mission server found [here](https://github.com/e-mission/e-mission-server/tree/master/emission/tests/data/real_examples).
 
 ### Aggregator Script Steps
 
