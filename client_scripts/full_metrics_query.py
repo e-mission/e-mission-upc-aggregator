@@ -21,7 +21,7 @@ def main(input_file, output_file, secret_key):
     # Run the pipeline script
     subprocess.run(["./e-mission-py.bash", "client_scripts/run_pipeline.py", uuid, pm_address])
 
-    res = subprocess.run(["./e-mission-py.bash", "client_scripts/run_count.py", uuid, pm_address, query_file], capture_output=True, encoding="utf-8")
+    res = subprocess.run(["./e-mission-py.bash", "client_scripts/run_metrics.py", uuid, pm_address, metric_file], capture_output=True, encoding="utf-8")
 
     # Forward the results of the count query
     print(res.stdout.strip())
@@ -38,9 +38,9 @@ if __name__ == '__main__':
         help='''
             the input json file for the user
         ''')
-    parse.add_argument("query_file", type=str,
+    parse.add_argument("metric_file", type=str,
         help='''
-            the input file for the user's query
+            the input file for the metric request
         ''')
     parse.add_argument("secret_key", type=str,
         help='''
