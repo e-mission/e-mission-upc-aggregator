@@ -114,7 +114,9 @@ Both Pipeline and Metrics are derived from the base e-mission server and are uno
 
 This directory contains a series of scripts that simulate the actions performed by a client device. Currently there are only a few examples such as upload and downloading data or launching and running user specified services.
 
-### `aggregator_scripts/
+### `aggregator_scripts/`
+
+This directory contains a series of scripts meant to represent the roles of aggregators when engaging with UPC. In a real implementation, the aggregator should always contact each user through their device applications and have the device interact with the service router directly. As a result all of our aggregators function by interacting with scripts in the `client_scripts` folder. Perhaps a more realistic implementation would require each client to have a server application which functions as a device application, but instead our application will just launch the client scripts directly. Additionally, to all for an easy to understand demo our example aggregators undergo the process of having users upload data and run the pipeline, which is not realistic. Instead a more reasonable approach would be to rely on whatever data is already processed.
 
 ## Example Usage
 
