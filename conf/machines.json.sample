@@ -19,7 +19,7 @@
     "machines_use_tls" : false,
     "_machines_use_tls_comment": "Flag that determines if the machines run in TLS. This refers to both the swarm servers if running in docker and the services running in containers",
 
-    "machines_certificate_bundle" : "",
+    "certificate_bundle_path" : "",
     "_machines_certificate_bundle_comment" : "path provided to were trusted certificates are located on a machine",
 
     "_endpoints_p1_comments" : "These are all the endpoints used by the service router",
@@ -28,7 +28,7 @@
     "unpause_endpoint" : "/unpause",
     "delete_service_endpoint" : "/kill",
     "delete_all_services_endpoint" : "/clear_containers",
-    "setup_network_endpoint", "/setup_networks"
+    "setup_network_endpoint" : "/setup_networks",
 
 
 

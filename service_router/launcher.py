@@ -6,7 +6,7 @@
 
 import requests
 import numpy as np
-from conf.machine_configs import swarm_port, machines_list, upc_mode, machines_use_tls, certificate_bundle_path
+from conf.machine_configs import swarm_port, machines_dict, upc_mode, machines_use_tls, certificate_bundle_path
 from tempfile import NamedTemporaryFile
 
 class Machine ():
@@ -29,7 +29,7 @@ class Machine ():
             if pod_file is not None:
                 raise HTTPError(403, "Kubernetes specified but no pod file is present")
             container_name, container_port = launch_unique_service(service_file, pod_file)
-        else if upc_mode == "docker":
+        elif upc_mode == "docker":
             json_dict = dict()
             json_dict['compose_file'] = service_file
             target_address = "{}/launch_service".format(self.getSwarmaddr())
@@ -52,7 +52,7 @@ class Machine ():
             # However, to allow the same scripts to run on both kubernetes and docker
             # we will not throw any exceptions
             pass
-        else if upc_mode == "docker":
+        elif upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
             target_address = "{}/pause".format(self.getSwarmaddr())
@@ -74,7 +74,7 @@ class Machine ():
             # However, to allow the same scripts to run on both kubernetes and docker
             # we will not throw any exceptions
             pass
-        else if upc_mode == "docker":
+        elif upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
             target_address = "{}/unpause".format(self.getSwarmaddr())
@@ -95,7 +95,7 @@ class Machine ():
             subprocess.run(["kubectl", "delete", "service", name ,"--namespace=default"])
             subprocess.run(["kubectl", "delete", "pod", name ,"--namespace=default"])
             return True
-        else if upc_mode == "docker":
+        elif upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
             target_address = "{}/kill".format(self.getSwarmaddr())
@@ -115,7 +115,7 @@ class Machine ():
         if upc_mode == "kubernetes":
             subprocess.run(["kubectl", "delete", "--all", "services" ,"--namespace=default"])
             subprocess.run(["kubectl", "delete", "--all", "pods" ,"--namespace=default"])
-        else if upc_mode == "docker":
+        elif upc_mode == "docker":
             json_dict = dict()
             json_dict['name'] = name
             target_address = "{}/clear_all".format(self.getSwarmaddr())
@@ -134,7 +134,7 @@ class Machine ():
             # However, to allow the same scripts to run on both kubernetes and docker
             # we will not throw any exceptions
             pass
-        else if upc_mode == "docker":
+        elif upc_mode == "docker":
             target_address = "{}/create_network".format(self.getSwarmaddr())
             if machines_use_tls:
                 r = requests.post(target_address, verify=certificate_bundle_path)
@@ -154,16 +154,18 @@ def setupMachines (machines):
     total_weight = 0.0
     for weight in machines.values():
         total_weight += weight
-    for ip, weight in machines.item():
+    for ip, weight in machines.items():
         output.append(Machine(ip, weight / total_weight))
     return output
 
-# List consisting of the IP addresses any machines in the cluster.
+# Dictionary consisting of the IP addresses any machines in the cluster
+# and their relevant weights.
+
 # Note we are not allowing dynamic addition because we are NOT
 # trying to reinvent docker swarm/kubernetes and instead trying
 # to construct a cheap replacement
 
-machines = setupMachines (machines_list) 
+machines = setupMachines (machines_dict) 
 
 
 # This file should be imported by the controller when not using kubernetes

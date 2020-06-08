@@ -19,8 +19,8 @@ delete_all_services_endpoint = config_data["delete_all_services_endpoint"]
 setup_network_endpoint = config_data["setup_network_endpoint"]
 
 # Setup the machines in the cluster
-machines_use_tls = config_data['use_tls']
-certificate_bundle_path = config_data["certificate_bundle"]
+machines_use_tls = config_data['machines_use_tls']
+certificate_bundle_path = config_data["certificate_bundle_path"]
 base_machines_dict = config_data["machines"]
 machines_dict = dict()
 for ip, weight in base_machines_dict.items():
