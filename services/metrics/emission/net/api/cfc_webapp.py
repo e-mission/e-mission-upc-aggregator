@@ -13,24 +13,17 @@ import datetime
 import pytz
 from conf.machine_configs import machines_use_tls, upc_port
 
-# Dictionary that holds the static delta f multipler values for each result type
-# We assume the options are count (in trips), distance (in meters), and
-# duration (in seconds). To compute the delta_f we consider the maximum
-# and minimum value between the most extreme mode of transportation, driving in our
-# case. Our delta_f is also dependent on the range of time over which we query, so
-# we provide metrics as a maximum that can be traveled per hour (which is the finest
-# granularity at which we let someone query data. Planning conservatively,
-# we assume that the maximum duration is a full hour. The maximum distance
-# traveled by in 1 hour by car. Rather than consider the most ever travel by car
-# in one hour, we will neglect racecar drivers and suggest that no one will drive
-# faster than an average of 160 km/hour. Finally for counts there is no clear defining
-# trip count. If you assume each trip takes at least 5 minutes then no more than 12 trips
-# could happen per hour. This is likely far more conservative than is needed and these 
-# values should not be considered with any rigor.
+# Dictionary of delta_f values used for adding noise to the data.
+# All of these are very conservative and applied in whole day estimates.
+# Further research can likely greatly reduce these numbers, especially
+# when multiple days are involved
 delta_f_dict = {
-        "count": 12, # Units of trips per hour
-        "distance": 160000, #Units of meters per hour
-        "duration": 3600 # Units of seconds per hour
+        # Units of trips/day
+        "count": {"car" : 55, "walk" : 55, "bicycle" : 55, "transit" : 55},
+        # Units of meters/day
+        "distance": {"car" : 3840000, "walk" : 504000, "bicycle" : 648000, "transit" : 1440000},
+        # Units of seconds/day
+        "duration": {"car" : 86400, "walk" : 86400, "bicycle" : 86400, "transit" : 86400}
         }
 
 # Helper function to convert all numpy types to python types
@@ -56,7 +49,7 @@ def numpy_to_py(dict_or_list):
 
 
 
-# We assume that date times only consist of at most year, month, day, hour, and tz.
+# We assume that date times only consist of at most year, month, day, and tz.
 # if month and day are not provided we will assume they represent 1 each, if only
 # day is not provided we will assume it represents 1.
 def extractDatetimeFromDict(datetime_dict):
@@ -65,18 +58,13 @@ def extractDatetimeFromDict(datetime_dict):
         month = datetime_dict['month']
         if 'day' in datetime_dict:
             day = datetime_dict['day']
-            if 'hour' in datetime_dict:
-                hour = datetime_dict['hour']
-            else:
-                hour = 0
         else:
             day = 1
     else:
         month = 1
         day = 1
-        hour = 0
     timezone = pytz.timezone(datetime_dict['timezone'])
-    return datetime.datetime(year, month, day, hour, tzinfo = timezone)
+    return datetime.datetime(year, month, day, tzinfo = timezone)
 
 
 @post('/metrics/local_date')
@@ -88,30 +76,33 @@ def summarize_metrics():
     start_time = request.json['start_time']
     end_time = request.json['end_time']
     freq_name = request.json['freq']
-    metric_list = request.json['metric_list']
-    offset_list = request.json['offset_list']
-    alpha_list = request.json['alpha_list']
+    metric = request.json['metric']
+    offset = request.json['offset']
+    alpha = request.json['alpha']
 
     # Calculate the range of time in hours. We currently only support values in datetime.
     end_datetime = extractDatetimeFromDict(end_time)
     start_datetime = extractDatetimeFromDict(start_time)
-    num_hours = ((end_datetime - start_datetime).total_seconds() / 3600.0)
+    num_days = ((end_datetime - start_datetime).total_seconds() / 86400.0)
 
-    # Look up delta f by metrics list
-    # Assume we must run the whole query at once, so we deduct from the privacy budget once
     cost = 0
-    for i, name in enumerate(metric_list):
-        assert (name in delta_f_dict)
-        delta_f = (num_hours * delta_f_dict[name])
+    # We currently assume that all modes of transportation that are supported
+    # through fake data are returned. We also assume the cost must be applied to each
+    # metric. If you want to filter a subset or change this assumption, it should be
+    # done here. That might be especially useful if you have much more car data than
+    # any other type of data for example.
+
+    delta_f_vals = delta_f_dict[metric]
+    for val in delta_f_vals.values():
+        delta_f = (num_days * val)
         query = saq.AE(delta_f)
-        cost += query.generate_diff_priv_cost(alpha_list[i], offset_list[i])
-    print(cost)
+        cost += query.generate_diff_priv_cost(alpha, offset)
 
     # Try and deduce from the privacy budget
     available_budget = safmt.deduct_budget(edb.pm_address, cost)
     if not available_budget:
         # Query could not complete, no budget remaining
-        return {"success": ""}
+        return {"success": False}
 
     is_return_aggregate = False
     metric_fn = metrics.summarize_by_local_date
