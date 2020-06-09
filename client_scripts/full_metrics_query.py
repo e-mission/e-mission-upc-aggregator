@@ -34,15 +34,15 @@ if __name__ == '__main__':
         description='''
             Example script to run all the example script steps
             ''')
-    parse.add_argument("input_file", type=str,
+    parser.add_argument("input_file", type=str,
         help='''
             the input json file for the user
         ''')
-    parse.add_argument("metric_file", type=str,
+    parser.add_argument("metric_file", type=str,
         help='''
             the input file for the metric request
         ''')
-    parse.add_argument("secret_key", type=str,
+    parser.add_argument("secret_key", type=str,
         help='''
             the secret key used to encrypt user data
         ''')

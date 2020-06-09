@@ -9,17 +9,17 @@ def main(input_file, output_file, secret_key):
     sasra.setup_networks()
 
     # Run the launch PM script
-    res = subprocess.run(["./e-mission-py.bash", "client_scripts/launch_pm.py", secret_key], capture_output=True, encoding="utf-8")
+    res = subprocess.run(["./e-mission-py.bash", "client_scripts/launch_pm.py", secret_key], stdout=subprocess.PIPE, encoding="utf-8")
     pm_address = res.stdout.strip()
 
     # Generate a consistent uuid value
-    uuid = 23
+    uuid = "23"
 
     # Run the upload script
     subprocess.run(["./e-mission-py.bash", "client_scripts/upload_data.py", input_file, uuid, pm_address])
 
     # Run the pipeline script
-    subprocess.run(["./e-mission-py.bash", "client_scripts/run_pipeline.py", uuid, pm_address ])
+    subprocess.run(["./e-mission-py.bash", "client_scripts/run_pipeline.py", uuid, pm_address])
 
     # Run the download script
     subprocess.run(["./e-mission-py.bash", "client_scripts/download_data.py", output_file, uuid, pm_address])
@@ -32,15 +32,15 @@ if __name__ == '__main__':
         description='''
             Example script to run all the example script steps
             ''')
-    parse.add_argument("input_file", type=str,
+    parser.add_argument("input_file", type=str,
         help='''
             the input json file for the user
         ''')
-    parse.add_argument("output_file", type=str,
+    parser.add_argument("output_file", type=str,
         help='''
             the output json file for the user
         ''')
-    parse.add_argument("secret_key", type=str,
+    parser.add_argument("secret_key", type=str,
         help='''
             the secret key used to encrypt user data
         ''')

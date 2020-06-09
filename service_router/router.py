@@ -11,7 +11,7 @@ import socket
 import requests
 
 import service_router.launcher as srl
-from conf.machine_configs import service_router_ip, service_router_port, service_router_tls, upc_mode, machines_use_tls, certificate_validation_path
+from conf.machine_configs import service_router_ip, service_router_port, service_router_tls, upc_mode, machines_use_tls, certificate_bundle_path
 
 BaseRequest.MEMFILE_MAX = 1024 * 1024 * 1024 # Allow the request size to be 1G
 # to accomodate large section sizes
@@ -33,7 +33,7 @@ def request_service():
         if upc_mode == "kubernetes":
             service_file = services_dict['service_file']
             pod_file = services_dict['pod_file'] 
-            server_container_name = service_dict['server_container_name']
+            server_container_name = services_dict['server_container_name']
         elif upc_mode == "docker":
             service_file = services_dict['compose_file']
             pod_file = None
@@ -54,9 +54,9 @@ def request_service():
     while attempt_counter > 0 and connection_failed:
         try:
             if machines_use_tls:
-                requests.post(attempt_to_connect_address, verify=certificate_bundle_path)
+                resp = requests.post(attempt_to_connect_address, verify=certificate_bundle_path)
             else:
-                requests.post(attempt_to_connect_address)
+                resp = requests.post(attempt_to_connect_address)
             connection_failed = False
             pods[address] = container_name
         except requests.exceptions.ConnectionError:

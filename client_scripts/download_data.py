@@ -20,15 +20,15 @@ if __name__ == '__main__':
             downloads data from an existing pm in json format. A consist uuid must be used
             to track user data, but this should eventually be removed.
             ''')
-    parse.add_argument("output_file", type=str,
+    parser.add_argument("output_file", type=str,
         help='''
             the output json file for the user
         ''')
-    parse.add_argument("uuid", type=str,
+    parser.add_argument("uuid", type=str,
         help='''
             the uuid used to tag all of the user's records. This should eventually be removed
         ''')
-    parse.add_argument("pm_address", type=str,
+    parser.add_argument("pm_address", type=str,
         help='''
             address of an existing pm. This pm is the target upload location
         ''')

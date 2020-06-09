@@ -406,9 +406,13 @@ def add_encrypt_key():
         abort (403, "Key already given\n")
     else:
         enc_key = request.json['key']
+        bytes_str = bytes(enc_key, 'utf-8')
+        if len(bytes_str) < 32:
+            bytes_str = bytes_str + bytes("".join(['0'] * (32 - len(bytes_str))) , "utf-8")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((url, 27018))
-            s.sendall (enc_key.to_bytes (32, byteorder='big'))
+            # Send the first 32 bytes
+            s.sendall (bytes_str[:32])
             s.recv(1024)
 
 # Future work may also include adding permission checks here.

@@ -42,15 +42,15 @@ if __name__ == '__main__':
             Runs the pipeline service through the shared_api. There must be an existing
             PM running and the uuid used must be known.
             ''')
-    parse.add_argument("uuid", type=str,
+    parser.add_argument("uuid", type=str,
         help='''
             the uuid used to tag all of the user's records. This should eventually be removed
         ''')
-    parse.add_argument("pm_address", type=str,
+    parser.add_argument("pm_address", type=str,
         help='''
             address of an existing pm. This pm is the target upload location
         ''')
-    parse.add_argument("query_file", type=str,
+    parser.add_argument("query_file", type=str,
         help='''
             the file that describes the query.
         ''')

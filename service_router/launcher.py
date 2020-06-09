@@ -3,8 +3,9 @@
 # necessary because docker swarm does not support privilege escalation,
 # so until we have access to Kubernetes we need a temporary alternative
 # to use multiple machines in a cluster.
-
+import json
 import requests
+import subprocess
 import numpy as np
 from conf.machine_configs import upc_port, swarm_port, machines_dict, upc_mode, machines_use_tls, certificate_bundle_path
 from tempfile import NamedTemporaryFile
@@ -28,7 +29,9 @@ class Machine ():
         if upc_mode == "kubernetes":
             if pod_file is None or server_container_name is None:
                 raise HTTPError(403, "Kubernetes specified but no pod file is present")
-            container_name, container_port = launch_unique_service(service_file, pod_file, server_container_name)
+            with open(service_file, "r") as service:
+                with open(pod_file, "r") as pod:
+                    container_name, container_port = launch_unique_service(json.load(service), json.load(pod), server_container_name)
         elif upc_mode == "docker":
             json_dict = dict()
             json_dict['compose_file'] = service_file
@@ -180,7 +183,7 @@ def spawnServiceInstance (service_file, pod_file=None, server_container_name=Non
         start += machines[index].getWeight()
         machine = machines[index]
         index += 1
-    return machine.spawnService (service_file, pod_file)
+    return machine.spawnService (service_file, pod_file, server_container_name)
 
 def pauseInstance(name):
     for m in machines:
@@ -223,7 +226,7 @@ def modfiy_pod_port(config_json, server_container_name, container_port):
     containers = config_json['spec']['containers']
     for container in containers:
         if container['name'] == server_container_name:
-            container['name']['ports'][0]['containerPort'] = container_port
+            container['ports'][0]['containerPort'] = container_port
 
 # Takes in a json for a kubernetes configuration and modifies the broadcasted port
 # to become a randomly assigned dynamic port
@@ -263,26 +266,26 @@ def convert_temp_name(old_name):
 # name and finally launches it as a service using a temporary file. It returns the temporary
 # name and the port.
 def launch_unique_service(service_config_json, pod_config_json, server_container_name):
-        with NamedTemporaryFile("w+", dir='.') as new_service_json_file:
-            with NamedTemporaryFile("w+", dir='.') as new_pod_json_file:
-                service_path_name, service_name = convert_temp_name(new_service_json_file.name)
-                pod_path_name, pod_name = convert_temp_name(new_pod_json_file.name)
-                # Change the service name
-                modify_name(service_config_json, service_name)
-                # Change the pod name
-                modify_name(pod_config_json, service_name)
-                # Modify the service label
-                modify_label(service_config_json, service_name)
-                # Modify the service selector
-                modify_selector(service_config_json, service_name)
-                # Modify the pod label
-                modify_label(pod_config_json, service_name)
-                # Change the default pod port
-                modfiy_pod_port(pod_config_json, server_container_name, upc_port)
-                # Dump pod file
-                json.dump(pod_config_json, new_pod_json_file)
-                new_pod_json_file.flush()
-                while True:
+        while True:
+            with NamedTemporaryFile("w+", dir='.') as new_service_json_file:
+                with NamedTemporaryFile("w+", dir='.') as new_pod_json_file:
+                    service_path_name, service_name = convert_temp_name(new_service_json_file.name)
+                    pod_path_name, pod_name = convert_temp_name(new_pod_json_file.name)
+                    # Change the service name
+                    modify_name(service_config_json, service_name)
+                    # Change the pod name
+                    modify_name(pod_config_json, service_name)
+                    # Modify the service label
+                    modify_label(service_config_json, service_name)
+                    # Modify the service selector
+                    modify_selector(service_config_json, service_name)
+                    # Modify the pod label
+                    modify_label(pod_config_json, service_name)
+                    # Change the default pod port
+                    modfiy_pod_port(pod_config_json, server_container_name, upc_port)
+                    # Dump pod file
+                    json.dump(pod_config_json, new_pod_json_file)
+                    new_pod_json_file.flush()
                     # Port updates need to occur for each failure because they are the
                     # most likely cause
                     new_port = modify_config_port(service_config_json, upc_port)
@@ -290,9 +293,6 @@ def launch_unique_service(service_config_json, pod_config_json, server_container
                     json.dump(service_config_json, new_service_json_file)
                     new_service_json_file.flush()
                     try:
-                        print(pod_config_json)
-                        print(service_config_json)
-                        print(pod_path_name)
                         # Fix to actually catch errors
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (pod_path_name)])
                         subprocess.run (['kubectl', 'apply', '-f', '{}'.format (service_path_name)])

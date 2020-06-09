@@ -15,6 +15,25 @@ import shared_apis.index_classes as saic
 # Global variables used to test and swap the api being called
 pm_address = None
 
+
+def get_mode_db():
+    return safmt.AbstractCollection(pm_address, "Stage_Modes", None)
+
+def get_habitica_db():
+    return safmt.AbstractCollection(pm_address, "Stage_user_habitica_access", None)
+
+def get_section_db():
+    return safmt.AbstractCollection(pm_address, "Stage_Sections", None)
+
+def get_trip_db():
+    return safmt.AbstractCollection(pm_address, "Stage_Trips", None)
+
+def get_profile_db():
+    return safmt.AbstractCollection(pm_address, "Stage_Profiles", None)
+
+def get_prediction_db():
+    return safmt.AbstractCollection(pm_address, "Stage_Predictions", None)
+
 def get_routeDistanceMatrix_db(user_id, method):
     if not os.path.exists('routeDistanceMatrices'):
         os.makedirs('routeDistanceMatrices')
@@ -35,11 +54,51 @@ def update_routeDistanceMatrix_db(user_id, method, updatedMatrix):
     f.write(json.dumps(updatedMatrix))
     f.close()   
 
+
+def get_client_db():
+    return safmt.AbstractCollection(pm_address, "Stage_clients", None)
+
+def get_routeCluster_db():
+    return safmt.AbstractCollection(pm_address, "Stage_routeCluster", None)
+
+def get_groundClusters_db():
+    return safmt.AbstractCollection(pm_address, "Stage_groundCluster", None)
+
+def get_uuid_db():
+    return safmt.AbstractCollection(pm_address, "Stage_uuids", None)
+
+def get_client_stats_db_backup():
+    return safmt.AbstractCollection(pm_address, "Stage_client_stats", None)
+
+def get_server_stats_db_backup():
+    return safmt.AbstractCollection(pm_address, "Stage_server_stats", None)
+
+def get_result_stats_db_backup():
+    return safmt.AbstractCollection(pm_address, "Stage_result_stats", None)
+
+def get_test_db():
+    return safmt.AbstractCollection(pm_address, "Test_Trips", None)
+
+def get_transit_db():
+    return safmt.AbstractCollection(pm_address, "Stage_Transits", None)
+
+def get_utility_model_db():
+    return safmt.AbstractCollection(pm_address, "Stage_utility_models", None)
+
+def get_alternatives_db():
+    return safmt.AbstractCollection(pm_address, "Stage_alternative_trips", None)
+
+def get_perturbed_trips_db():
+    return safmt.AbstractCollection(pm_address, "Stage_alternative_trips", None)
+
 def get_usercache_db():
     return saic.UsercacheCollection(pm_address)
 
 def get_timeseries_db():
     return saic.TimeseriesCollection(pm_address)
+
+def get_timeseries_error_db():
+    return safmt.AbstractCollection(pm_address, "Stage_timeseries_error", None)
 
 def get_analysis_timeseries_db():
     """
@@ -47,9 +106,29 @@ def get_analysis_timeseries_db():
     """
     return saic.AnalysisTimeseriesCollection(pm_address)
 
+def get_non_user_timeseries_db():
+    """
+    " Stores the data that is not associated with a particular user
+    """
+    return saic.NonUserTimeseriesCollection(pm_address)
 
 def get_pipeline_state_db():
-    return safmt.AbstractCollection(pm_address, "Stage_database", dict())
+    return safmt.AbstractCollection(pm_address, "Stage_pipeline_state", None)
+
+def get_push_token_mapping_db():
+    return safmt.AbstractCollection(pm_address, "Stage_push_token_mapping", None)
+
+def get_common_place_db():
+    return safmt.AbstractCollection(pm_address, "Stage_common_place", None)
+
+def get_common_trip_db():
+    return safmt.AbstractCollection(pm_address, "Stage_common_trips", None)
+
+def get_fake_trips_db():
+    return safmt.AbstractCollection(pm_address, "Stage_fake_trips", None)
+
+def get_fake_sections_db():
+    return safmt.AbstractCollection(pm_address, "Stage_fake_sections", None)
 
 # Static utility method to save entries to a mongodb collection.  Single
 # drop-in replacement for collection.save() now that it is deprecated in 

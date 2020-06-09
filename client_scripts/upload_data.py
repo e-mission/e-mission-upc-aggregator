@@ -16,11 +16,11 @@ def save_phone_to_server(input_file, uuid, pm_address):
 
     for data in entries:
         # Format the data to match server expectations
-        del entry["_id"]
-        if 'write_local_dt' in entry['metadata']:
-            del entry['metadata']['write_local_dt']
-        if 'type' not in entry['metadata']:
-            entry['metadata']['type'] = "sensor-data"
+        del data["_id"]
+        if 'write_local_dt' in data['metadata']:
+            del data['metadata']['write_local_dt']
+        if 'type' not in data['metadata']:
+            data['metadata']['type'] = "sensor-data"
         data.update({"user_id": uuid})
         # Hack to deal with milliseconds until we have moved everything over
         if isMillisecs(data["metadata"]["write_ts"]):
@@ -38,7 +38,6 @@ def save_phone_to_server(input_file, uuid, pm_address):
         result = usercache_db.update_one(update_query,
                                            document,
                                            upsert=True)
-
         # I am not sure how to trigger a writer error to test this
         # and whether this is the format expected from the server in the rawResult
         if 'ok' in result.raw_result and result.raw_result['ok'] != 1.0:
@@ -51,15 +50,15 @@ if __name__ == '__main__':
             uploads data in a json format to an existing PM. A consist uuid must be used
             to track user data, but this should eventually be removed.
             ''')
-    parse.add_argument("input_file", type=str,
+    parser.add_argument("input_file", type=str,
         help='''
             the input json file for the user
         ''')
-    parse.add_argument("uuid", type=str,
+    parser.add_argument("uuid", type=str,
         help='''
             the uuid used to tag all of the user's records. This should eventually be removed
         ''')
-    parse.add_argument("pm_address", type=str,
+    parser.add_argument("pm_address", type=str,
         help='''
             address of an existing pm. This pm is the target upload location
         ''')

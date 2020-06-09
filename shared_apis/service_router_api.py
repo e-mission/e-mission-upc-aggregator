@@ -4,14 +4,14 @@ import json
 from conf.machine_configs import service_router_tls, service_router_addr, certificate_bundle_path, service_endpoint, pause_endpoint, unpause_endpoint, delete_service_endpoint, delete_all_services_endpoint, setup_network_endpoint
 
 def request_service(service_name):
-    json_values = dict()
-    json_values['service'] = service_name
+    json_entries = dict()
+    json_entries['service'] = service_name
     error = False
     try:
         if service_router_tls:
-            r = requests.post(service_router_addr + service_endpoint, verify=certificate_bundle_path, timeout=600)
+            r = requests.post(service_router_addr + service_endpoint, json=json_entries, verify=certificate_bundle_path, timeout=600)
         else:
-            r = requests.post(service_router_addr + service_endpoint, timeout=600)
+            r = requests.post(service_router_addr + service_endpoint, json=json_entries, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -29,9 +29,9 @@ def pause_service(address):
     error = False
     try:
         if service_router_tls:
-            r = requests.post(service_router_addr + pause_endpoint, verify=certificate_bundle_path, timeout=600)
+            r = requests.post(service_router_addr + pause_endpoint, json=json_entries, verify=certificate_bundle_path, timeout=600)
         else:
-            r = requests.post(service_router_addr + pause_endpoint, timeout=600)
+            r = requests.post(service_router_addr + pause_endpoint, json=json_entries, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -49,9 +49,9 @@ def resume_service(address):
     error = False
     try:
         if service_router_tls:
-            r = requests.post(service_router_addr + unpause_endpoint, verify=certificate_bundle_path, timeout=600)
+            r = requests.post(service_router_addr + unpause_endpoint, json=json_entries, verify=certificate_bundle_path, timeout=600)
         else:
-            r = requests.post(service_router_addr + unpause_endpoint, timeout=600)
+            r = requests.post(service_router_addr + unpause_endpoint, json=json_entries, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
@@ -69,9 +69,9 @@ def delete_service(address):
     error = False
     try:
         if service_router_tls:
-            r = requests.post(service_router_addr + delete_service_endpoint, verify=certificate_bundle_path, timeout=600)
+            r = requests.post(service_router_addr + delete_service_endpoint, json=json_entries, verify=certificate_bundle_path, timeout=600)
         else:
-            r = requests.post(service_router_addr + delete_service_endpoint, timeout=600)
+            r = requests.post(service_router_addr + delete_service_endpoint, json=json_entries, timeout=600)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful

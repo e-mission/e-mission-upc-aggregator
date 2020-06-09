@@ -5,7 +5,7 @@ services:
     depends_on:
       - db
     environment:
-      - DB_HOST=db
+      - DB_HOST=db$ctr
       - WEB_SERVER_HOST=0.0.0.0
     ports:
       - "8080:8080"
@@ -28,14 +28,13 @@ services:
     #of the data base. Learn more about how to use volumes here: https://docs.docker.com/storage/volumes/
     # And learn how to configure volumes in your compose file here: https://docs.docker.com/compose/compose-file/#volume-configuration-reference
     volumes:
-      - mongo-data:/data/db
+      - mongo-data-raw:/raw
     networks:
        - emission
 
 networks:
   emission:
+    external: True
 
 volumes:
   mongo-data:
-    
-

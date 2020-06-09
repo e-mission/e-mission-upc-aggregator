@@ -17,9 +17,9 @@ if __name__ == '__main__':
         description='''
             Example script to run all the example script steps
             ''')
-    parse.add_argument("secret_key", type=str,
+    parser.add_argument("secret_key", type=str,
         help='''
             the secret key used to encrypt user data
         ''')
     args = parser.parse_args()
-    main(args.input_file, args.output_file, args.secret_key)
+    launch_pm(args.secret_key)

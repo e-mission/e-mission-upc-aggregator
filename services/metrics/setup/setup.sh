@@ -5,7 +5,7 @@
 # - on OSX: /Users/<user>/miniconda3/bin/conda
 # - on Windows: C:/Users/<user>/Miniconda3/Scripts/conda
 
-source setup/checks/check_for_conda.sh
+. setup/checks/check_for_conda.sh
 
 echo "Setting up blank environment"
 conda create --name emission python=3.6
@@ -20,7 +20,7 @@ curl -o /tmp/pyasn1-0.4.8-py_0.tar.bz2 -L https://anaconda.org/conda-forge/pyasn
 curl -o /tmp/pyasn1-modules-0.2.7-py_0.tar.bz2 -L https://anaconda.org/conda-forge/pyasn1-modules/0.2.7/download/noarch/pyasn1-modules-0.2.7-py_0.tar.bz2
 
 echo "Installing manually downloaded packages"
-conda install /tmp/*.bz2
+conda install /tmp/*.bz2 -v -n emission
 
 echo "Updating using conda now"
 conda env update --name emission --file setup/environment36.yml

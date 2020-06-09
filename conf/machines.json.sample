@@ -12,7 +12,7 @@
 
     "machines" :
         {
-            "34.82.229.14": 1
+            "192.168.99.100": 1
         },
     "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second). If you are using kubernetes with nodeport the IP should be any IP address. If you are using minikube make sure and use your minikube address. If instead you have a multi machine cluster with just docker you need to specify every machine",
 
