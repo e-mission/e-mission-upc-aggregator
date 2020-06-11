@@ -8,7 +8,6 @@ standard_library.install_aliases()
 from builtins import range
 from builtins import *
 from builtins import object
-from pymongo import MongoClient
 import logging
 from datetime import datetime
 import sys
@@ -26,6 +25,7 @@ jsonpickle_numpy.register_handlers()
 import emission.analysis.classification.inference.mode.seed.section_features as easf
 import emission.core.get_database as edb
 import emission.analysis.config as eac
+import shared_apis.fake_mongo_types as safmt
 
 # We are not going to use the feature matrix for analysis unless we have at
 # least 50 points in the training set. 50 is arbitrary. We could also consider
@@ -51,7 +51,7 @@ class ModeInferencePipelineMovesFormat:
     logging.info("initial loadTrainingDataStep DONE")
 
     logging.debug("finished loading current training set, now loading from backup!")
-    backupSections = MongoClient(edb.url).Backup_database.Stage_Sections
+bbackupSections = safmt.AbstractCollection(edb.pm_address, "Backup_database", "Stage_Sections", None)
     self.backupConfirmedSections = self.loadTrainingDataStep(allConfirmedTripsQuery, backupSections)
     logging.info("loadTrainingDataStep DONE")
 
