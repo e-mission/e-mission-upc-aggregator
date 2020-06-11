@@ -39,7 +39,7 @@ def convert_objectid_to_string(dict_or_list_or_item):
 # Class used to fake a cursor
 class FakeCursor:
 
-    def __init__(self, target_address, stage_name, indices, 
+    def __init__(self, target_address, database, collection, indices, 
             filter=None, projection=None, skip=0, limit=0, 
             no_cursor_timeout=False, 
             cursor_type=pymongo.cursor.CursorType.NON_TAILABLE, sort=None, 
@@ -50,7 +50,8 @@ class FakeCursor:
             comment=None):
 
         self.target_address = target_address
-        self.stage_name = stage_name
+        self.database = database
+        self.collection = collection
         self.indices = indices
 
 
@@ -221,7 +222,8 @@ class FakeCursor:
 
     def get_load_data_entries(self):
         json_entries = dict()
-        json_entries['stage_name'] = self.stage_name
+        json_entries['database'] = self.database
+        json_entries['collection'] = self.collection
         json_entries['indices'] = self.indices
         
         # Optional args
@@ -277,12 +279,13 @@ class FakeCursor:
 
 class FakeInsertOneResult:
 
-    def __init__(self, target_address, stage_name, indices, data_dict,
+    def __init__(self, target_address, database, collection, indices, data_dict,
             bypass_document_validation):
 
         # Setup the json
         json_entries = dict()
-        json_entries['stage_name'] = stage_name
+        json_entries['database'] = database
+        json_entries['collection'] = collection
         json_entries['indices'] = indices
         json_entries['data'] = data_dict
         json_entries['is_many'] = False
@@ -310,12 +313,13 @@ class FakeInsertOneResult:
 
 class FakeInsertManyResult:
 
-    def __init__(self, target_address, stage_name, indices, data_dict, ordered,
-            bypass_document_validation):
+    def __init__(self, target_address, database, collection, indices, 
+            data_dict, ordered, bypass_document_validation):
 
         # Setup the json
         json_entries = dict()
-        json_entries['stage_name'] = stage_name
+        json_entries['database'] = database
+        json_entries['collection'] = collection
         json_entries['indices'] = indices
         json_entries['data'] = data_dict
         json_entries['is_many'] = True
@@ -345,13 +349,14 @@ class FakeInsertManyResult:
 
 class FakeUpdateResult:
 
-    def __init__(self, target_address, stage_name, indices, query_dict, 
+    def __init__(self, target_address, database, collection, indices, query_dict, 
             data_dict, is_many, is_update, upsert, bypass_document_validation, 
             collation):
 
         # Setup the json
         json_entries = dict()
-        json_entries['stage_name'] = stage_name
+        json_entries['database'] = database
+        json_entries['collection'] = collection
         json_entries['indices'] = indices
         json_entries['query'] = query_dict
         json_entries['data'] = data_dict
@@ -394,11 +399,13 @@ class FakeUpdateResult:
 
 class FakeDeleteResult:
 
-    def __init__(self, target_address, stage_name, indices, query_dict, is_many, collation):
+    def __init__(self, target_address, database, collection, indices, 
+            query_dict, is_many, collation):
 
         # Setup the json
         json_entries = dict()
-        json_entries['stage_name'] = stage_name
+        json_entries['database'] = database
+        json_entries['collection'] = collection
         json_entries['indices'] = indices
         json_entries['query'] = query_dict
         json_entries['is_many'] = is_many
@@ -428,15 +435,17 @@ class FakeDeleteResult:
 
 # Classes used to replace the db() calls
 class AbstractCollection:
-    def __init__(self, target_address, stage_name, indices):
+    def __init__(self, target_address, database, collection, indices):
         self.target_address = target_address
-        self.stage_name = stage_name
+        self.database = database
+        self.collection = collection
         self.indices = indices
 
     def insert(self, doc_or_docs, manipulate=True, check_keys=True,
             continue_on_error=False, **kwargs):
         json_entries = dict()
-        json_entries['stage_name'] = self.stage_name
+        json_entries['database'] = self.database
+        json_entries['collection'] = self.collection
         json_entries['indices'] = self.indices
 
         json_entries['doc_or_docs'] = doc_or_docs
@@ -476,18 +485,20 @@ class AbstractCollection:
 
     def insert_many(self, data_dict_list, ordered=True, 
             bypass_document_validation=False):
-        return FakeInsertManyResult(self.target_address, self.stage_name,
-                self.indices, data_dict_list, ordered,
+        return FakeInsertManyResult(self.target_address, self.database,
+                self.collection, self.indices, data_dict_list, ordered,
                 bypass_document_validation)
 
     def insert_one(self, data_dict, bypass_document_validation=False):
-        return FakeInsertOneResult(self.target_address, self.stage_name,
-                self.indices, data_dict, bypass_document_validation)
+        return FakeInsertOneResult(self.target_address, self.database,
+                self.collection, self.indices, data_dict, 
+                bypass_document_validation)
 
     def update(self, spec, document, upsert=False, manipulate=False,
             multi=False, check_keys=True, **kwargs):
         json_entries = dict()
-        json_entries['stage_name'] = self.stage_name
+        json_entries['database'] = self.database
+        json_entries['collection'] = self.collection
         json_entries['indices'] = self.indices
 
         json_entries['spec'] = spec
@@ -522,35 +533,35 @@ class AbstractCollection:
     def update_many(self, query_dict, data_dict, upsert=False, 
             array_filters=None, bypass_document_validation=False, 
             collation=None):
-        return FakeUpdateResult(self.target_address, self.stage_name,
+        return FakeUpdateResult(self.target_address, self.database, self.collection,
                 self.indices, query_dict, data_dict, True, True, upsert=upsert,
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
     
     def update_one(self, query_dict, data_dict, upsert=False,
             bypass_document_validation=False, collation=None):
-        return FakeUpdateResult(self.target_address, self.stage_name,
+        return FakeUpdateResult(self.target_address, self.database, self.collection,
                 self.indices, query_dict, data_dict, False, True, upsert=upsert,
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
 
     def replace_one(self, query_dict, data_dict, upsert=False,
             bypass_document_validation=False, collation=None):
-        return FakeUpdateResult(self.target_address, self.stage_name,
+        return FakeUpdateResult(self.target_address, self.database, self.collection,
                 self.indices, query_dict, data_dict, False, False, upsert=upsert,
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
 
     def delete_many(self, query_dict, collation=None, session=None):
-        return FakeDeleteResult(self.target_address, self.stage_name,
+        return FakeDeleteResult(self.target_address, self.database, self.collection,
                 self.indices, query_dict, True, collation)
 
     def delete_one(self, query_dict, collation=None):
-        return FakeDeleteResult(self.target_address, self.stage_name,
+        return FakeDeleteResult(self.target_address, self.database, self.collection,
                 self.indices, query_dict, False, collation)
 
     def find(self, filter=None, *args, **kwargs):
-        return FakeCursor(self.target_address, self.stage_name,
+        return FakeCursor(self.target_address, self.database, self.collection,
                 self.indices, filter, *args, **kwargs)
 
     def find_one(self, filter=None, projection=None, 
@@ -563,7 +574,8 @@ class AbstractCollection:
             comment=None):
 
         json_entries = dict()
-        json_entries['stage_name'] = self.stage_name
+        json_entries['database'] = self.database
+        json_entries['collection'] = self.collection
         json_entries['indices'] = self.indices
         
         # Optional args
