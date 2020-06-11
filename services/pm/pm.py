@@ -47,18 +47,16 @@ app = app()
 
 enc_key = None
 mongoHostPort = 27017
-_current_db = None
 url = "localhost"
+databases = dict()
 
-def _get_current_db():
-    global _current_db
-    if _current_db is None:
-        print("Connecting to database URL "+url)
-        _current_db = MongoClient(host=url, port=mongoHostPort).Stage_database
-    return _current_db
+def _get_current_db(database_name):
+    if database_name not in databases:
+        databases[database_name] = MongoClient(host=url, port=mongoHostPort)[database_name]
+    return databases[database_name]
 
-def get_collection(stage_name, indices=None):
-    collection = _get_current_db()[stage_name]
+def get_collection(database_name, collection_name, indices=None):
+    collection = _get_current_db(database_name)[collection_name]
     if indices is not None:
         for index, elements in indices.items():
             # Should add checks for typing
@@ -77,7 +75,7 @@ def setInitPrivacyBudget():
     return starting_budget
 
 def setPrivacyBudget(budget):
-    table = get_collection("privacyBudget")
+    table = get_collection("Stage_PrivacyBudget" ,"privacyBudget")
     # We simply want to update everything so we make the query parameter empty
     query = dict()
     budget_dict = {"$set" : {"privacy_budget" : budget}}
@@ -85,7 +83,7 @@ def setPrivacyBudget(budget):
     result = table.update_one(query, budget_dict, upsert=True)
 
 def getPrivacyBudget():
-    table = get_collection("privacyBudget")
+    table = get_collection("Stage_PrivacyBudget" ,"privacyBudget")
     filtered = {"_id": False}
     storedBudget = table.find_one({}, filtered)
     if storedBudget is None:
@@ -128,13 +126,14 @@ def getCursor(find_method):
 def findOneData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
   
 
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
   data = getCursor(db.find_one)
   result_dict = {'data' : data}
   convert_objectid_to_string(result_dict)
@@ -144,12 +143,13 @@ def findOneData():
 def findData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
 
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
 
   cursor = getCursor(db.find)
   data = list(cursor)
@@ -161,12 +161,13 @@ def findData():
 def countData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n")
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
 
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
 
   cursor = getCursor(db.find)
   with_limit_and_skip = request.json['with_limit_and_skip']
@@ -176,12 +177,13 @@ def countData():
 def distinctData():
   if enc_key is None:
       abort (403, "Cannot load data without a key.\n")
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
 
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
 
   cursor = getCursor(db.find)
   distinct_key = request.json['distinct_key']
@@ -191,7 +193,8 @@ def distinctData():
 def insertData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Data is the data transferred
   data = request.json['data']
   convert_string_to_objectid(data)
@@ -201,7 +204,7 @@ def insertData():
 
   is_many = request.json['is_many']
   # Get the database
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
   bypass_document_validation = request.json['bypass_document_validation']
   result_dict = dict()
   if is_many:
@@ -219,12 +222,13 @@ def insertData():
 def insertDepricatedData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
   # Get the database
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
 
   # Get fields
   doc_or_docs = request.json['doc_or_docs']
@@ -254,7 +258,8 @@ def insertDepricatedData():
 def updateData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # query is the filter
   query = request.json['query']
   convert_string_to_objectid(query)
@@ -269,7 +274,7 @@ def updateData():
   bypass_document_validation = request.json['bypass_document_validation']
   collation = request.json['collation']
   # Get the database
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
   if is_many:
     result = db.update_many(query, data, upsert=upsert, 
                 bypass_document_validation=bypass_document_validation,
@@ -291,7 +296,8 @@ def updateData():
 def replaceOneData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # query is the filter
   query = request.json['query']
   convert_string_to_objectid(query)
@@ -305,7 +311,7 @@ def replaceOneData():
   bypass_document_validation = request.json['bypass_document_validation']
   collation = request.json['collation']
   # Get the database
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
   result = db.replace_one(query, data, upsert=upsert, 
                 bypass_document_validation=bypass_document_validation,
                 collation=collation)
@@ -323,12 +329,13 @@ def replaceOneData():
 def updateDepricatedData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # Indices is a json dict mapping keys to [data_type, is_sparse]
   # Each index is of the form itemA.itemB.....itemZ,
   indices = request.json['indices']
   # Get the database
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
 
   # Get fields
   spec = request.json['spec']
@@ -362,7 +369,8 @@ def updateDepricatedData():
 def deleteData():
   if enc_key is None:
       abort (403, "Cannot store data without a key.\n") 
-  stage_name = request.json['stage_name']
+  database = request.json['database']
+  collection = request.json['collection']
   # query is the filter
   query = request.json['query']
   convert_string_to_objectid(query)
@@ -371,7 +379,7 @@ def deleteData():
   indices = request.json['indices']
   is_many = request.json['is_many']
   # Get the database
-  db = get_collection(stage_name, indices)
+  db = get_collection(database, collection, indices)
   collation = request.json['collation']
   if is_many:
     result = db.delete_many(query, collation)

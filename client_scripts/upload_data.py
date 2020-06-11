@@ -16,7 +16,8 @@ def save_phone_to_server(input_file, uuid, pm_address):
 
     for data in entries:
         # Format the data to match server expectations
-        del data["_id"]
+        if "_id" in data:
+            del data["_id"]
         if 'write_local_dt' in data['metadata']:
             del data['metadata']['write_local_dt']
         if 'type' not in data['metadata']:
@@ -42,7 +43,7 @@ def save_phone_to_server(input_file, uuid, pm_address):
         # and whether this is the format expected from the server in the rawResult
         if 'ok' in result.raw_result and result.raw_result['ok'] != 1.0:
             raise Exception()
-
+    
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(

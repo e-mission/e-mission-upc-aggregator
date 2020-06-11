@@ -77,8 +77,8 @@ def summarize_metrics():
     end_time = request.json['end_time']
     freq_name = request.json['freq']
     metric = request.json['metric']
-    offset = request.json['offset']
-    alpha = request.json['alpha']
+    offset_dict = request.json['offset']
+    alpha_dict = request.json['alpha']
 
     # Calculate the range of time in hours. We currently only support values in datetime.
     end_datetime = extractDatetimeFromDict(end_time)
@@ -93,10 +93,11 @@ def summarize_metrics():
     # any other type of data for example.
 
     delta_f_vals = delta_f_dict[metric]
-    for val in delta_f_vals.values():
-        delta_f = (num_days * val)
-        query = saq.AE(delta_f)
-        cost += query.generate_diff_priv_cost(alpha, offset)
+    for mode, val in delta_f_vals.items():
+        if mode in offset_dict:
+            delta_f = (num_days * val)
+            query = saq.AE(delta_f)
+            cost += query.generate_diff_priv_cost(alpha_dict[mode], offset_dict[mode])
 
     # Try and deduce from the privacy budget
     available_budget = safmt.deduct_budget(edb.pm_address, cost)
@@ -106,11 +107,11 @@ def summarize_metrics():
 
     is_return_aggregate = False
     metric_fn = metrics.summarize_by_local_date
+    metric_list = [metric]
     ret_val = metric_fn(user_uuid,
               start_time, end_time,
-              freq_name, metric_list, is_return_aggregate)
-    # logging.debug("ret_val = %s" % bson.json_util.dumps(ret_val))
-    print(ret_val)
+              freq_name, metric_list, True)
+    ret_val = ret_val['aggregate_metrics']
     result = {"success" : True, "results": ret_val}
     numpy_to_py(result)
     return result

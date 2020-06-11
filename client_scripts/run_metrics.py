@@ -39,7 +39,7 @@ def run_metrics(uuid, pm_address, metrics_file):
     
 
     # Delete the metrics service
-    delete_service(metrics_address)
+    #delete_service(metrics_address)
 
     if error:
         assert(not error)

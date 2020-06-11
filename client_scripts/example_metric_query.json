@@ -1,6 +1,6 @@
 {
-    "offset": 100,
-    "alpha": 0.05,
+    "offset": {"car": 1000},
+    "alpha": {"car": 0.05},
     "start_time": {
                     "year": 2015,
                     "month": 7,
