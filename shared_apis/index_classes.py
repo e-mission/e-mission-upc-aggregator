@@ -2,7 +2,7 @@ import pymongo
 from shared_apis.fake_mongo_types import AbstractCollection
 
 class NonUserTimeseriesCollection(AbstractCollection):
-    def __init__(self, target_address):
+    def __init__(self, target_address, database):
         indices_dict = dict()
         indices_dict["user_id"] = [[pymongo.HASHED], False]
         indices_dict["metadata.key"] = [[pymongo.HASHED], False]
@@ -29,7 +29,7 @@ class NonUserTimeseriesCollection(AbstractCollection):
         indices_dict["data.loc"] = [[pymongo.GEOSPHERE], True]
         self.append_local_dt_indices(indices_dict, "data.local_dt") # recreated location
 
-        super().__init__(target_address, "Stage_analysis_timeseries", indices_dict)
+        super().__init__(target_address, database, "Stage_analysis_timeseries", indices_dict)
 
     def append_local_dt_indices(self, indices_dict, index_prefix):
         indices_dict["{}.year".format(index_prefix)] = [[pymongo.DESCENDING], True]
@@ -42,7 +42,7 @@ class NonUserTimeseriesCollection(AbstractCollection):
 
 class AnalysisTimeseriesCollection(AbstractCollection):
 
-    def __init__(self, target_address):
+    def __init__(self, target_address, database):
         indices_dict = dict()
         indices_dict["metadata.key"] = [[pymongo.HASHED], False]
         indices_dict["data.start_ts"] = [[pymongo.DESCENDING], True]
@@ -68,7 +68,7 @@ class AnalysisTimeseriesCollection(AbstractCollection):
         indices_dict["data.loc"] = [[pymongo.GEOSPHERE], True]
         self.append_local_dt_indices(indices_dict, "data.local_dt") # recreated location
 
-        super().__init__(target_address, "Stage_analysis_timeseries", indices_dict)
+        super().__init__(target_address, database, "Stage_analysis_timeseries", indices_dict)
 
     def append_local_dt_indices(self, indices_dict, index_prefix):
         indices_dict["{}.year".format(index_prefix)] = [[pymongo.DESCENDING], True]
@@ -81,17 +81,17 @@ class AnalysisTimeseriesCollection(AbstractCollection):
 
 class TimeseriesCollection(AbstractCollection):
 
-    def __init__(self, target_address):
+    def __init__(self, target_address, database):
         indices_dict = dict()
         indices_dict["metadata.key"] =[[pymongo.HASHED], False]
         indices_dict['metadata.write_ts'] = [[pymongo.DESCENDING], False]
         indices_dict['data.ts'] = [[pymongo.DESCENDING], True]
         indices_dict['data.loc'] = [[pymongo.GEOSPHERE], True]
-        super().__init__(target_address, "Stage_timeseries", indices_dict)
+        super().__init__(target_address, database, "Stage_timeseries", indices_dict)
 
 class UsercacheCollection(AbstractCollection):
 
-    def __init__(self, target_address):
+    def __init__(self, target_address, database):
         indices_dict = dict()
         index1 = ["metadata.type", "metadata.write_ts",
                 "metadata.key"]
@@ -99,4 +99,4 @@ class UsercacheCollection(AbstractCollection):
         indices_dict[index_one] =[[pymongo.ASCENDING, pymongo.ASCENDING, pymongo.ASCENDING], False]
         indices_dict['metadata.write_ts'] = [[pymongo.DESCENDING], False]
         indices_dict['data.ts'] = [[pymongo.DESCENDING], True]
-        super().__init__(target_address, "Stage_usercache", indices_dict)
+        super().__init__(target_address, database, "Stage_usercache", indices_dict)
