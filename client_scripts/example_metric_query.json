@@ -2,15 +2,15 @@
     "offset": {"car": 1000},
     "alpha": {"car": 0.05},
     "start_time": {
-                    "year": 2015,
-                    "month": 7,
-                    "day": 22,
+                    "year": 2018,
+                    "month": 5,
+                    "day": 4,
                     "timezone": "America/Los_Angeles"
                   },
     "end_time": {
-                    "year": 2015,
-                    "month": 7,
-                    "day": 23,
+                    "year": 2018,
+                    "month": 5,
+                    "day": 5,
                     "timezone": "America/Los_Angeles"
                   },
     "freq" : "DAILY",

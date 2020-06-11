@@ -51,7 +51,7 @@ class ModeInferencePipelineMovesFormat:
     logging.info("initial loadTrainingDataStep DONE")
 
     logging.debug("finished loading current training set, now loading from backup!")
-bbackupSections = safmt.AbstractCollection(edb.pm_address, "Backup_database", "Stage_Sections", None)
+    backupSections = safmt.AbstractCollection(edb.pm_address, "Backup_database", "Stage_Sections", None)
     self.backupConfirmedSections = self.loadTrainingDataStep(allConfirmedTripsQuery, backupSections)
     logging.info("loadTrainingDataStep DONE")
 

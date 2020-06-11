@@ -12,7 +12,7 @@ def save_phone_to_server(input_file, uuid, pm_address):
         entries = json.load(fp)
 
     # Get the index to upload
-    usercache_db = UsercacheCollection(pm_address)
+    usercache_db = UsercacheCollection(pm_address, "Stage_database")
 
     for data in entries:
         # Format the data to match server expectations

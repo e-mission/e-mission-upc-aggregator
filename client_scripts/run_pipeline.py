@@ -28,7 +28,7 @@ def run_pipeline(uuid, pm_address):
         error = True
 
     # Delete the pipeline service
-    #delete_service(pipeline_address)
+    delete_service(pipeline_address)
 
     if error:
         assert(not error)
