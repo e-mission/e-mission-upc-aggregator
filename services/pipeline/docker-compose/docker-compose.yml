@@ -1,0 +1,16 @@
+version: "3"
+services:
+  pipeline:
+    image: e-mission/pipeline:1.0
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+    ports:
+      #ENV VAR FOR RUNTIME PORT MAPPING
+        - $PORTMAP
+    networks:
+      - emission
+networks:
+  emission:
+    external: True
