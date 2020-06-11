@@ -1,5 +1,7 @@
 import argparse
 import json
+import socket
+import requests
 from shared_apis.service_router_api import request_service, delete_service
 from conf.machine_configs import machines_use_tls, certificate_bundle_path
 
@@ -20,6 +22,7 @@ def run_metrics(uuid, pm_address, metrics_file):
     json_entries['offset'] = metrics_contents['offset']
     json_entries['alpha'] = metrics_contents['alpha']
     address = "{}/metrics/local_date".format(metrics_address)
+    error = False
     try:
         if machines_use_tls:
             r = requests.post(address, verify=certificate_bundle_path, json=json_entries, timeout=600)

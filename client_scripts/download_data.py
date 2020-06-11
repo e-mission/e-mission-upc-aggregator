@@ -8,8 +8,9 @@ def save_server_to_phone(output_file, uuid, pm_address):
     # Load the index file
     usercache_db = UsercacheCollection(pm_address)
     # Load the data from the PM
-    retrievedData = list(usercache_db.find({"user_id": uuid, "metadata.type": "document"}, # query
-                                            {'_id': False, 'user_id': False}).sort("metadata.write_ts", pymongo.ASCENDING)) # projection, sort
+    #retrievedData = list(usercache_db.find({"user_id": uuid, "metadata.type": "document"}, # query
+    #                                        {'_id': False, 'user_id': False}).sort("metadata.write_ts", pymongo.ASCENDING)) # projection, sort
+    retrievedData = list(usercache_db.find({}))
     # Store the data in the file
     json.dump(retrievedData, open(output_file, "w"), default=bju.default, allow_nan=False, indent=4)
 

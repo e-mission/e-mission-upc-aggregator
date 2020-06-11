@@ -1,5 +1,7 @@
 import argparse
 import json
+import socket
+import requests
 from shared_apis.service_router_api import request_service, delete_service
 from conf.machine_configs import machines_use_tls, certificate_bundle_path
 
@@ -14,6 +16,7 @@ def run_count(uuid, pm_address, query_file):
     with open(query_file, "r") as f:
         json_entries['query'] = json.load(f)
     address = "{}/count_query".format(query_address)
+    error = False
     try:
         if machines_use_tls:
             r = requests.post(address, verify=certificate_bundle_path, json=json_entries, timeout=600)
@@ -29,7 +32,7 @@ def run_count(uuid, pm_address, query_file):
         print(r.json())
 
     # Delete the count service
-    delete_service(query_address)
+    #delete_service(query_address)
 
     if error:
         assert(not error)
@@ -55,4 +58,4 @@ if __name__ == '__main__':
             the file that describes the query.
         ''')
     args = parser.parse_args()
-    run_count(args.uuid, args.pm_address, query_file)
+    run_count(args.uuid, args.pm_address, args.query_file)

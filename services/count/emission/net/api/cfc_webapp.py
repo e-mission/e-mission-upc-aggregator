@@ -4,6 +4,9 @@ import json
 import socket
 import numpy as np
 import emission.core.get_database as edb
+import emission.storage.timeseries.geoquery as estg
+import emission.storage.decorations.analysis_timeseries_queries as esda
+import emission.storage.timeseries.timequery as estt
 import shared_apis.queries as saq
 import shared_apis.fake_mongo_types as safmt
 import datetime
@@ -18,6 +21,7 @@ def count_query():
     # Dummy id used as a placeholder. It must be consistent for each user but
     # otherwise doesn't matter. An optimization would remove all instance of user_uuid.
     user_uuid = request.json['uuid']
+    query = request.json['query']
     query_obj = saq.AE(1)
     cost = query_obj.generate_diff_priv_cost(query['alpha'], query['offset'])
 
