@@ -10,11 +10,7 @@ import emission.core.get_database as edb
 from emission.core.get_database import get_section_db, get_mode_db, get_routeCluster_db,get_transit_db
 from emission.core.common import calDistance, Include_place_2
 from emission.analysis.modelling.tour_model.trajectory_matching.route_matching import getRoute,fullMatchDistance,matchTransitRoutes,matchTransitStops
-
-Sections = get_section_db()
-from pymongo import MongoClient
-BackupSections = MongoClient(edb.url).Backup_database.Stage_Sections
-Modes = get_mode_db()
+import shared_apis.fake_mongo_types as safmt
 
 
 # The speed is in m/s
@@ -249,6 +245,8 @@ def calSpeedDistParams(speeds):
 #     return new_mat
 
 def mode_cluster(mode,eps,sam):
+    Sections=get_section_db()
+    BackupSections = safmt.AbstractCollection(edb.pm_address, "Backup_database", "Stage_Sections", None)
     mode_change_pnts=[]
     # print(tran_mat)
     query = {"$and": [{'type': 'move'},\
@@ -361,6 +359,7 @@ def get_mode_share_by_count(lst):
 # ground truth.
 def get_mode_share_by_count(list_idx):
     Sections=get_section_db()
+    BackupSections = safmt.AbstractCollection(edb.pm_address, "Backup_database", "Stage_Sections", None)
     ## takes a list of idx's
     AllModeList = getAllModes()
 
