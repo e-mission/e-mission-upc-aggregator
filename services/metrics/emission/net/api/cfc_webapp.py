@@ -111,8 +111,21 @@ def summarize_metrics():
     ret_val = metric_fn(user_uuid,
               start_time, end_time,
               freq_name, metric_list, True)
-    ret_val = ret_val['aggregate_metrics']
-    result = {"success" : True, "results": ret_val}
+    metrics_resp = ret_val['aggregate_metrics'][0]
+    ret_dict = dict()
+    # Metrics were successfully obtained
+    if metrics_resp:
+        metrics_data = metrics_resp[0]
+        for key in offset_dict.keys():
+            if key in metrics_data:
+                ret_dict[key] = metrics_data[key]
+            else:
+                ret_dict[key] = 0
+    else:
+        for key in offset_dict.keys():
+            ret_dict[key] = 0
+
+    result = {"success" : True, "results": ret_dict}
     numpy_to_py(result)
     return result
 
