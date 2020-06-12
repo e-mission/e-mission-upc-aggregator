@@ -20,7 +20,6 @@ def run_pipeline(uuid, pm_address):
             r = requests.post(address, verify=certificate_bundle_path, json=json_entries, timeout=600)
         else:
             r = requests.post(address, json=json_entries, timeout=600)
-            print(r)
     except (socket.timeout) as e:
         error = True
     #Check if sucessful
