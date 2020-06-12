@@ -32,7 +32,7 @@ def run_count(uuid, pm_address, query_file):
         print(r.json())
 
     # Delete the count service
-    #delete_service(query_address)
+    delete_service(query_address)
 
     if error:
         assert(not error)

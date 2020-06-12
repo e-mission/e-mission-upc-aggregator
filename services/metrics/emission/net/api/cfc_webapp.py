@@ -19,11 +19,11 @@ from conf.machine_configs import machines_use_tls, upc_port
 # when multiple days are involved
 delta_f_dict = {
         # Units of trips/day
-        "count": {"car" : 55, "walk" : 55, "bicycle" : 55, "transit" : 55},
+        "count": {"CAR" : 55, "WALK" : 55, "BICYCLE" : 55, "TRANSIT" : 55},
         # Units of meters/day
-        "distance": {"car" : 3840000, "walk" : 504000, "bicycle" : 648000, "transit" : 1440000},
+        "distance": {"CAR" : 3840000, "WALK" : 504000, "BICYCLE" : 648000, "TRANSIT" : 1440000},
         # Units of seconds/day
-        "duration": {"car" : 86400, "walk" : 86400, "bicycle" : 86400, "transit" : 86400}
+        "duration": {"CAR" : 86400, "WALK" : 86400, "BICYCLE" : 86400, "TRANSIT" : 86400}
         }
 
 # Helper function to convert all numpy types to python types

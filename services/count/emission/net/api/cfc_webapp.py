@@ -1,5 +1,5 @@
 from emission.net.api.bottle import route, post, get, run, template, static_file, request, app, HTTPError, abort, BaseRequest, JSONPlugin, response
-
+import bson
 import json
 import socket
 import numpy as np
@@ -14,6 +14,20 @@ import pytz
 from conf.machine_configs import machines_use_tls, upc_port
 
 
+def convert_objectid_to_string(dict_or_list_or_item):
+    if isinstance(dict_or_list_or_item, dict):
+        for key, value in dict_or_list_or_item.copy().items():
+            if isinstance(value, bson.ObjectId):
+                dict_or_list_or_item[key] = str(value)
+            else:
+                convert_objectid_to_string(value)
+
+    elif isinstance(dict_or_list_or_item, list):
+        for i, value in enumerate(dict_or_list_or_item.copy()):
+            if isinstance(value, bson.ObjectId):
+                dict_or_list_or_item[i] = str(value)
+            else:
+                convert_objectid_to_string(value)
 
 @post('/count_query')
 def count_query():
@@ -33,7 +47,7 @@ def count_query():
 
     start_time = query['start_ts']
     end_time = query['end_ts']
-    time_query = estt.TimeQuery("metadata.write_ts", start_time, end_time)
+    time_query = estt.TimeQuery("data.ts", start_time, end_time)
     region = query['sel_region']
     if region is None:
         geo_query = None
@@ -42,7 +56,7 @@ def count_query():
 
     loc_entry_list = esda.get_entries(esda.CLEANED_LOCATION_KEY, user_uuid, 
                                     time_query=time_query, geo_query=geo_query)
-
+    convert_objectid_to_string(loc_entry_list)
     if len(loc_entry_list) > 0:
         ret_val = 1
     else:
