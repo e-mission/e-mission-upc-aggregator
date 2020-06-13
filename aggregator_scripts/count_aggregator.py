@@ -1,6 +1,7 @@
 import argparse
 import json
 import numpy as np
+import os
 import subprocess
 import shared_apis.service_router_api as sasra
 import shared_apis.queries as saq
@@ -10,9 +11,9 @@ def main(input_dir, query_file, output_file):
     count_results = []
     for filename in files:
         input_file = input_dir + "/" + filename
-        secret_key = np.random.randint(low=0, high=1 << 62, type='uint64')
+        secret_key = str(np.random.randint(low=0, high=1 << 62, dtype='uint64'))
         res = subprocess.run(["./e-mission-py.bash", "client_scripts/full_count_query.py", 
-            input_file, query_file, secret_key], capture_output=True, encoding="utf-8")
+            input_file, query_file, secret_key], stdout=subprocess.PIPE, encoding="utf-8")
         count_result = res.stdout.strip()
         count_results.append(json.loads(count_result))
     num_participants = 0
@@ -24,8 +25,8 @@ def main(input_dir, query_file, output_file):
 
     with open(query_file, "r") as f:
         query_contents = json.load(f)
-    offset = query_contents['query']['offset']
-    alpha = query_contents['query']['alpha']
+    offset = query_contents['offset']
+    alpha = query_contents['alpha']
     query_contents = saq.AE(1)
     noisy_result = query_contents.produce_noisy_result (total, alpha, offset)
     output = dict()
@@ -55,4 +56,4 @@ if __name__ == '__main__':
             the output json file for the reuslts
         ''')
     args = parser.parse_args()
-    main(args.input_file, args.query_file, args.output_file)
+    main(args.input_dir, args.query_file, args.output_file)

@@ -35,7 +35,7 @@ def run_metrics(uuid, pm_address, metrics_file):
         error = True
     else:
         # Print the results
-        print(r.json())
+        print(json.dumps(r.json()))
     
 
     # Delete the metrics service
