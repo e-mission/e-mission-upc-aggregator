@@ -1,28 +1,17 @@
-# E-MISSION NEW ARCHITECTURE
+# E-MISSION User Private Clouds
 
-The e-mission new architecture is a series of system changes designed to support individualized user storage, policy choices, and requests. To facilitate this, we have composed a series of modules, mostly running in containers, which represent the various components. These components are:
-
-* System Controller
-* User Data Storage
-* Data Simulation
-* Data Aggregation
-* Data Querying
-* Multimachine Communication
-
-Each of these will sections covered in more detail, along with the code added/changed to implement it. Additionally we made changes to produce a variety of new images for containers, 
+This repository contains the implementation of User Private Clouds (UPC) and the relevant services used to operate select e-mission functionality within UPC. A higher level description of UPC is available in my [technical report](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2020/EECS-2020-130.html).
 
 ## Installation
-To get everything to work properly with the current implementation, you need a linux machine with the following installations:
+To get everything to work properly with the current implementation, you need at least one linux machine with the following installations:
 
 * Anaconda Python3
 * Ecryptfs
 * Docker
-* Docker-Compose
+* Either docker-compose or kubernetes
 
 ### Anaconda Python3
 On each machine we need a host process to provision docker instances which means you need access to `Python 3.5` or greater. Depending on the data analysis you wish to run you may need access to additional libraries, most of which should be supported by the `conda env` produced for the base e-mission server. You find the installation instructions [here](https://github.com/e-mission/e-mission-docs/blob/master/docs/install/manual_install.md).
-
-It shouldn't be necessary to have as large an environment as the existing `conda env` provisions, but this sticks with some of the core design decisions we made in working on these changes "don't remove/optimize features until we get a working product." It for this reason that you see huge chunks of the e-mission code copied over (and consequentially creating a need to merge with the main repository) when we could probably succeed with a only including a much smaller subset.
 
 ### Ecryptfs
 
@@ -39,172 +28,218 @@ We opted to use `Ecryptfs` mainly because it was easy to use and its encryption 
 
 Having `docker` is essential to running the modified architecture because every single component runs inside a container except for the component responsible for launching containers. You can find information on how to install `docker` on your platform from their [website](https://docs.docker.com/install/), as well as information on how `docker` works if you are unfamiliar.
 
-### Docker-Compose
+### Docker-Compose or Kubernetes
 
-We additionally rely on `docker-compose` to actually launch our containers with specified input files. You can find the documentation on `docker-compose` also on their [website](https://docs.docker.com/compose/install/).
+Our current implementation supports either using docker-compose with a set of servers we built or kubernetes to launch the UPC services. There are tradeoffs with each selection, which hopefully these will do a good job of summarizing. We cannot use docker-swarm because ecryptfs requires sudo permissions, which are not available with docker-swarm.
 
-Here we have opted to rely on default `docker` rather than a more robust microservices implementation through either `docker swarm` or `kubernetes`. The former was a decision we made after we discovered that `docker swarm` couldn't support functionality we needed for our implementation whereas the latter we simply didn't have time to pursue.
+Docker-Compose Advantages:
+  * Simple to use.
+  * Pausing containers is possible. This is useful if you need many concurrent users.
+  * Each container is very lightweight.
+    
+Docker-Compose Disadvantages:
+  * Not representative of a real system.
+  * No native distributed storage.
+  * Currently no support for recovery upon whole machine failure.
+  * Server upkeep cannot no longer be a cloud task.
+  * Less isolation than Kubernetes offers.
+  * You cannot test on one machine unless it has a public IP address.
 
-## Architecture Code
+Kubernetes Advantages:
+  * Designed to balance pods across machines.
+  * Easy configuration on cloud machines.
+  * Recovery upon machine failure
+  * Better able to set resource limits.
+  * Overall more development.
 
-To facilitate our new architecture we have added new code and docker functionality in a variety of locations. Regretably these are probably not the best locations to place this code and our changes can seem a bit disjoint in their placement. I will do my best to list what is located where and what its purpose is. Additionally with each section we will present a brief higher level overview of the intended purpose of each component, but this is not meant asa substitute for a detailed description of the architecture (which is in progress).
+Kubernetes Disadvantages:
+  * Pods are a bad fundamental layer and the number of pods that can be spawned at once is very small. You may need to get creative with how you reuse pods.
+  * No support for pausing containers.
+  * Constructing a Kubernetes cluster may be more difficult than just installing docker.
+  * Kubernetes has a harsher learning curve because it has more functionality.
 
-However before we can detail the exact component we need an overview of the components. Our new architecture basically consists of 3 components:
+Ultimately I would suggest using Kubernetes. However, if you need many concurrent users for deployment you will need to decide how to allocate users (it will be far too slow to delete pods as needed) and you may need to pick the best way to recycle containers. If this proves too difficult and pausing containers is essential to usable performance, then you may need to settle for the docker-compose based implementation.
 
-1. Users
-2. Algorithm Providers
-3. A system controller
+#### Installing Docker-Compose
 
-These components are then split further into various subcomponents but at a very high level users provide their data and have an abstraction of an individualized workstation through our "user cloud" abstraction. Algorithm providers interact directly which each user to acquire their necessary data and then aggregate their results as necessary. The system controller is responsible for providing the connection between users and their storage as well as algorithm providers access to users. By abstracting this component into a controller it allows us to dynamically reallocate resources.
+You can find the documentation on `docker-compose` and how to install it on this [website](https://docs.docker.com/compose/install/). 
 
-### System Controller
+#### Installing Kubernetes
 
-The system controller is basically a central server that all participants connect to. It can perform a variety of tasks, some of which are:
+To run kubernetes there are a few necessary components. First you must install [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) and its dependencies on at least one machine, whichever machine hosts the service router. Next you will need access to a Kubernetes cluster. For testing purposes you will probably first want to install [minikube](https://kubernetes.io/docs/tasks/tools/install-minikube/). Minikube containers can interact with each other so you can test correctness with a single machine. You may also need to configure your docker images to work properly with minikube, either by uploading the images to a remote registry from which minikube will download or by [building the images directly in minikube](https://stackoverflow.com/questions/52310599/what-does-minikube-docker-env-mean). 
 
-* Tell an algorithm instance where to find users.
-* Tell users where their user cloud is located.
-* Create a user cloud for a newly signed up user.
-* Pause and unpause the physical container for each cloud.
+While it may be possible to run multi-machine cluster using minikube, I am not familiar with how to do so. Instead I recommend using a cloud provider that has kubernetes support. In my technical report I found the [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine) particularly easy to use and if you are a student you may have free credits. However when transitioning to a cloud kubernetes engine you may have to make additional changes to adhere to requirements of the cloud provider. For example, in my experience I needed to change all of the docker images paths to correspond to Google's [container registry](https://cloud.google.com/container-registry), and I needed to modify the firewall rules to allow external traffic to access the ports the containers would occupy (because we use the NodePort service type).
 
-The last task is particularly important to us because our focus on placing everything in containers for increased isolation relies on an assumption that most of time each user cloud will not be processing data. This allows us to pause that instance which makes us better capable to provision our CPU resources more effectively (presumably at some cost to storing on disk).
+## Code Overview
 
-Our actually implementation of this involves using `bottle.py` to create a server that receives post requests at some known address. Then our server holds mappings of users to their clouds locations as well as their current status ("Running" or "Paused"). Finally the server will periodically pause containers not in use according to some user specified timing requirements.
+This section will give a brief overview of how to code is organized and where you will need to make changes to alter various functionality. It is not intended to serve as a comprehensive overview to UPC and the aforementioned report will likely be more beneficial.
 
-#### Files
-The actually files changed or added to implement the controller (relative to the e-mission-server base directory) are:
+### `conf/`
 
-* `launch_machine.py` - Helper script to launch the controller.
-* `conf/net/machines.json.sample` - Example configuration used to specify the controller
-* `emission/net/api/controller.py` - Actual code used to provide the server.
+This folder containers the information necessary for configuring the service router and the user services. The main file that you might need to edit `conf/machines.json.sample`. If you opt to replace this with a different file then you will need to edit `conf/machine_configs.py` (which you will also need to edit if you add any additional configuration details.
 
-We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
+Machines.json.sample contains a list of shorthands for api names as well as set of configuration details. At a minimum before you begin you will need to set:
+  * **service\_router\_ip** with the IP address of the machine hosting the service router
+  * **Machines** with the ips of the machines in your cluster. If you are using docker-compose you need to list every machine and place a weight for how likely it is to choose each machine. If you are using kubernetes you only need to list a single machine (and a dummy weight) as services are accessible from all machines in a Kubernetes cluster with our configuration.
+  * **upc\_mode** with either "kubernetes", if you are using a kubernetes deployment, or "docker" if you are using a docker-compose deployment
 
-### User Data Storage
+There are other fields you may wish to modify, notably the ports upon which each server runs, but it is not necessary to change these to get a working implementation.
 
-User data storage is done through our "user cloud" concept. The user cloud is currently simply a copy of the e-mission server but with extra information (for example the ability to send the user's key to mongo to deploy the database over an encrypted file system). For this reason we have opted to included all the original e-mission code with some extra functionality. This conseqeuentially means that code sizes are a lot bigger than should be necessary (because we include a lot of files we didn't modify) and we haven't removed any of the code that is no longer relevant (for example each user still needs to log in and register despite being the only user in the container. There should be a more modular approach that would for example allow us to only swap in the `cfc_webapp.py` file into an existing docker image that otherwise contains the rest of the e-mission code but we have not looked into doing this. 
+The most important aspect of your configuration is that it must be consistent across all your machines and services to ensure it works properly.
 
-The presence of additional user clouds per machine also required us to provision ports dynamically and present that information through environment variables (to make each instance unique from the same start script). This is NOT a robust process and understanding the exact rules for naming likely requires further investigation.
+### `service_router/`
+This directory contains all the files used to orchestrate spawning various services across your cluster of machines. It contains the following files you may need to use or change:
 
-#### Files
-The actually files changed or added to implement the user cloud (relative to the e-mission-server base directory) are:
+  *  `router.py`: Launches the service router.
+  *  `swarm.py`: A server that you will need to launch on each machine if you are running with docker-compose
+  *  `kubernetes_services.json`: A json file which for each known service contains the location of each pod file, service file, and the name of the container that acts a server within the pod. If you are using kubernetes and add a service you will need to add an entry to this file.
+  *  `docker_services.json`: A json file which for each known service contains the location of the docker-compose file. If you add a service and use docker-compose you will need to add an entry to this file.
 
-* `emission/net/api/cfc_webapp.py` - Actual code for the e-mission web server. You can find my changes in a section commented "Nick's changes"
+Additionally, if you intended to alter or add functionality to the service router you may need to modify one of the python files.
 
-We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
+### `shared_apis/`
 
-### Data Simulation
+This directory contains a set of apis that will likely be shared by clients, aggregators, or services. The biggest reason you may need to modify one of these scripts is if you need to use one of the e-mission database views that are not currently supported then you may want to `index_classes.py`. When using differential privacy, some example queries are provided in `queries.py`. The other files support the APIs for interacting with the pm and the service router.
 
-Data simulation is almost entirely consistent with the main branch of the e-mission server. We use the same fake data generator and we have only modified the example script that generates user data to support our examples. This was primarily done by moving the code from `Data Generator - Demo.ipyn` to `initialize_data.py` so that it could run without `iPython notebook`.
+### `services/`
 
-Additionally we opted to modify the example to deterministically alternate between two fixed locations (so that we could have a consistent and fixed amount of data). This may or may not be a useful method moving forward.
+The services directory contains a set of sample services that the service router can spawn. Admittedly, each service should probably be included as a submodule if it is included at all. The most important components for each service are the presence of a docker image (which is why for development all of the code is provided) and the configuration files for kubernetes and docker-compose. In our example we have provided 4 service: 
+  * The Permission Manager (PM): The service that is provided a user's storage key.
+  * Pipeline: A service that runs the e-mission intake pipeline.
+  * Metrics: A service that replaces the metrics endpoint in the `cfc_webapp.py` of the e-mission server.
+  * Count: A service that performs example count queries based on location and date.
 
-### Data Aggregation
+The Pipeline, Metrics, and Count services are derived from the base e-mission server and are unoptimized. If there is a significant reason to do so, I can work on removing the unnecessary files, but this could be a timeconsuming or tedious process. There is also the question of how to update e-mission server components upon which the service relies, which is why I maintain the same code structure, with only two modified files: `emission/net/api/cfc_webapp.py` and `emission/core/get_database.py`.
 
-In implementing algorithms we opted to split algorithms into 2 components:
+### `client_scripts/`
 
-1. An aggregation component that process the whole dataset.
-2. A set of queriers that collect data from users one at a time, possibly with one querier per user.
+This directory contains a series of scripts that simulate the actions performed by a client device. Currently there are only a few examples such as upload and downloading data or launching and running user specified services.
 
-Our primary example use case was `Jack Sullivan's` work on differentially private queriers, which is why we opted to struct code in this manner. You can find the relevant code in many locations, but we opted to stick with the same `POST Request` server model for all components (i.e. a research launches an aggregator server which gets many queriers launched through the controller). We currently only use functionality that we added (for example to support being able to ask if data exists for a particular range and if so to retrieve it). We have not shown any support for an aggregator that for example wants to run the e-mission pipeline on some subset of users. We also do not have any work on modifying how users are requested/sampled and how to ensure it is done in a fair process.
+### `aggregator_scripts/`
 
-#### Files
-The actually files used to implement aggregation (relative to the e-mission-server base directory) are:
+This directory contains a series of scripts meant to represent the roles of aggregators when engaging with UPC. In a real implementation, the aggregator should always contact each user through their device applications and have the device interact with the service router directly. As a result all of our aggregators function by interacting with scripts in the `client_scripts` folder. Perhaps a more realistic implementation would require each client to have a server application which functions as a device application, but instead our application will just launch the client scripts directly. Additionally, to all for an easy to understand demo our example aggregators undergo the process of having users upload data and run the pipeline, which is not realistic. Instead a more reasonable approach would be to rely on whatever data is already processed.
 
-* `emission/net/ext_service/launch_aggregator.py` - Helper script to launch the sample aggregator.
-* `emission/net/ext_service/aggregator.py` - Actual code for the server component of the sample aggregator.
+## Example Usage
 
-We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
+In this section we will demo scripts that are used to run client scripts or aggregation scripts. These should serve as examples of how to create a new client or aggregator. Additionally, to provide some insights into how the existing code is built the process will include not just the steps for you to run but what is happening with each step.
 
-### Data Querying
+Finally, its worth noting that both setups assume no existing users or persistent storage. If you rely on either your steps will likely be much simpler but may require altering the service router to properly associate each user with their longterm storage.
 
-The data querying component is an additional POST server. This component is far more in tune with a traditional microservices architecture as all instances are identical except for the endpoints at which they connect. For that reason a feasible redesign would be to just deploy the queriers in a standard kubernetes cluster. The actual functionality is that the controller spawns each querier instance and then provides the aggregator with addresses of the queriers. Then the aggregator connects with the querier and provides a set of users that it wants the querier to connect to and the querier will then performed that request by making a post request to the desired user clouds. Finally it send the result to the aggregator (and if necessary remains up to execute any concluding interaction with the usercloud).
+### Shared Setups
 
-#### Files
-The actually files used to implement the querier (relative to the e-mission-server base directory) are:
+Whether you are running an example of a client or aggregator there are a few steps that you will need to be successfully operated.
 
-* `runQueryCorrect.py` - Helper script to launch a correctness query.
-* `emission/net/int_service/query_microservice.py` - Sample implementation of a querier server.
+  1. Make sure each machine in your cluster has the necessary installations.
 
-We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
+  2. Modify the configurations in `/conf/machines_sample.json` matches the machines in your cluster. To avoid any issues you should keep this synchronized across all the machines in your cluster.
 
-### Multimachine Communication
+  3. Make sure you have each docker image. You can rebuild each docker script by running `build_images.sh` in bash. If you find yourself frequently editing a service you will likely find it useful to modify the dockerfile to import your self from a github repository. If you choose to do this you can modify the first step of the `setup_script.sh` found in the respective service directories to pull changes to the repo as an initial runtime step and avoid the time necessary to rebuild the image (which can take some time).
 
-One fundamental challenge with this project was the struggle to align the project with existing schema in microservices architectures. To illustrate this more clearly let's give the example of how `kubernetes` or `docker swarm` might opt to handle a web server. The general paradigm is that someone creates an image of the web server. The user does this with some number of instances to reflect their expected workload. However all users connect to the same web address and `kubernetes` decides which web server should be routed traffic based on load management, similarly managing the movement of instances across a cluster of machines. Crucially all web traffic goes to the same place because all instances are identical! In our user cloud implementation we have a code base which should be identical for each user but once a user connects it is no longer stateless, so a user must connect again to the previous instance it connected to (the only piece of state we have added is a user secret key to encrypt data but this is a very important piece of state).
+  4. Select a machine on which to run the service router and load the e-mission anaconda environment. If this is your first time then run 
+  ```
+  $ source setup/setup.sh
+  ```
+  In your terminal. If you have already completed this step then run
+  ```
+  $ conda activate emission
+  ```
+  in each terminal.
 
-The implication of this is that we cannot treat the user cloud as a service in the way a traditional microservices architecture would and instead need to create individual containers manually. Due to limitations in `docker swarm` we actually can't even directly deploy containers as services with a single container (it cannot provide privleged containers). This is not a limitation with `kubernetes`, which makes it promising as an alternative, especially given that kubernetes can then address issues like load management and reliability. However we have opted to push this to future work, mostly because there are not many theoretical challenges with using `kubernetes` but I was unexperienced and my research seemed to indicate setup can be complex. One definite improvement would be to port these modules to `kubernetes` and hopefully in the process remove many of the hacks needed to implement it.
+  If you are running with docker-compose then you will need to repeat this step on each additional cluster.
 
-For the time being we using docker to spawn individual contains and associate machines together with many a per machine python server that can launch a docker container. We then decide how to allocate containers across machines using static information (though we could use information like current CPU consumed and available memory but we figured this was a temporary fix before using kubernetes).
+  5. Configure you cluster to properly interact with the service router. If you are using kubernetes this requires ensuring your `kubectl` is properly configured. If you are using docker-compose you will need to launch a server on each machine, including the machine with the service router if it is part of the cluster, by running:
+  ```
+  $ ./e-mission-py.bash service_router/swarm.py
+  ```
 
-#### Files
-The actually files used to implement the controller (relative to the e-mission-server base directory) are:
+  6. Launch the service router on one of your machines. To do so run:
+  ```
+  $ ./e-mission-py.bash service_router/router.py
+  ```
 
-* `conf/net/machines.json.sample` - Example configuration used to specify machines that can be accessed. It does not provide support for fault tolerance for example.
-* `emission/net/int_service/swarm.py` - Server run locally to actually launch docker commands. This should be removed eventually.
-* `emission/net/int_service/swarm_controller.py` - Helper file to provide abstractions to the controller about how to launch an instance. This should be removed eventually.
+Now you have the service router running and it knows about your cluster. At this point you can run either the client or aggregator example.
 
-We also interact with existing e-mission files as well as some possible helper scripts but we will not detail them here.
+### Client Script Steps
 
-### Docker Changes
+The example client script we will be running will demonstrate multiple client operations. In particular, the script launches a PM, uploads user data from a json file, runs the pipeline, and finally downloads the process data to a user selected json file. To run this example you will need a json file containing user data. If you already have real data you can use that. Alternatively, if you are intended to use many users you can explore fake data generation, which is currently possible to produce using a combination of this [repo](https://github.com/njriasan/e-mission-thesis-fake-data/settings) to generate a population.xml and this [repo](https://github.com/e-mission/em-dataload) to convert it to e-mission collected data. Alternatively if you are testing with a single user you may want to use some of the available data in the main e-mission server found [here](https://github.com/e-mission/e-mission-server/tree/master/emission/tests/data/real_examples).
 
-You can find information about how to run the code in `docker/README.md`. One important piece of information is that testing any changes requires pushing to github (and likely requires that you modify the docker file and relevant start scripts to reflect that endpoint). The reason is that the existing code base creates the docker image by executing `git clone` when building the image. We made further modifications by having the start script pull the latest commit to avoid rebuilding the image, but all of this indicates that testing changes require pushing to a remote repository.
-
-You can find the details on how constructing the docker instances work in the `docker/README.md` as well.
-
-### Reading the Code
-
-To get familiar with our implementation and changes we suggest the following reading order:
-
-1. Multimachine Communication - This should consist mostly of raw docker commands so hopefully it gives a clear picture of what is actual happening.
-2. `bottle.py` - Reading and understanding how a bottle server works is the next step for understanding what the controller and user cloud are based around.
-3. `controller.py` and `cfc_webapp.py` - Together these should give an overview of how the controller and user cloud actually exist. It should also highlight what is happening inside containers.
-4. Data generation scripts - Both how to call them and what is happening should provide an understanding of how to actually fill a user cloud.
-5. Data Aggregator and Data Querier - These together should provide an example of how an application may query and interact with our user cloud
-6. Scripts to run the whole process (`runNewArch.py` for example) - These should give you an example how use can construct experiments to test the architecture.
-
-## Running an Example
-
-First you need to make sure the relevant docker images are built. This information can be found in `docker/README.md` and for our example this will require building all 3 of the images listed. If you are planning on using this as a starting point for future changes there a couple important takeaways.
-
-1. If you want your changes to be reflected and you are not working off the main branch you need to modify all 3 dockerfiles and change possibly the repository name and the branch. Failure to do so will cause the image to fail to download your changes from github.
-2. Any changes that you make must be pushed to github to test them. This is necessary because again the image downloads from your repository. It is however not necessary to rebuild the images each time you make a change because we have added commands into the startup script to download the latest commit (which you also be aware of in case you want to control which components have up to date changes and which do not). For this reason we recommend using multiple branches and if you are planning on making large changes possibly a different branch for each component so you can test them independently.
-
-Once you actually begin making changes and have configured your repository and branches future builds can be completed from the `build_images.sh` script.
-
-Next you need to make sure and update what machines you will be using. Eventually this step should be replaced by configuring your kubernetes cluster. However since that functionality is not yet available and our configuration is not compatible with docker swarm due to its reliance on privileged containers, you will need to modify our configuration for our docker "controller." To do so you want to open the file `conf/net/machines.json.sample`. In this file you will find a few important json fields. Most of these you won't need to edit (and you should refer to the code if you are curious about their functionality) but you may need to change `controller-ip`, which refers to the ip address from which you will launch your controller, `controller-port` which is the public accessible tcp port upon which the controller will run, `swarm-port` which is the port from which a per machine server responsible for launching docker containers will run, and finally `machines` which is a dictionary mapping ip addresses of the machines participating to integer values. These integers don't necessarily have any inherent meaning but can be used if you want to give weighted priority to certain machines when launching UPC containers based upon their features (for example available RAM).
-
-Now that you have completed the necessary setup you need to launch the server that will spawn docker containers across your machines. This requires you to first launch the e-mission anaconda environment as the server must be run outside of docker so they can eventually launch docker containers. Assuming you have already setup the installation steps for the anaconda environment found [here](https://github.com/e-mission/e-mission-docs/blob/master/docs/install/manual_install.md) run:
+To run the example client script first make sure your machine is using the emission conda environment and then execute:
 ```
- $ source setup/setup.sh
-```
-
-You must do this on every machine you will be using (and if you plan on using more than one terminal in each terminal you use). Now from inside the e-mission environment you can launch the server and controller. To do so run
-
-```
- $ ./e-mission-py.bash launch_machine.py
+ $ .\e-mission-py.bash example_all_steps.py <input_file> <output_destination> <secret_key>
 ```
 
- The script `launch_machine.py` will setup the controller if the ip address matches the controller and launch the server (note this will takeup one terminal). If you need greater inspect you can launch each component manually in a separate terminal (check the script for details). This means its also very important that you push your configuration file to your repository and ensure it is consistent across all machines participating. If this script is not launching the controller check that the ip address matches the form expected by the script and that ip address matches the ip address python receives when it calls `gethostbyname` on the current machine.
+where your input file is the file containing your data, the output destination is the path to where you want to store the processed data as a json, and secret key is a random value used to encrypt data with ecryptfs. In practice you should ensure to use a random high entropy value for each user, but for testing correctness you can use any value. This will then cause the script to execute the following steps:
 
-Finally once your network is started (which may take a while on the first attempt) you can run any of your tests. In this example we will run `runNewArch.py`, which creates fake users, uploads their data to each UPC and finally particpates in some queries. To launch this you can run
+  1. If running with docker-compose setup the docker network in which all containers will spawn. If you are using kubernetes this step will do nothing.
+
+  2. Invoke `client_scripts/launch_pm.py`, which will make a request to the service router to launch the PM service. To explain the steps in more detail this process will first make a request to the service router through a post connection using the api in `shared_apis/service_router_api.py`. This will then contact the service router with the name of the service you wish to launch. The service router will then search one of two json files, either `service_router/docker_services.json` or `service_router/kubernetes_services.json` depending on if you are using docker-compose or kubernetes. This will then give the service router a path to the necessary configuration files. Then the service router will attempt to spawn the service using the respective cluster method.
+
+If you are using kubernetes, the service router generates a new random file and copies over the information in the configuration files, swapping the necessary ports, names, and labels. This is because kubernetes defines services using the names given and (to my knowledge) must be presented with a configuration file. It may be possible to do this directly with the python kubernetes api but I am not sure how to do so. The port at which the container is spawned is done dynamically to ensure multiple pods can launch on the same machine.
+
+If you are using docker-compose the service router first randomly selects a machine in the cluster on which to spawn the containers. Then, the service router contacts the machine with the request using our `service_router/swarm.py` servers. This machine then makes a request using docker-compose and a dynamically allocated port and name.
+
+The service router then verifies it can connect to the spawned service within a specified timeout (this is because with the startup script when docker or kubernetes says a container is ready it may not have started the server yet) and once complete returns the client an address and port at which to contact the pm service.
+
+Finally, the client, having the PM address, sends over the secret key that it uses to encrypt its data.
+
+  3. Next the script invokes `client_scripts/upload_data.py` to upload the data from the input file to the PM using the mongo api in `shared_apis/fake_mongo_types.py`.
+
+  4. The script invokes `client_scripts/run_pipeline.py` to request the service router launch an instance of the pipeline service. The service router responds with the service address and the client then sends it the address of the PM so it can run the intake pipeline. Finally, this script then requests the pipeline service is deleted once finished.
+
+  5. The script invokes `client_scripts/download_data.py` to request all download all data processed by the PM to the specified output file.
+
+  6. The script has the service router delete the PM.
+
+### Aggregator Script Steps
+
+The example aggregator script we will be running will demonstrate running a count query across multiple users with differential privacy. In our example we will not assume any client has already been crated, so instead we will repeat the process of uploading data and running the intake pipeline for each user. This will again require having many data files so refer to the links given in the client script steps.
+
+Additionally, in our example we will be referring to the differential privacy examples given in this [technical report](https://www2.eecs.berkeley.edu/Pubs/TechRpts/2019/EECS-2019-69.html), which allows us to specify budget consumption without relying on directly interpretting an epsilon value. Instead aggregators provide an offset and alpha value.
+
+Note: For this example script we assume budget costs can be calculated before data is collected and that there are always sufficient users. This is because it enables us to process users iteratively, which is more space efficient for our sample implementation. Queries of this nature are then restricted to accuracy known beforehand (say to within a thousand users of the real answer for example). However, you likely will want to either be able and set the value for epsilon after receiving response from users and ensuring you have sufficient users respond. To do so, you will need to extend the PM with a refund budget feature (to avoid race conditions) if a query is aborted. Similarly you will also need to rewrite the given scripts to first attempt and deduct the max amount of budget, determine the number of responses, initiate the count query, and then refund the user any budget not consumed (if any). The current implementation has the count query perform budget deductions but you may wish to have the client directly perform all budget requests instead and then only have the query itself performed by the service.
+
+To run the example script in a terminal with your emission anaconda environment loaded, run:
 
 ```
- $ ./e-mission-py.bash runNewArch.py
+  $  ./e-mission-py.bash aggregator_scripts/count_aggregation.py <data_directory> <query_file> <output_file>
 ```
 
-from a terminal in the e-mission source environment. This example may take a while before you see any output. If you are seeking to make your own trials then consider investigating this script and the more importantly the scripts it calls in order to function. 
+The data directory is a directory containing each of the files containing user data and no additional files. The query file is a file which provides a set of parameters for the count query. In particular, the file needs to specify the location as a bounded box, the interval of time in which to search in unix time, and the query parameters. An example is shown in `client_scripts/example_count_query.json`. Finally, the output file is the location to place a json file with the results.
 
-### Teardown
+The script then undergoes the following steps:
 
-One issue you may encounter is that if you are running tests you can accidentally dedicate a lot of memory to stopped docker containers. To address this we offer two nearly identical scripts. `prune_docker.sh` will prune any docker images, volumes, or containers you have that are not being used but are consuming memory. `teardown_docker.sh` does the same thing but also first stops all currently running docker containers (which means you should be very careful if you have other docker containers running on your machine.
+1. For each user it invokes `client_scripts/full_count_query.py` with a data file and the query file. 
 
+2. This first launches a PM, uploads the data, and runs the intake pipeline.
 
-### Summary
+3. It then launches the count query service and sends the count query the query parameters and the PM address.
 
-In conclusion the steps to running an example in UPC are 
+4. The count query then deducts the necessary budget and responds with the result (including if the user can participate).
 
-1. Build the images, first by modifying the dockerfiles to refer to your repository and then using `build_images.sh`.
-2. Update the configuration file, `/conf/net/machines.json.sample` to refer to the machines you will be using.
-3. Load the e-mission environment.
-4. Launch the server on each machine and the controller on the dedicated machine with `launch_machine.py`.
-5. Run your desired test file, such as `runNewArch.py`
-6. Teardown as necessary or desired with either `prune_docker.sh` or `teardown_docker.sh`
+5. The script then returns the results to the aggregator.
+
+6. The aggregator adds noise to the final result according to the query parameters and explained in the linked technical report.
+
+## Missing Features and Possible Future Improvements
+This section is a list of shortcomings with the current implementation that could benefit from either further discussion or further development.
+
+### TLS Support
+The code presented here should hold the necessary changes to add support for TLS, but that functionality is largely untested. I did demonstrate that TLS with self-signed certificates works with an implementation very similar to the code give in this file, but this feature has not been tested since support for Kubernetes was added (and may no longer work on the docker-compose version either). At a minimum you will need to `certificate_bundle_path` variable within `/conf/machines.json.sample` to refer to the path to validate the certificates you are using and indicate that seek to use tls in `/conf/machines.json.sample`. I have never implemented TLS with Kubernetes but if you wish to do so these [steps](https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/) may prove helpful.
+
+### Service Validation
+One feature missing from the current implementation is a process that validates that each service spawned is what is expected. [Docker image ids are digests of their hash values](https://windsock.io/explaining-docker-image-ids/), so validating that the image downloaded is what it claims to be should be simple. Additionally, to add support for matching user expectations, we could extend the service launch step to return the image id, so the user could verify that the image is what they expected. For validating containers, the problem is more difficult because the container is dynamic and potentially changing. However, we can impose additional constraints, such as checking for volumes, using existing tools, examples of which are found [here](https://github.com/e-mission/e-mission-upc-aggregator/issues/6).
+
+### Authentication
+One glaring weakness with the current implementation of the service router is that it has no means of authenticating users. As a result, any user can for example request that all services be deleted. This is the current situation because I have no real users and as a result no need to impose access permissions across fake accounts. However, in the future it will probably be helpful to launch the service router alongside a database and store information about which users can invoke requests on which services. Similarly, we should probably add some support for ensuring that a PM that is spawned with a key along takes requests from authorized services or users, although it is unclear what the best of way of doing so would be.
+
+### Optimized Services
+The services provided are not optimized for the UPC architecture. For example, despite only being able to run the intake pipeline, the pipeline service contains almost of all of the existing e-mission code and still expects each user to store a uuid in its database (despite being the only user). If is would beneficial to significantly reduce to the code size or optimize the implementation I can consider doing so in the future, but this will also make it harder to try and update a server component upon which a service relies.
+
+### Kubernetes Limitations
+As noted above Kubernetes has limitations with regards to the number of pods that can spawn at once and has a significant cost to remove a pod. As a result, future work needs to be focused on reusing existing pods. It may also prove useful to more aggressively explore the limits that are promised in a cluster. It may be possible that by promising each pod a very very small percentage of CPU and allowing it to allocate more when needed and then relying on most containers to be inactive most of the time that it is possible to allocate many more pods to the point where the number of allocate pods is tolerable or even comparable to just allocating containers.
+
+### Automated Pausing or Deletion
+Currently the service router takes no special efforts to ensure fairness with respect to pausing or tearing down containers. Instead we rely entirely on having clients communicate with the service router that they are finished operating. In any real deployment this is likely unacceptable so we probably want to institute a process to either pause or delete services that are operating for too long. If this has interest I can try and revive a previous partial implementation I had when this run solely with docker-compose.
+
+### Reusable Storage
+Configuring either kubernetes or docker-compose with persistent volumes should hopefully be a straightforward task. However, if you opt to delete a service the existing implementation will not properly locate the previous volume location. At the time of writing this is because we haven't equipped distributed storage, so in the future this will need to be supported. This likely requires adding a component to the service router that maps users to volume locations, again likely requiring a persistent database. Additional steps may be required if volumes are by default specified in the configuration files.

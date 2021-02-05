@@ -1,4 +1,0 @@
-{
-    "provider": "firebase",
-    "server_auth_token": "Get from firebase console"
-}

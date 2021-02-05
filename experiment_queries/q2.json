@@ -1,8 +1,0 @@
-{
-    "query_type": "rc",
-    "r_start": 15.0,
-    "r_end": 25.0,
-    "alpha": 0.05,
-    "start_ts": 1501592400,
-    "end_ts": 1564664400
-}

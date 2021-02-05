@@ -1,0 +1,18 @@
+{
+    "PM":
+        { 
+            "compose_file": "services/pm/docker-compose/docker-compose.yml"
+        },
+    "Pipeline": 
+        {
+            "compose_file": "services/pipeline/docker-compose/docker-compose.yml"
+        }, 
+    "Metrics": 
+        {
+            "compose_file": "services/metrics/docker-compose/docker-compose.yml"
+        },
+    "Count": 
+        {
+            "compose_file": "services/count/docker-compose/docker-compose.yml"
+        }
+}

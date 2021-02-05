@@ -1,0 +1,26 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "count",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "count"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "count",
+        "image": "e-mission/count:1.0",
+        "ports": [
+          {
+            "containerPort": 80
+          }
+        ],
+        "resources": {}
+      }
+    ]
+  },
+  "status": {}
+}

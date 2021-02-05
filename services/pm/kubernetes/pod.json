@@ -1,0 +1,57 @@
+{
+  "kind": "Pod",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "web-server",
+    "creationTimestamp": null,
+    "labels": {
+      "io.kompose.service": "web-server"
+    }
+  },
+  "spec": {
+    "containers": [
+      {
+        "name": "pm",
+        "image": "e-mission/pm:1.0",
+        "ports": [
+          {
+            "containerPort": 80
+          }
+        ],
+        "env": [
+          {
+            "name": "DB_HOST",
+            "value": "localhost"
+          },
+          {
+            "name": "WEB_SERVER_HOST",
+            "value": "localhost"
+          }
+        ],
+        "resources": {}
+      },
+      {
+        "name": "database",
+        "image": "e-mission/custom-mongo:1.0",
+        "ports": [
+          {
+            "containerPort": 27017
+          }
+        ],
+        "env": [
+          {
+            "name": "DB_HOST",
+            "value": "localhost"
+          },
+          {
+            "name": "WEB_SERVER_HOST",
+            "value": "localhost"
+          }
+        ],
+        "resources": {}
+      }
+    ],
+    "restartPolicy": "OnFailure"
+  },
+  "status": {}
+}

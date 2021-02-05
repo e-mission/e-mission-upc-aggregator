@@ -1,0 +1,52 @@
+{
+    "service_router_use_tls" : false,
+    "_service_router_use_tls_comment": "Flag that determines if the service router runs in TLS",
+
+    "service_router_ip" : "127.0.1.1",
+    "_service_router_ip_comment": "The controller-ip is the IP address hosting the controller",
+    "service_router_port" : 4430,
+
+    "upc_port" : 8123,
+    "swarm_port" : 54321,
+
+
+    "machines" :
+        {
+            "192.168.99.100": 1
+        },
+    "_machines_comment" : "The machines keyword contains a dictionary of machines, where the mapping is machine base address -> numeric value, which can be any number used to represent the weight the machine should be given. The built in controller then attempts to assign containers proportional to that weight (so if 1 machine had a value \"2\" and another a value \"1\" the first should get twice as many containers as the second). If you are using kubernetes with nodeport the IP should be any IP address. If you are using minikube make sure and use your minikube address. If instead you have a multi machine cluster with just docker you need to specify every machine",
+
+    "machines_use_tls" : false,
+    "_machines_use_tls_comment": "Flag that determines if the machines run in TLS. This refers to both the swarm servers if running in docker and the services running in containers",
+
+    "certificate_bundle_path" : "",
+    "_machines_certificate_bundle_comment" : "path provided to were trusted certificates are located on a machine",
+
+    "_endpoints_p1_comments" : "These are all the endpoints used by the service router",
+    "service_endpoint" : "/service_request",
+    "pause_endpoint" : "/pause",
+    "unpause_endpoint" : "/unpause",
+    "delete_service_endpoint" : "/kill",
+    "delete_all_services_endpoint" : "/clear_containers",
+    "setup_network_endpoint" : "/setup_networks",
+
+
+
+    "_endpoints_p2_comments" : "These are all the endpoints used by the fake mongo api",
+    "insert_endpoint" : "/data/insert",
+    "insert_deprecated_endpoint" : "/data/insert-deprecated",
+    "find_endpoint" : "/data/find",
+    "find_one_endpoint" : "/data/find_one",
+    "delete_endpoint" : "/data/delete",
+    "update_endpoint" : "/data/update",
+    "update_deprecated_endpoint" : "/data/update-deprecated",
+    "replace_one_endpoint" : "/data/replace_one",
+    "count_endpoint" : "/data/count",
+    "distinct_endpoint" : "/data/distinct",
+    "cloud_key_endpoint" : "/cloud/key",
+    "privacy_budget_endpoint" : "/privacy_budget",
+
+
+    "upc_mode" : "kubernetes",
+    "_upc_mode_comment" : "upc_mode gives the endpoint to which the service router so launch machines. The two options are kubernetes and docker. Kubernetes launches containers in a kubernetes cluster and docker launches things directly on docker containers. We cannot use docker swarm due to permissions issues, so each docker machine must run its own server."
+}
